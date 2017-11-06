@@ -38,7 +38,8 @@ const setupAccountRequest = async authorisationServerId => {
     clientSecret,
     accessTokenPayload,
   );
-  return response.access_token;
+  const accessToken = response.access_token;
+  return accessToken;
 };
 
 exports.setupAccountRequest = setupAccountRequest;

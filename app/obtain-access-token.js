@@ -14,7 +14,7 @@ const credentials = (userid, password) => {
  * Assume authentication using a client_id and client_secret:
  * https://tools.ietf.org/html/rfc6749#section-2.3
  */
-const postToken = async (authorisationServerHost, clientId, clientSecret) => {
+const postToken = async (authorisationServerHost, clientId, clientSecret, payload) => {
   try {
     const tokenUri = `${authorisationServerHost}/token`;
     const authCredentials = credentials(clientId, clientSecret);
@@ -23,10 +23,7 @@ const postToken = async (authorisationServerHost, clientId, clientSecret) => {
       .post(`${authorisationServerHost}/token`)
       .set('authorization', authCredentials)
       .set('content-type', 'application/x-www-form-urlencoded')
-      .send({
-        scope: 'accounts',
-        grant_type: 'client_credentials',
-      });
+      .send(payload);
     return response.body;
   } catch (err) {
     const error = new Error(err.message);

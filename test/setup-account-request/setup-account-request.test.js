@@ -23,6 +23,11 @@ describe('setupAccountRequest called with authorisationServerId', () => {
   const authServerHost = 'http://example.com';
   const clientId = 'id';
   const clientSecret = 'secret';
+  const tokenPayload = {
+    scope: 'accounts',
+    grant_type: 'client_credentials',
+  };
+
   let setupAccountRequest;
   let postTokenStub;
 
@@ -46,6 +51,6 @@ describe('setupAccountRequest called with authorisationServerId', () => {
   it('returns access-token from postToken call', async () => {
     const token = await setupAccountRequest('authorisationServerId');
     assert.equal(token, accessToken);
-    assert(postTokenStub.calledWith(authServerHost, clientId, clientSecret));
+    assert(postTokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
   });
 });

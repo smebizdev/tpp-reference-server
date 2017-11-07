@@ -26,7 +26,17 @@ const setupAccountRequest = async authorisationServerId => {
   }
   const authorizationServerHost = await authorisationServerHost(authorisationServerId);
   const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
-  const response = await postToken(authorizationServerHost, clientId, clientSecret);
+  const accessTokenPayload = {
+    scope: 'accounts',
+    grant_type: 'client_credentials',
+  };
+
+  const response = await postToken(
+    authorizationServerHost,
+    clientId,
+    clientSecret,
+    accessTokenPayload,
+  );
   return response.access_token;
 };
 

@@ -3,7 +3,7 @@ const assert = require('assert');
 
 const nock = require('nock');
 
-describe('Setup account request POST /account-requests 201 response', () => {
+describe('postAccountRequests', () => {
   const requestBody = buildAccountRequestData();
   const accountRequestId = '88379';
   const response = {

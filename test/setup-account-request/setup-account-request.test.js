@@ -33,9 +33,8 @@ describe('setupAccountRequest called with blank fapiFinancialId', () => {
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
-  const awaitingAuthorisation = 'AwaitingAuthorisation';
   const authServerHost = 'http://example.com';
-  const resourceServerPath = 'http://example.com/resources';
+  const resourceServer = 'http://example.com/resources';
   const clientId = 'id';
   const clientSecret = 'secret';
   const tokenPayload = {
@@ -43,41 +42,51 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     grant_type: 'client_credentials',
   };
   const accountRequestId = '88379';
-
+  const envStub = env.mock({
+    ASPSP_AUTH_SERVER: authServerHost,
+    ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
+    ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
+    ASPSP_RESOURCE_SERVER: resourceServer,
+  });
   let setupAccountRequestProxy;
-  let postTokenStub;
-  let postAccountRequestsStub;
+  let tokenStub;
+  let accountRequestsStub;
   const tokenResponse = { access_token: accessToken };
-  const accountRequestsResponse = {
+  const accountRequestsResponse = status => ({
     Data: {
       AccountRequestId: accountRequestId,
-      Status: awaitingAuthorisation,
+      Status: status,
     },
-  };
-
-  before(() => {
-    postTokenStub = sinon.stub().returns(tokenResponse);
-    postAccountRequestsStub = sinon.stub().returns(accountRequestsResponse);
-    setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
-      'env-var': env.mock({
-        ASPSP_AUTH_SERVER: authServerHost,
-        ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
-        ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
-        ASPSP_RESOURCE_SERVER: resourceServerPath,
-      }),
-      '../obtain-access-token': { postToken: postTokenStub },
-      './account-requests': { postAccountRequests: postAccountRequestsStub },
-    }).setupAccountRequest;
   });
 
-  it('returns access-token from postToken call', async () => {
-    const token = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
-    assert.equal(token, accessToken);
-    assert(postTokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
-    assert(postAccountRequestsStub.calledWithExactly(
-      resourceServerPath,
-      accessToken,
-      fapiFinancialId,
-    ));
+  const setup = status => () => {
+    tokenStub = sinon.stub().returns(tokenResponse);
+    accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
+    setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
+      'env-var': envStub,
+      '../obtain-access-token': { postToken: tokenStub },
+      './account-requests': { postAccountRequests: accountRequestsStub },
+    }).setupAccountRequest;
+  };
+
+  describe('when AwaitingAuthorisation', () => {
+    before(setup('AwaitingAuthorisation'));
+
+    it('returns accountRequestId from postAccountRequests call', async () => {
+      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+      assert.equal(id, accountRequestId);
+
+      assert(tokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
+      assert(accountRequestsStub.calledWithExactly(resourceServer, accessToken, fapiFinancialId));
+    });
+  });
+
+  describe('when Rejected', () => {
+    before(setup('Rejected'));
+
+    it('returns null', async () => {
+      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+      assert.equal(id, null);
+    });
   });
 });

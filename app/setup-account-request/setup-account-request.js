@@ -37,6 +37,7 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
   }
 };
 
+// Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
   const authorisationServer = await authorisationServerHost(authorisationServerId);
   const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
@@ -54,16 +55,25 @@ const createAccessToken = async (authorisationServerId) => {
   return response.access_token;
 };
 
+// Returns accountRequestId when request successful
 const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
   const resourceServer = await resourceServerHost(authorisationServerId);
-  return postAccountRequests(resourceServer, accessToken, fapiFinancialId);
+  const response = postAccountRequests(resourceServer, accessToken, fapiFinancialId);
+  if (response.Data && response.Data.Status === 'AwaitingAuthorisation') {
+    return response.Data.AccountRequestId;
+  }
+  return null;
 };
 
 const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
   validateParameters(authorisationServerId, fapiFinancialId);
   const accessToken = await createAccessToken(authorisationServerId);
-  await createAccountRequest(authorisationServerId, accessToken, fapiFinancialId);
-  return accessToken;
+  const accountRequestId = await createAccountRequest(
+    authorisationServerId,
+    accessToken,
+    fapiFinancialId,
+  );
+  return accountRequestId;
 };
 
 exports.setupAccountRequest = setupAccountRequest;

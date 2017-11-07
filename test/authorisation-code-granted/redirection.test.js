@@ -4,7 +4,7 @@ const env = require('env-var');
 const httpMocks = require('node-mocks-http');
 const sinon = require('sinon');
 
-const fakeRedirectionUrl = 'http://localhost:999/authorized';
+const fakeRedirectionHost = 'http://localhost:999';
 const authServerHost = 'http://example.com';
 const clientId = 'id';
 const clientSecret = 'secret';
@@ -15,7 +15,7 @@ const authorisationCode = '12345_67xxx';
 const tokenPayload = {
   grant_type: 'authorization_code', // eslint-disable-line quote-props
   'authorization-code': authorisationCode,
-  redirect_uri: fakeRedirectionUrl, // eslint-disable-line quote-props
+  redirect_uri: `${fakeRedirectionHost}/tpp/authorized`, // eslint-disable-line quote-props
 };
 
 describe('Authorized Code Granted Redirection', () => {
@@ -28,7 +28,7 @@ describe('Authorized Code Granted Redirection', () => {
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
     redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
       'env-var': env.mock({
-        REGISTERED_REDIRECT_URL: fakeRedirectionUrl,
+        REGISTERED_REDIRECT_HOST: fakeRedirectionHost,
         ASPSP_AUTH_SERVER: authServerHost,
         ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
         ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
@@ -51,11 +51,7 @@ describe('Authorized Code Granted Redirection', () => {
     postTokenStub.reset();
   });
 
-  describe('url configured', () => {
-    it('returns redirection url', () => {
-      assert.equal(redirection.authorisationCodeGrantedUrl, fakeRedirectionUrl);
-    });
-
+  describe('host configured', () => {
     it('handles the redirection route', async () => {
       await redirection.authorisationCodeGrantedHandler(request, response);
       assert.equal(response.statusCode, 204);
@@ -76,7 +72,7 @@ describe('Authorized Code Granted Redirection', () => {
         postTokenStub = sinon.stub().throws(error);
         redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
           'env-var': env.mock({
-            REGISTERED_REDIRECT_URL: fakeRedirectionUrl,
+            REGISTERED_REDIRECT_HOST: fakeRedirectionHost,
             ASPSP_AUTH_SERVER: authServerHost,
             ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
             ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
@@ -94,7 +90,7 @@ describe('Authorized Code Granted Redirection', () => {
     });
   });
 
-  describe('url missing', () => {
+  describe('host missing', () => {
     it('throws an error', () => {
       try {
         redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {});

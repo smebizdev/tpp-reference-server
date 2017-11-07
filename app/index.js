@@ -10,10 +10,7 @@ const { login } = require('./login');
 const { proxyMiddleware } = require('./proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./account-request-authorise-consent');
-const {
-  authorisationCodeGrantedUrl,
-  authorisationCodeGrantedHandler,
-} = require('./authorisation-code-granted/redirection');
+const { authorisationCodeGrantedHandler } = require('./authorisation-code-granted/redirection');
 
 const app = express();
 
@@ -37,7 +34,7 @@ app.use(
 app.all('/account-request-authorise-consent', requireAuthorization);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
 
-app.get(authorisationCodeGrantedUrl, authorisationCodeGrantedHandler);
+app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization);
 app.use('/open-banking', proxyMiddleware);

@@ -1,7 +1,7 @@
 const env = require('env-var');
 const { postToken } = require('../obtain-access-token');
 
-const url = env.get('REGISTERED_REDIRECT_URL').asString();
+const url = `${env.get('REGISTERED_REDIRECT_HOST').asString()}/tpp/authorized`;
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();
 const authServerClientId = env.get('ASPSP_AUTH_SERVER_CLIENT_ID').asString();
 const authServerClientSecret = env.get('ASPSP_AUTH_SERVER_CLIENT_SECRET').asString();
@@ -39,5 +39,4 @@ const handler = async (req, res) => {
   }
 };
 
-exports.authorisationCodeGrantedUrl = url;
 exports.authorisationCodeGrantedHandler = handler;

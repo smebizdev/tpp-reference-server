@@ -25,7 +25,7 @@ const buildAccountRequestData = () => ({
  * @resourceServerPath e.g. http://example.com/open-banking/v1.1
  */
 const postAccountRequests = async (resourceServerPath, accessToken,
-  fapiFinancialId, jwsSignature) => {
+  fapiFinancialId) => {
   try {
     const body = buildAccountRequestData();
     const accountRequestsUri = `${resourceServerPath}/account-requests`;
@@ -36,7 +36,7 @@ const postAccountRequests = async (resourceServerPath, accessToken,
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8')
       .set('x-fapi-financial-id', fapiFinancialId)
-      .set('x-jws-signature', jwsSignature)
+      .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .send(body);
     return response.body;
   } catch (err) {

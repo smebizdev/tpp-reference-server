@@ -24,7 +24,7 @@ describe('Setup account request POST /account-requests 201 response', () => {
 
   const accessToken = '2YotnFZFEjr1zCsicMWpAA';
   const fapiFinancialId = 'abc';
-  const jwsSignature = 'sig';
+  const jwsSignature = 'not-required-swagger-to-be-changed';
 
   nock(/example\.com/)
     .post('/open-banking/v1.1/account-requests')
@@ -42,7 +42,6 @@ describe('Setup account request POST /account-requests 201 response', () => {
       resourceServerPath,
       accessToken,
       fapiFinancialId,
-      jwsSignature,
     );
     assert.deepEqual(result, response);
   });

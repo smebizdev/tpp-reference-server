@@ -12,7 +12,7 @@
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
-    "env-var": "^3.0.2",
+    "env-var": "3.0.2",
     "express": "^4.15.5",
     "express-http-proxy": "^1.0.7",
     "monk": "^6.0.5",
@@ -30,6 +30,7 @@
     "foreman": "^2.0.0",
     "mocha": "^3.5.3",
     "nock": "^9.0.22",
+    "node-mocks-http": "1.6.6",
     "proxyquire": "^1.8.0",
     "sinon": "^4.0.0",
     "supertest": "^3.0.0"
@@ -38,8 +39,10 @@
     "foreman": "./node_modules/foreman/nf.js start",
     "start": "node index.js",
     "test": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive",
-    "test:watch": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive --watch",
-    "test:debug": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' node --inspect-brk node_modules/mocha/bin/_mocha --recursive --watch --no-timeouts",
+    "test:watch":
+      "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive --watch",
+    "test:debug":
+      "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' node --inspect-brk node_modules/mocha/bin/_mocha --recursive --watch --no-timeouts",
     "eslint": "node ./node_modules/eslint/bin/eslint.js .",
     "checks": "node ./node_modules/eslint/bin/eslint.js . && mocha"
   },

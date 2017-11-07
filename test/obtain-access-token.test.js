@@ -1,4 +1,4 @@
-const { postToken } = require('../../app/setup-account-request/obtain-access-token');
+const { postToken } = require('../app/obtain-access-token');
 const assert = require('assert');
 
 const nock = require('nock');

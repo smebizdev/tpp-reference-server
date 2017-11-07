@@ -37,8 +37,7 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
   }
 };
 
-const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
-  validateParameters(authorisationServerId, fapiFinancialId);
+const createAccessToken = async (authorisationServerId) => {
   const authorisationServer = await authorisationServerHost(authorisationServerId);
   const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
   const accessTokenPayload = {
@@ -52,9 +51,18 @@ const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
     clientSecret,
     accessTokenPayload,
   );
-  const accessToken = response.access_token;
+  return response.access_token;
+};
+
+const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
   const resourceServer = await resourceServerHost(authorisationServerId);
-  postAccountRequests(resourceServer, accessToken, fapiFinancialId);
+  return postAccountRequests(resourceServer, accessToken, fapiFinancialId);
+};
+
+const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
+  validateParameters(authorisationServerId, fapiFinancialId);
+  const accessToken = await createAccessToken(authorisationServerId);
+  await createAccountRequest(authorisationServerId, accessToken, fapiFinancialId);
   return accessToken;
 };
 

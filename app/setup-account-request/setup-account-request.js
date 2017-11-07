@@ -1,8 +1,9 @@
 const { postToken } = require('../obtain-access-token');
+const env = require('env-var');
 
-const authServer = process.env.ASPSP_AUTH_SERVER;
-const authServerClientId = process.env.ASPSP_AUTH_SERVER_CLIENT_ID;
-const authServerClientSecret = process.env.ASPSP_AUTH_SERVER_CLIENT_SECRET;
+const authServer = env.get('ASPSP_AUTH_SERVER').asString();
+const authServerClientId = env.get('ASPSP_AUTH_SERVER_CLIENT_ID').asString();
+const authServerClientSecret = env.get('ASPSP_AUTH_SERVER_CLIENT_SECRET').asString();
 
 // Todo: lookup auth server via Directory and OpenIdEndpoint responses.
 const authorisationServerHost = async authServerId => (authServerId ? authServer : null);

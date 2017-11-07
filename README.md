@@ -284,6 +284,10 @@ heroku config:set X_FAPI_FINANCIAL_ID=<mock-id>
 heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://example.com
+heroku config:set ASPSP_RESOURCE_SERVER=http://example.com
+heroku config:set ASPSP_AUTH_SERVER=http://example.com
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_ID=spoofClientId
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_SECRET=spoofClientSecret
 
 git push heroku master
 ```

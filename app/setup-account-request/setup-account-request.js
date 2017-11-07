@@ -18,13 +18,23 @@ const clientCredentials = async authorisationServerId => {
   return authorisationServerId ? credentials : null;
 };
 
-// eslint-disable-next-line arrow-parens
-const setupAccountRequest = async authorisationServerId => {
-  if (!authorisationServerId) {
-    const error = new Error('authorisationServerId missing from request payload');
+const validateParameters = (authorisationServerId, fapiFinancialId) => {
+  let error;
+  if (!fapiFinancialId) {
+    error = new Error('fapiFinancialId missing from request payload');
     error.status = 400;
+  }
+  if (!authorisationServerId) {
+    error = new Error('authorisationServerId missing from request payload');
+    error.status = 400;
+  }
+  if (error) {
     throw error;
   }
+};
+
+const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
+  validateParameters(authorisationServerId, fapiFinancialId);
   const authorizationServerHost = await authorisationServerHost(authorisationServerId);
   const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
   const accessTokenPayload = {

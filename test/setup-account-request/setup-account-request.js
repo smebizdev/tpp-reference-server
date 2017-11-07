@@ -31,11 +31,10 @@ describe('setupAccountRequest called with authorisationServerId', () => {
     process.env.ASPSP_AUTH_SERVER_CLIENT_ID = clientId;
     process.env.ASPSP_AUTH_SERVER_CLIENT_SECRET = clientSecret;
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
-    setupAccountRequest = proxyquire(
-      // eslint-disable-line
-      '../../app/setup-account-request/setup-account-request',
-      { '../obtain-access-token': { postToken: postTokenStub } },
-    ).setupAccountRequest;
+    // eslint-disable-next-line prefer-destructuring
+    setupAccountRequest = proxyquire('../../app/setup-account-request/setup-account-request', {
+      '../obtain-access-token': { postToken: postTokenStub },
+    }).setupAccountRequest;
   });
 
   after(() => {

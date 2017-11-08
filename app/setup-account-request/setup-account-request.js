@@ -1,6 +1,7 @@
 const { postToken } = require('../obtain-access-token');
 const { postAccountRequests } = require('./account-requests');
 const env = require('env-var');
+const debug = require('debug')('debug');
 
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();
 const authServerClientId = env.get('ASPSP_AUTH_SERVER_CLIENT_ID').asString();
@@ -10,8 +11,15 @@ const authServerClientSecret = env.get('ASPSP_AUTH_SERVER_CLIENT_SECRET').asStri
 const authorisationServerHost = async authServerId => (authServerId ? authServer : null);
 
 // Todo: lookup resource server via Directory and OpenIdEndpoint responses.
-const resourceServerHost = async authorisationServerId =>
-  (authorisationServerId ? env.get('ASPSP_RESOURCE_SERVER').asString() : null);
+const resourceServerPath = async (authorisationServerId) => {
+  if (authorisationServerId) {
+    // todo store and retrieve host and apiVersion in config keyed by authorisationServerId
+    const host = env.get('ASPSP_RESOURCE_SERVER').asString();
+    const apiVersion = 'v1.1';
+    return `${host}/open-banking/${apiVersion}`;
+  }
+  return null;
+};
 
 // Todo: retrieve clientCredentials from store keyed by authorisationServerId.
 const clientCredentials = async (authorisationServerId) => {
@@ -57,8 +65,9 @@ const createAccessToken = async (authorisationServerId) => {
 
 // Returns accountRequestId when request successful
 const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
-  const resourceServer = await resourceServerHost(authorisationServerId);
-  const response = postAccountRequests(resourceServer, accessToken, fapiFinancialId);
+  const resourcePath = await resourceServerPath(authorisationServerId);
+  const response = postAccountRequests(resourcePath, accessToken, fapiFinancialId);
+  debug(`account-requests response: ${response.body}`);
   if (response.Data && response.Data.Status === 'AwaitingAuthorisation') {
     return response.Data.AccountRequestId;
   }

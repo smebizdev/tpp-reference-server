@@ -18,6 +18,7 @@ const buildAccountRequestData = () => ({
     // TransactionFromDateTime: // not populated - request from the earliest available transaction
     // TransactionToDateTime: // not populated - request to the latest available transactions
   },
+  Risk: {},
 });
 
 /*

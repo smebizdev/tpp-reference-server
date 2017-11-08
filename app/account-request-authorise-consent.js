@@ -6,8 +6,9 @@ const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId } = req.body;
+    const fapiFinancialId = req.headers['x-fapi-financial-id'];
     debug(`authorisationServerId: ${authorisationServerId}`);
-    await setupAccountRequest(authorisationServerId);
+    await setupAccountRequest(authorisationServerId, fapiFinancialId);
     return res.status(204).send();
   } catch (err) {
     error(err);

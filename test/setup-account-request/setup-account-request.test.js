@@ -77,7 +77,8 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       assert.equal(id, accountRequestId);
 
       assert(tokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
-      assert(accountRequestsStub.calledWithExactly(resourceServer, accessToken, fapiFinancialId));
+      const resourcePath = `${resourceServer}/open-banking/v1.1`;
+      assert(accountRequestsStub.calledWithExactly(resourcePath, accessToken, fapiFinancialId));
     });
   });
 

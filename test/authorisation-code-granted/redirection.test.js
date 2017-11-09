@@ -4,7 +4,7 @@ const env = require('env-var');
 const httpMocks = require('node-mocks-http');
 const sinon = require('sinon');
 
-const fakeRedirectionHost = 'http://localhost:999';
+const redirectionUrl = 'http://localhost:9999/tpp/authorized';
 const authServerHost = 'http://example.com';
 const clientId = 'id';
 const clientSecret = 'secret';
@@ -14,8 +14,8 @@ const authorisationCode = '12345_67xxx';
 
 const tokenPayload = {
   grant_type: 'authorization_code', // eslint-disable-line quote-props
-  'authorization-code': authorisationCode,
-  redirect_uri: `${fakeRedirectionHost}/tpp/authorized`, // eslint-disable-line quote-props
+  code: authorisationCode,
+  redirect_uri: redirectionUrl, // eslint-disable-line quote-props
 };
 
 describe('Authorized Code Granted Redirection', () => {
@@ -28,7 +28,7 @@ describe('Authorized Code Granted Redirection', () => {
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
     redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
       'env-var': env.mock({
-        REGISTERED_REDIRECT_HOST: fakeRedirectionHost,
+        SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
         ASPSP_AUTH_SERVER: authServerHost,
         ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
         ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
@@ -38,10 +38,10 @@ describe('Authorized Code Granted Redirection', () => {
 
     request = httpMocks.createRequest({
       method: 'GET',
-      url: '/authorized',
+      url: '/tpp/authorized',
       query: {
-        'authorization-code': authorisationCode,
-        state: authorisationServerId, // eslint-disable-line quote-props
+        code: authorisationCode,
+        authorisationServerId,
       },
     });
     response = httpMocks.createResponse();
@@ -72,7 +72,7 @@ describe('Authorized Code Granted Redirection', () => {
         postTokenStub = sinon.stub().throws(error);
         redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
           'env-var': env.mock({
-            REGISTERED_REDIRECT_HOST: fakeRedirectionHost,
+            SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
             ASPSP_AUTH_SERVER: authServerHost,
             ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
             ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,

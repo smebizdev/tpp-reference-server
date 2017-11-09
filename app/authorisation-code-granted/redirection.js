@@ -1,7 +1,7 @@
 const env = require('env-var');
 const { postToken } = require('../obtain-access-token');
 
-const url = `${env.get('REGISTERED_REDIRECT_HOST').asString()}/tpp/authorized`;
+const redirectionUrl = `${env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString()}`;
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();
 const authServerClientId = env.get('ASPSP_AUTH_SERVER_CLIENT_ID').asString();
 const authServerClientSecret = env.get('ASPSP_AUTH_SERVER_CLIENT_SECRET').asString();
@@ -21,14 +21,13 @@ const clientCredentials = async authorisationServerId => {
 const handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const authorisationServerId = req.query.state;
-    const authorisationCode = req.query['authorization-code'];
+    const { authorisationServerId, code } = req.query;
     const authorizationServerHost = await authorisationServerHost(authorisationServerId);
     const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
     const accessTokenPayload = {
-      grant_type: 'authorization_code', // eslint-disable-line quote-props
-      'authorization-code': authorisationCode,
-      redirect_uri: url, // eslint-disable-line quote-props
+      grant_type: 'authorization_code',
+      redirect_uri: redirectionUrl,
+      code,
     };
 
     await postToken(authorizationServerHost, clientId, clientSecret, accessTokenPayload);

@@ -20,7 +20,7 @@ const postToken = async (authorisationServerHost, clientId, clientSecret, payloa
     const authCredentials = credentials(clientId, clientSecret);
     log(`POST to ${tokenUri}`);
     const response = await request
-      .post(`${authorisationServerHost}/token`)
+      .post(tokenUri)
       .set('authorization', authCredentials)
       .set('content-type', 'application/x-www-form-urlencoded')
       .send(payload);

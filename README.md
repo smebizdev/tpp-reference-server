@@ -223,6 +223,9 @@ Or run with environment variables set on the command line:
 
 ```sh
 DEBUG=error,log \
+  ASPSP_AUTH_SERVER=http://localhost:8001 \
+  ASPSP_AUTH_SERVER_CLIENT_ID=spoofClientId \
+  ASPSP_AUTH_SERVER_CLIENT_SECRET=spoofClientSecret \
   ASPSP_READWRITE_HOST=localhost:8001 \
   OB_PROVISIONED=false \
   OB_DIRECTORY_HOST=http://localhost:8001 \
@@ -272,12 +275,19 @@ heroku create --region eu <newname>
 heroku addons:create redistogo # or any other redis add-on
 heroku addons:create mongolab:sandbox
 
+heroku config:set ASPSP_AUTH_SERVER=http://example-aspsp-auth-server.com
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_ID=spoofClientId
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_SECRET=spoofClientSecret
 heroku config:set ASPSP_READWRITE_HOST=example.com
 heroku config:set AUTHORIZATION=<mock-token>
 heroku config:set X_FAPI_FINANCIAL_ID=<mock-id>
 heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://example.com
+heroku config:set ASPSP_RESOURCE_SERVER=http://example.com
+heroku config:set ASPSP_AUTH_SERVER=http://example.com
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_ID=spoofClientId
+heroku config:set ASPSP_AUTH_SERVER_CLIENT_SECRET=spoofClientSecret
 
 git push heroku master
 ```

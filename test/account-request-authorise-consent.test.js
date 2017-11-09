@@ -4,6 +4,7 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const express = require('express');
 const bodyParser = require('body-parser');
+const env = require('env-var');
 
 const authorisationServerId = '123';
 
@@ -13,6 +14,9 @@ const setupApp = (setupAccountRequestStub) => {
   const { accountRequestAuthoriseConsent } = proxyquire(
     '../app/account-request-authorise-consent',
     {
+      'env-var': env.mock({
+        REGISTERED_REDIRECT_URL: 'http://example.com/redirect',
+      }),
       './setup-account-request': {
         setupAccountRequest: setupAccountRequestStub,
         clientCredentials: clientCredentialsStub,
@@ -45,11 +49,9 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
 
   before(() => {
     process.env.ASPSP_AUTH_SERVER = 'http://example.com';
-    process.env.REGISTERED_REDIRECT_URL = 'http://example.com/redirect';
   });
   after(() => {
     process.env.ASPSP_AUTH_SERVER = null;
-    process.env.REGISTERED_REDIRECT_URL = null;
   });
 
   it('returns 302 redirect to /authorize endpoint', (done) => {

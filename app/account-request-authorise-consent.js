@@ -2,8 +2,9 @@ const { setupAccountRequest, clientCredentials } = require('./setup-account-requ
 const { createClaims, createJsonWebSignature } = require('./authorise');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
+const env = require('env-var');
 
-const registeredRedirectUrl = () => process.env.REGISTERED_REDIRECT_URL;
+const registeredRedirectUrl = env.get('REGISTERED_REDIRECT_URL').asString();
 
 const statePayload = (authorisationServerId, sessionId) => {
   const state = {
@@ -36,7 +37,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const signature = createJsonWebSignature(payload);
     const uri =
       `${authServerEndpoint}?` +
-      `redirect_url=${registeredRedirectUrl()}&` +
+      `redirect_url=${registeredRedirectUrl}&` +
       `state=${state}&` +
       `clientId=${clientId}&` +
       'response_type=code&' +

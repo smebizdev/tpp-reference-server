@@ -1,5 +1,5 @@
 const env = require('env-var');
-const { postToken } = require('../obtain-access-token');
+const { postToken } = require('./obtain-access-token');
 
 const redirectionUrl = `${env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString()}`;
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();

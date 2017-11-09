@@ -18,7 +18,7 @@ const tokenPayload = {
   redirect_uri: redirectionUrl, // eslint-disable-line quote-props
 };
 
-describe('Authorized Code Granted Redirection', () => {
+describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
   let request;
@@ -26,14 +26,14 @@ describe('Authorized Code Granted Redirection', () => {
 
   beforeEach(() => {
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
-    redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
+    redirection = proxyquire('../app/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
         ASPSP_AUTH_SERVER: authServerHost,
         ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
         ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
       }),
-      '../obtain-access-token': { postToken: postTokenStub },
+      './obtain-access-token': { postToken: postTokenStub },
     });
 
     request = httpMocks.createRequest({
@@ -51,7 +51,7 @@ describe('Authorized Code Granted Redirection', () => {
     postTokenStub.reset();
   });
 
-  describe('host configured', () => {
+  describe('redirect url configured', () => {
     it('handles the redirection route', async () => {
       await redirection.authorisationCodeGrantedHandler(request, response);
       assert.equal(response.statusCode, 204);
@@ -70,14 +70,14 @@ describe('Authorized Code Granted Redirection', () => {
 
       beforeEach(() => {
         postTokenStub = sinon.stub().throws(error);
-        redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {
+        redirection = proxyquire('../app/authorisation-code-granted.js', {
           'env-var': env.mock({
             SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
             ASPSP_AUTH_SERVER: authServerHost,
             ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
             ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
           }),
-          '../obtain-access-token': { postToken: postTokenStub },
+          './obtain-access-token': { postToken: postTokenStub },
         });
       });
 
@@ -90,10 +90,10 @@ describe('Authorized Code Granted Redirection', () => {
     });
   });
 
-  describe('host missing', () => {
+  describe('redirect url missing', () => {
     it('throws an error', () => {
       try {
-        redirection = proxyquire('../../app/authorisation-code-granted/redirection.js', {});
+        redirection = proxyquire('../app/authorisation-code-granted.js', {});
       } catch (e) {
         assert(
           e.message.match(/"REGISTERED_REDIRECT_URL" is a required variable/),

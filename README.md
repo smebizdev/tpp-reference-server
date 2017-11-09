@@ -285,7 +285,7 @@ heroku config:set X_FAPI_FINANCIAL_ID=<mock-id>
 heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com
-heroku config:set REGISTERED_REDIRECT_URL=http://<host>/tpp/authorized
+heroku config:set SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized
 
 git push heroku master
 ```

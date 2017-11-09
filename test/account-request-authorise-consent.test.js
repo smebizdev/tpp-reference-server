@@ -15,7 +15,7 @@ const setupApp = (setupAccountRequestStub) => {
     '../app/account-request-authorise-consent',
     {
       'env-var': env.mock({
-        REGISTERED_REDIRECT_URL: 'http://example.com/redirect',
+        SOFTWARE_STATEMENT_REDIRECT_URL: 'http://example.com/redirect',
       }),
       './setup-account-request': {
         setupAccountRequest: setupAccountRequestStub,

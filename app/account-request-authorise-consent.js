@@ -4,7 +4,7 @@ const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');
 
-const registeredRedirectUrl = env.get('REGISTERED_REDIRECT_URL').asString();
+const registeredRedirectUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
 const statePayload = (authorisationServerId, sessionId) => {
   const state = {

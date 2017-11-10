@@ -147,7 +147,6 @@ const fetchOBAccountPaymentServiceProviders = async () => {
     }
     return [];
   } catch (e) {
-    console.log(e);
     error(e);
     return [];
   }

@@ -1,6 +1,7 @@
 if (!process.env.DEBUG) process.env.DEBUG = 'error,log';
 
 const proxy = require('express-http-proxy');
+const { caCert, clientCert, clientKey } = require('./certs-util');
 const { getAuthFromSession } = require('./authorization');
 
 const { ASPSP_READWRITE_HOST } = process.env;
@@ -19,6 +20,9 @@ const proxyReqOptDecorator = (options, req) => {
     getAuthFromSession(sid, (auth) => {
       newOptions.headers['authorization'] = auth;
       newOptions.headers['x-fapi-financial-id'] = xFapiFinancialId;
+      newOptions.key = clientKey();
+      newOptions.cert = clientCert;
+      newOptions.ca = caCert;
       log(`  session: ${sid}`);
       log(`  authorization: ${auth}`);
       log(`  x-fapi-financial-id: ${xFapiFinancialId}`);
@@ -38,6 +42,7 @@ const proxyMiddleware = proxy(ASPSP_READWRITE_HOST, {
   proxyReqPathResolver,
   proxyReqOptDecorator,
   proxyReqBodyDecorator,
+  https: true,
 });
 
 exports.proxyMiddleware = proxyMiddleware;

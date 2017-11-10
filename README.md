@@ -322,3 +322,53 @@ Run eslint checks with:
 ```sh
 npm run eslint
 ```
+
+## Security certificates in Reference App ecosystem
+
+OpenBanking specification requires all parties to use Mutual TLS for every connection. OpenBanking uses its own Certification Authority certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
+- For ASPSP server certificate in pair with certificate key and CA certificate must be used to secure resources provided by servers.
+- For TPP client certificate in pair with certificate key and CA certificate must be used to establish secured connection with servers (ASPSP Authorization/Resource Server, OpenBanking Directory and OpenId Configuration).
+
+### Reference App with mock server
+For the purpose of Reference App "dummy" CA certificate (for simplicity application does not use any root certificate to sign CA cert), Mock server certificate and TPP Reference Server certificate have been created. Also, Mock server certificate and TPP Reference Server certificate have been signed by "dummy" CA certificate.
+The created certificates allow running MATLS secured Reference App ecosystem on local environment or any hosted version.
+
+### Reference App connected to OpenBankig Directory
+To connect Reference App to sandbox OpenBanking Directory and Ozone banks (dummy banks), reference application has to be registered in OpenBanking Directory. It will require creating client (TPP) key and CSR which after uploaded to OpenBanking Directory console return signed client certificate (Transport Certificate from OB Directory console) and CA certificate (Signing Certificate from OB Directory console)
+Environment variables to set up (all base64 encoded):
+- CLIENT_CERT - Transport Certificate from OB Directory console
+- CLIENT_KEY - key used to generate client CSR
+- CA_CERT - Signing Certificate from OB Directory console
+
+### Own certificates for development environment (not required)
+In case someone would like to create its own certificates, the receipt below explains how this can be done. Bear in mind that TPP Server and Mock Server accepts certificates and key as environment variable encoded using base64. 
+
+**How to create own certificates.**
+
+- Create the CA Key
+openssl genrsa -des3 -out ca.key 4096
+
+- Create the CA Certificate for signing Client/Server Certs (env var CA_CERT)
+openssl req -new -x509 -days 730 -key ca.key -out ca.crt
+
+- Create the Server Key, CSR, and Certificate (env var SERVER_KEY)
+openssl genrsa -des3 -out server.key 1024
+openssl req -new -key server.key -out server.csr
+
+- Remove passphrase from client key 
+chmod 0600 server.key
+ssh-keygen -p -P [PASSPHRASE_FOR_SERVER_CERT] -N ""  -f ./server.key
+
+- Self signing server csr using CA cert and generate server certificate (env var SERVER_CERT)
+openssl x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+
+- Create the Client Key and CSR (env var CLIENT_KEY)
+openssl genrsa -des3 -out client.key 1024
+openssl req -new -key client.key -out client.csr
+
+- Remove passphrase from client key 
+chmod 0600 client.key
+ssh-keygen -p -P [PASSPHRASE_FOR_CLIENT_CERT] -N ""  -f ./client.key
+
+- Self signing client csr using CA cert and generate server certificate (env var CLIENT_CERT)
+openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt

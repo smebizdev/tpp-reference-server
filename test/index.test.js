@@ -14,6 +14,7 @@ process.env.SOFTWARE_STATEMENT_ID = 'xxxxxxxx-xx2b-4xx3-a19a-xx9ec3baxxxx';
 process.env.SOFTWARE_STATEMENT_ASSERTION_KID = 'xxXXTm-XXxKBDuXxKoWXXX_xxxx';
 process.env.CLIENT_SCOPES = 'openid TPPReadAccess ASPSPReadAccess';
 process.env.DEMO_ONLY_PRIVATE_KEY_URL = 'http://secure-url.com/private_key.pem';
+process.env.REGISTERED_REDIRECT_URL = 'http://localhost:$PORT/tpp/authorized';
 
 const { app } = require('../app/index.js');
 const { session } = require('../app/session.js');

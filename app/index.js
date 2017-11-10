@@ -10,10 +10,12 @@ const { login } = require('./login');
 const { proxyMiddleware } = require('./proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./account-request-authorise-consent');
+const { authorisationCodeGrantedHandler } = require('./authorisation-code-granted');
 
 const app = express();
 
-if (process.env.NODE_ENV !== 'test') { // don't log requests when testing
+if (process.env.NODE_ENV !== 'test') {
+  // don't log requests when testing
   app.use(morgan('dev')); // for logging
 }
 
@@ -24,10 +26,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/login', login.authenticate);
 app.use('/logout', login.logout);
 app.all('/account-payment-service-provider-authorisation-servers', requireAuthorization);
-app.use('/account-payment-service-provider-authorisation-servers', OBAccountPaymentServiceProviders);
+app.use(
+  '/account-payment-service-provider-authorisation-servers',
+  OBAccountPaymentServiceProviders,
+);
 
 app.all('/account-request-authorise-consent', requireAuthorization);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
+
+app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization);
 app.use('/open-banking', proxyMiddleware);

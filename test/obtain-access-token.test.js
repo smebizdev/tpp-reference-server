@@ -55,7 +55,7 @@ describe('POST /token error sending request', () => {
       assert.ok(false);
     } catch (error) {
       assert.equal(error.name, 'Error');
-      assert.equal(error.message, 'socket hang up');
+      assert.equal(error.message, 'getaddrinfo ENOTFOUND bad-uri bad-uri:80');
       assert.equal(error.status, 500);
     }
   });

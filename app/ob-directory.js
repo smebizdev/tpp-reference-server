@@ -6,7 +6,7 @@ const util = require('util');
 const debug = require('debug')('debug');
 const log = require('debug')('log');
 const error = require('debug')('error');
-const { getAll, set } = require('./storage');
+const { getAll, get, set } = require('./storage');
 
 const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
 const NOT_PROVISIONED_FOR_OB_TOKEN = 'NO_TOKEN';
@@ -65,7 +65,11 @@ const extractAuthorisationServers = (data) => {
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
     const id = `${item.orgId}-${item.BaseApiDNSUri}`;
-    await set(AUTH_SERVER_COLLECTION, item, id);
+    const existing = await get(AUTH_SERVER_COLLECTION, id);
+    const authServer = existing || {};
+    item.id = id; // eslint-disable-line
+    authServer.obDirectoryConfig = item;
+    await set(AUTH_SERVER_COLLECTION, authServer, id);
   }));
 };
 
@@ -75,7 +79,7 @@ const storedAuthorisationServers = async () => {
     if (!list) {
       return [];
     }
-    const servers = list.map(s => transformServerData(s));
+    const servers = list.map(a => transformServerData(a.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
     error(e);

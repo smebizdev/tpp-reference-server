@@ -185,3 +185,4 @@ const OBAccountPaymentServiceProviders = async (req, res) => {
 
 exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;
 exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;
+exports.allAuthorisationServers = allAuthorisationServers;

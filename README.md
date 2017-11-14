@@ -55,7 +55,7 @@ The server has to be configured with
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
 * `SOFTWARE_STATEMENT_ASSERTION_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
 * `CLIENT_SCOPES='openid TPPReadAccess ASPSPReadAccess'`.
-* `DEMO_ONLY_PRIVATE_KEY_URL=https://some.secure-url.com/private_key.pem`.
+* `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
 
 This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.
 
@@ -229,6 +229,10 @@ DEBUG=error,log \
   ASPSP_READWRITE_HOST=localhost:8001 \
   OB_PROVISIONED=false \
   OB_DIRECTORY_HOST=http://localhost:8001 \
+  MTLS_ENABLED=false \
+  TRANSPORT_CERT='' \
+  SIGNING_CERT='' \
+  SIGNING_KEY='' \
   AUTHORIZATION=alice \
   X_FAPI_FINANCIAL_ID=abcbank \
   MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
@@ -286,6 +290,10 @@ heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com
 heroku config:set SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized
+heroku config:set MTLS_ENABLED=false
+heroku config:set OB_ISSUING_CA=''
+heroku config:set TRANSPORT_CERT=''
+heroku config:set TRANSPORT_KEY=''
 
 git push heroku master
 ```
@@ -315,10 +323,42 @@ Manual Testing
 Sending Form Data to login with POstman - use `x-www-form-urlencoded`
 
 
-### eslint
+## eslint
 
 Run eslint checks with:
 
 ```sh
 npm run eslint
 ```
+
+## Using mTLS
+
+The OpenBanking specification requires parties to use [Mutual TLS authentication](https://en.wikipedia.org/wiki/Mutual_authentication) for every connection. OpenBanking uses its own Certification Authority (certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
+
+- For the ASPSP server, a certificate paired with a certificate key and CA certificate are used to secure resources provided by servers.
+
+- For the TPP client, a certificate paired with a certificate key and CA certificate are used to establish a secured connection with servers, including `ASPSP Authorization`/`Resource Server`, `OpenBanking Directory` and `OpenId` Configuration.
+
+### Running against The Reference Mock Server
+
+This __DOES NOT__ require setting up `MTLS`.
+
+The server has to be configured with (this is default)
+* `MTLS_ENABLED=false`.
+
+### Running against OpenBanking Directory with an ASPSP reference sandbox
+
+If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp)
+and want to interact with an ASPSP reference sandbox listed on OB Directory,
+then ensure
+
+* You have downloaded the required `Transport` and `Signing` Certs (follow OB
+   Directory issued instructions).
+
+* You have access to the `private key` used when generating the `Signing` Cert CSR.
+
+The server has to be configured with
+* `MTLS_ENABLED=true`.
+* `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
+* `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.

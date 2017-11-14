@@ -1,4 +1,5 @@
 const request = require('superagent');
+const { setupMutualTLS } = require('./certs-util');
 const log = require('debug')('log');
 
 // Use Basic Authentication Scheme: https://tools.ietf.org/html/rfc2617#section-2
@@ -19,7 +20,7 @@ const postToken = async (authorisationServerHost, clientId, clientSecret, payloa
     const tokenUri = `${authorisationServerHost}/token`;
     const authCredentials = credentials(clientId, clientSecret);
     log(`POST to ${tokenUri}`);
-    const response = await request
+    const response = await setupMutualTLS(request)
       .post(tokenUri)
       .set('authorization', authCredentials)
       .set('content-type', 'application/x-www-form-urlencoded')

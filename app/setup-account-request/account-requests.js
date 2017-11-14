@@ -1,4 +1,5 @@
 const request = require('superagent');
+const { setupMutualTLS } = require('../certs-util');
 const log = require('debug')('log');
 
 const buildAccountRequestData = () => ({
@@ -31,7 +32,7 @@ const postAccountRequests = async (resourceServerPath, accessToken,
     const body = buildAccountRequestData();
     const accountRequestsUri = `${resourceServerPath}/account-requests`;
     log(`POST to ${accountRequestsUri}`);
-    const response = await request
+    const response = await setupMutualTLS(request)
       .post(accountRequestsUri)
       .set('authorization', `Bearer ${accessToken}`)
       .set('content-type', 'application/json; charset=utf-8')

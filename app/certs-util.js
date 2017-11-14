@@ -12,3 +12,4 @@ exports.setupMutualTLS = setupMutualTLS;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;
+exports.mtlsEnabled = mtlsEnabled;

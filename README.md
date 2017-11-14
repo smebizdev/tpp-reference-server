@@ -346,11 +346,13 @@ This __DOES NOT__ require setting up `MTLS`.
 The server has to be configured with (this is default)
 * `MTLS_ENABLED=false`.
 
-### Running against OpenBanking Directory with an ASPSP sandbox
+### Running against OpenBanking Directory with an ASPSP reference sandbox
 
-If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp) and want to interact with ASPSP sandbox (e.g. Ozone bank), then ensure
+If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp)
+and want to interact with an ASPSP reference sandbox listed on OB Directory,
+then ensure
 
-* You have downloaded the required `Transport` and `Signing` Certs (follow OpenB
+* You have downloaded the required `Transport` and `Signing` Certs (follow OB
    Directory issued instructions).
 
 * You have access to the `private key` used when generating the `Signing` Cert CSR.

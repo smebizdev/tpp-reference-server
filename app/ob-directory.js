@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { decorate } = require('./certs-util');
+const { setupMutualTLS } = require('./certs-util');
 const nJwt = require('njwt');
 const qs = require('qs');
 const { session } = require('./session');
@@ -117,7 +117,7 @@ const getAccessToken = async () => {
     createdJwt.setHeader('kid', softwareStatementAssertionKid);
     const compactedJwt = createdJwt.compact();
 
-    const response = await decorate(request
+    const response = await setupMutualTLS(request)
       .post(authUrl)
       .send(qs.stringify({
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
@@ -125,7 +125,7 @@ const getAccessToken = async () => {
         client_id: softwareStatementId,
         client_assertion: compactedJwt,
         scope: authClientScopes,
-      })));
+      }));
 
     const token = response.body.access_token;
     const tokenType = response.body.token_type;
@@ -148,10 +148,10 @@ const fetchOBAccountPaymentServiceProviders = async () => {
       (await getAccessToken()) : { token: NOT_PROVISIONED_FOR_OB_TOKEN };
     const bearerToken = `Bearer ${accessToken.token}`;
     log(`getting: ${uri}`);
-    const response = await decorate(request
+    const response = await setupMutualTLS(request)
       .get(uri)
       .set('Authorization', bearerToken)
-      .set('Accept', 'application/json'));
+      .set('Accept', 'application/json');
     log(`response: ${response.status}`);
     if (response.status === 200) {
       const authServers = extractAuthorisationServers(response.body);

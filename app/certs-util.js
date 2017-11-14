@@ -6,9 +6,9 @@ const ca = Buffer.from(process.env.OB_ISSUING_CA || '', 'base64').toString();
 const cert = Buffer.from(process.env.TRANSPORT_CERT || '', 'base64').toString();
 const key = () => Buffer.from(process.env.TRANSPORT_KEY || '', 'base64').toString();
 
-const decorate = agent => (mtlsEnabled ? agent.key(key()).cert(cert).ca(cert) : agent);
+const setupMutualTLS = agent => (mtlsEnabled ? agent.key(key()).cert(cert).ca(cert) : agent);
 
-exports.decorate = decorate;
+exports.setupMutualTLS = setupMutualTLS;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;

@@ -45,7 +45,7 @@ describe('storage set data with id', () => {
     return assert.deepEqual(expected, result);
   });
 
-  after(() => {
-    drop(collection);
+  after(async () => {
+    await drop(collection);
   });
 });

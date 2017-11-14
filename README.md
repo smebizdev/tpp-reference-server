@@ -55,7 +55,7 @@ The server has to be configured with
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
 * `SOFTWARE_STATEMENT_ASSERTION_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
 * `CLIENT_SCOPES='openid TPPReadAccess ASPSPReadAccess'`.
-* `DEMO_ONLY_PRIVATE_KEY_URL=https://some.secure-url.com/private_key.pem`.
+* `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
 
 This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.
 
@@ -229,6 +229,10 @@ DEBUG=error,log \
   ASPSP_READWRITE_HOST=localhost:8001 \
   OB_PROVISIONED=false \
   OB_DIRECTORY_HOST=http://localhost:8001 \
+  MTLS_ENABLED=false \
+  TRANSPORT_CERT='' \
+  SIGNING_CERT='' \
+  SIGNING_KEY='' \
   AUTHORIZATION=alice \
   X_FAPI_FINANCIAL_ID=abcbank \
   MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
@@ -286,6 +290,10 @@ heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com
 heroku config:set SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized
+heroku config:set MTLS_ENABLED=false
+heroku config:set OB_ISSUING_CA=''
+heroku config:set TRANSPORT_CERT=''
+heroku config:set TRANSPORT_KEY=''
 
 git push heroku master
 ```
@@ -315,7 +323,7 @@ Manual Testing
 Sending Form Data to login with POstman - use `x-www-form-urlencoded`
 
 
-### eslint
+## eslint
 
 Run eslint checks with:
 
@@ -323,52 +331,32 @@ Run eslint checks with:
 npm run eslint
 ```
 
-## Security certificates in Reference App ecosystem
+## Using mTLS
 
-OpenBanking specification requires all parties to use Mutual TLS for every connection. OpenBanking uses its own Certification Authority certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
-- For ASPSP server certificate in pair with certificate key and CA certificate must be used to secure resources provided by servers.
-- For TPP client certificate in pair with certificate key and CA certificate must be used to establish secured connection with servers (ASPSP Authorization/Resource Server, OpenBanking Directory and OpenId Configuration).
+The OpenBanking specification requires parties to use [Mutual TLS authentication](https://en.wikipedia.org/wiki/Mutual_authentication) for every connection. OpenBanking uses its own Certification Authority (certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
 
-### Reference App with mock server
-For the purpose of Reference App "dummy" CA certificate (for simplicity application does not use any root certificate to sign CA cert), Mock server certificate and TPP Reference Server certificate have been created. Also, Mock server certificate and TPP Reference Server certificate have been signed by "dummy" CA certificate.
-The created certificates allow running MATLS secured Reference App ecosystem on local environment or any hosted version.
+- For the ASPSP server, a certificate paired with a certificate key and CA certificate are used to secure resources provided by servers.
 
-### Reference App connected to OpenBankig Directory
-To connect Reference App to sandbox OpenBanking Directory and Ozone banks (dummy banks), reference application has to be registered in OpenBanking Directory. It will require creating client (TPP) key and CSR which after uploaded to OpenBanking Directory console return signed client certificate (Transport Certificate from OB Directory console) and CA certificate (Signing Certificate from OB Directory console)
-Environment variables to set up (all base64 encoded):
-- CLIENT_CERT - Transport Certificate from OB Directory console
-- CLIENT_KEY - key used to generate client CSR
-- CA_CERT - Signing Certificate from OB Directory console
+- For the TPP client, a certificate paired with a certificate key and CA certificate are used to establish a secured connection with servers, including `ASPSP Authorization`/`Resource Server`, `OpenBanking Directory` and `OpenId` Configuration.
 
-### Own certificates for development environment (not required)
-In case someone would like to create its own certificates, the receipt below explains how this can be done. Bear in mind that TPP Server and Mock Server accepts certificates and key as environment variable encoded using base64. 
+### Running against The Reference Mock Server
 
-**How to create own certificates.**
+This __DOES NOT__ require setting up `MTLS`.
 
-- Create the CA Key
-openssl genrsa -des3 -out ca.key 4096
+The server has to be configured with (this is default)
+* `MTLS_ENABLED=false`.
 
-- Create the CA Certificate for signing Client/Server Certs (env var CA_CERT)
-openssl req -new -x509 -days 730 -key ca.key -out ca.crt
+### Running against OpenBanking Directory with an ASPSP sandbox
 
-- Create the Server Key, CSR, and Certificate (env var SERVER_KEY)
-openssl genrsa -des3 -out server.key 1024
-openssl req -new -key server.key -out server.csr
+If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp) and want to interact with ASPSP sandbox (e.g. Ozone bank), then ensure
 
-- Remove passphrase from client key 
-chmod 0600 server.key
-ssh-keygen -p -P [PASSPHRASE_FOR_SERVER_CERT] -N ""  -f ./server.key
+* You have downloaded the required `Transport` and `Signing` Certs (follow OpenB
+   Directory issued instructions).
 
-- Self signing server csr using CA cert and generate server certificate (env var SERVER_CERT)
-openssl x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+* You have access to the `private key` used when generating the `Signing` Cert CSR.
 
-- Create the Client Key and CSR (env var CLIENT_KEY)
-openssl genrsa -des3 -out client.key 1024
-openssl req -new -key client.key -out client.csr
-
-- Remove passphrase from client key 
-chmod 0600 client.key
-ssh-keygen -p -P [PASSPHRASE_FOR_CLIENT_CERT] -N ""  -f ./client.key
-
-- Self signing client csr using CA cert and generate server certificate (env var CLIENT_CERT)
-openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+The server has to be configured with
+* `MTLS_ENABLED=true`.
+* `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
+* `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.

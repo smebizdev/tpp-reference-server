@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { decorate, clientKey } = require('./certs-util');
+const { decorate } = require('./certs-util');
 const nJwt = require('njwt');
 const qs = require('qs');
 const { session } = require('./session');
@@ -7,7 +7,7 @@ const util = require('util');
 const debug = require('debug')('debug');
 const log = require('debug')('log');
 const error = require('debug')('error');
-const { getAll, set } = require('./storage');
+const { getAll, get, set } = require('./storage');
 
 const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
 const NOT_PROVISIONED_FOR_OB_TOKEN = 'NO_TOKEN';
@@ -18,6 +18,7 @@ const directoryAuthHost = process.env.OB_DIRECTORY_AUTH_HOST;
 const softwareStatementId = process.env.SOFTWARE_STATEMENT_ID;
 const softwareStatementAssertionKid = process.env.SOFTWARE_STATEMENT_ASSERTION_KID;
 const authClientScopes = process.env.CLIENT_SCOPES;
+const signingKey = () => Buffer.from(process.env.SIGNING_KEY || '', 'base64').toString();
 
 log(`OB_DIRECTORY_HOST: ${directoryHost}`);
 
@@ -65,7 +66,11 @@ const extractAuthorisationServers = (data) => {
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
     const id = `${item.orgId}-${item.BaseApiDNSUri}`;
-    await set(AUTH_SERVER_COLLECTION, item, id);
+    const existing = await get(AUTH_SERVER_COLLECTION, id);
+    const authServer = existing || {};
+    item.id = id; // eslint-disable-line
+    authServer.obDirectoryConfig = item;
+    await set(AUTH_SERVER_COLLECTION, authServer, id);
   }));
 };
 
@@ -75,7 +80,7 @@ const storedAuthorisationServers = async () => {
     if (!list) {
       return [];
     }
-    const servers = list.map(s => transformServerData(s));
+    const servers = list.map(a => transformServerData(a.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
     error(e);
@@ -97,9 +102,8 @@ const getAccessToken = async () => {
       scope: authClientScopes,
       aud: authUrl,
     };
-    // const result = await decorate(request.get(signingKeyUrl));
-    const signingKey = clientKey();
-    const createdJwt = nJwt.create(claims, signingKey, 'RS256');
+
+    const createdJwt = nJwt.create(claims, signingKey(), 'RS256');
     createdJwt.setHeader('kid', softwareStatementAssertionKid);
     const compactedJwt = createdJwt.compact();
 

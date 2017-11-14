@@ -74,12 +74,22 @@ const storeAuthorisationServers = async (list) => {
   }));
 };
 
-const storedAuthorisationServers = async () => {
+const allAuthorisationServers = async () => {
   try {
     const list = await getAll(AUTH_SERVER_COLLECTION);
     if (!list) {
       return [];
     }
+    return list;
+  } catch (e) {
+    error(e);
+    return [];
+  }
+};
+
+const authorisationServersForClient = async () => {
+  try {
+    const list = await allAuthorisationServers();
     const servers = list.map(a => transformServerData(a.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
@@ -147,7 +157,7 @@ const fetchOBAccountPaymentServiceProviders = async () => {
       const authServers = extractAuthorisationServers(response.body);
       debug(`data: ${JSON.stringify(authServers)}`);
       await storeAuthorisationServers(authServers);
-      return storedAuthorisationServers();
+      return authorisationServersForClient();
     }
     return [];
   } catch (e) {
@@ -158,7 +168,7 @@ const fetchOBAccountPaymentServiceProviders = async () => {
 
 const OBAccountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  let servers = storedAuthorisationServers();
+  let servers = authorisationServersForClient();
   if (servers.length > 0) {
     fetchOBAccountPaymentServiceProviders(); // async update store
   } else {
@@ -169,3 +179,4 @@ const OBAccountPaymentServiceProviders = async (req, res) => {
 
 exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;
 exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;
+exports.allAuthorisationServers = allAuthorisationServers;

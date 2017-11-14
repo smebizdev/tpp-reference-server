@@ -47,7 +47,7 @@ const proxyMiddleware = proxy(ASPSP_READWRITE_HOST, {
   proxyReqPathResolver,
   proxyReqOptDecorator,
   proxyReqBodyDecorator,
-  https: true,
+  https: mtlsEnabled,
 });
 
 exports.proxyMiddleware = proxyMiddleware;

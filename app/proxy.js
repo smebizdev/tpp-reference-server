@@ -1,11 +1,15 @@
 if (!process.env.DEBUG) process.env.DEBUG = 'error,log';
 
 const proxy = require('express-http-proxy');
+const {
+  caCert, clientCert, clientKey, mtlsEnabled,
+} = require('./certs-util');
 const { getAuthFromSession } = require('./authorization');
 
 const { ASPSP_READWRITE_HOST } = process.env;
 const xFapiFinancialId = process.env.X_FAPI_FINANCIAL_ID;
 const log = require('debug')('log');
+const debug = require('debug')('debug');
 
 const proxyReqPathResolver = (request) => {
   log(request.path);
@@ -19,9 +23,14 @@ const proxyReqOptDecorator = (options, req) => {
     getAuthFromSession(sid, (auth) => {
       newOptions.headers['authorization'] = auth;
       newOptions.headers['x-fapi-financial-id'] = xFapiFinancialId;
-      log(`  session: ${sid}`);
-      log(`  authorization: ${auth}`);
-      log(`  x-fapi-financial-id: ${xFapiFinancialId}`);
+      if (mtlsEnabled) {
+        newOptions.key = clientKey();
+        newOptions.cert = clientCert;
+        newOptions.ca = caCert;
+      }
+      debug(`  session: ${sid}`);
+      debug(`  authorization: ${auth}`);
+      debug(`  x-fapi-financial-id: ${xFapiFinancialId}`);
       resolve(newOptions);
     });
   });
@@ -38,6 +47,7 @@ const proxyMiddleware = proxy(ASPSP_READWRITE_HOST, {
   proxyReqPathResolver,
   proxyReqOptDecorator,
   proxyReqBodyDecorator,
+  https: mtlsEnabled,
 });
 
 exports.proxyMiddleware = proxyMiddleware;

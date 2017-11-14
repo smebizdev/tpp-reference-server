@@ -1,4 +1,5 @@
-const request = require('axios');
+const request = require('superagent');
+const { setupMutualTLS } = require('./certs-util');
 const nJwt = require('njwt');
 const qs = require('qs');
 const { session } = require('./session');
@@ -17,7 +18,7 @@ const directoryAuthHost = process.env.OB_DIRECTORY_AUTH_HOST;
 const softwareStatementId = process.env.SOFTWARE_STATEMENT_ID;
 const softwareStatementAssertionKid = process.env.SOFTWARE_STATEMENT_ASSERTION_KID;
 const authClientScopes = process.env.CLIENT_SCOPES;
-const signingKeyUrl = process.env.DEMO_ONLY_PRIVATE_KEY_URL;
+const signingKey = () => Buffer.from(process.env.SIGNING_KEY || '', 'base64').toString();
 
 log(`OB_DIRECTORY_HOST: ${directoryHost}`);
 
@@ -112,26 +113,23 @@ const getAccessToken = async () => {
       aud: authUrl,
     };
 
-    const signingKey = (await request.get(signingKeyUrl)).data;
-    const createdJwt = nJwt.create(claims, signingKey, 'RS256');
+    const createdJwt = nJwt.create(claims, signingKey(), 'RS256');
     createdJwt.setHeader('kid', softwareStatementAssertionKid);
     const compactedJwt = createdJwt.compact();
 
-    const response = await request({
-      url: authUrl,
-      method: 'POST',
-      data: qs.stringify({
+    const response = await setupMutualTLS(request)
+      .post(authUrl)
+      .send(qs.stringify({
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         grant_type: 'client_credentials',
         client_id: softwareStatementId,
         client_assertion: compactedJwt,
         scope: authClientScopes,
-      }),
-    });
+      }));
 
-    const token = response.data.access_token;
-    const tokenType = response.data.token_type;
-    const tokenExpiry = parseInt(response.data.expires_in, 10);
+    const token = response.body.access_token;
+    const tokenType = response.body.token_type;
+    const tokenExpiry = parseInt(response.body.expires_in, 10);
     const tokenExpiresAt = new Date().getTime() + (tokenExpiry * 1000);
     accessToken = { token, tokenType, tokenExpiresAt };
     session.setAccessToken(accessToken);
@@ -150,17 +148,13 @@ const fetchOBAccountPaymentServiceProviders = async () => {
       (await getAccessToken()) : { token: NOT_PROVISIONED_FOR_OB_TOKEN };
     const bearerToken = `Bearer ${accessToken.token}`;
     log(`getting: ${uri}`);
-    const response = await request({
-      url: uri,
-      method: 'GET',
-      headers: {
-        Authorization: bearerToken,
-        Accept: 'application/json',
-      },
-    });
+    const response = await setupMutualTLS(request)
+      .get(uri)
+      .set('Authorization', bearerToken)
+      .set('Accept', 'application/json');
     log(`response: ${response.status}`);
     if (response.status === 200) {
-      const authServers = extractAuthorisationServers(response.data);
+      const authServers = extractAuthorisationServers(response.body);
       debug(`data: ${JSON.stringify(authServers)}`);
       await storeAuthorisationServers(authServers);
       return authorisationServersForClient();

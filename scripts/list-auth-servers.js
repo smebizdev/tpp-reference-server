@@ -24,8 +24,8 @@ const authServerRows = async () => {
 };
 
 authServerRows().then((rows) => {
-  rows.forEach(row => console.log(row));
   if (process.env.NODE_ENV !== 'test') {
+    rows.forEach(row => console.log(row)); // eslint-disable-line
     process.exit();
   }
 });

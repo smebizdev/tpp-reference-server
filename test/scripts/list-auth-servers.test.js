@@ -1,5 +1,5 @@
 const assert = require('assert'); // eslint-disable-line
-const proxyquire = require('proxyquire');// eslint-disable-line
+const proxyquire = require('proxyquire'); // eslint-disable-line
 const sinon = require('sinon'); //eslint-disable-line
 
 const authorisationServersData = [
@@ -22,14 +22,21 @@ const authorisationServersData = [
     },
   },
 ];
+let authServerRows;
+
+const authServerRowsFn = (authServerList) => {
+  const allAuthorisationServersStub = sinon.stub().returns(authServerList);
+  return proxyquire('../../scripts/list-auth-servers', // eslint-disable-line
+    { '../app/authorisation-servers': { allAuthorisationServers: allAuthorisationServersStub } },
+  ).authServerRows;
+};
 
 describe('authServerRows', () => {
-  let authServerRows;
-
   describe('when no auth servers present', () => {
     beforeEach(() => {
-      authServerRows = require('../../scripts/list-auth-servers').authServerRows; // eslint-disable-line
+      authServerRows = authServerRowsFn([]);
     });
+
     it('returns tsv headers', async () => {
       assert.deepEqual(
         await authServerRows(),
@@ -40,10 +47,7 @@ describe('authServerRows', () => {
 
   describe('when auth servers present', () => {
     beforeEach(() => {
-      const authorisationServersStub = sinon.stub().returns(authorisationServersData);
-      authServerRows = proxyquire('../../scripts/list-auth-servers',   //eslint-disable-line
-        { '../app/ob-directory': { allAuthorisationServers: authorisationServersStub } },
-      ).authServerRows;
+      authServerRows = authServerRowsFn(authorisationServersData);
     });
 
     it('returns tsv of auth servers', async () => {

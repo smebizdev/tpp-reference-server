@@ -1,4 +1,4 @@
-const { allAuthorisationServers } = require('../app/ob-directory');
+const { allAuthorisationServers } = require('../app/authorisation-servers');
 
 const authServerRows = async () => {
   const header = [

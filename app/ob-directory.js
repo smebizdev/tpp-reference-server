@@ -113,7 +113,8 @@ const fetchOBAccountPaymentServiceProviders = async () => {
 
 const OBAccountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  let servers = authorisationServersForClient();
+  let servers = await authorisationServersForClient();
+  log(`servers length: ${servers.length}`);
   if (servers.length > 0) {
     fetchOBAccountPaymentServiceProviders() // async update auth servers
       .then(() => updateOpenIdConfigs()); // async update openId configs

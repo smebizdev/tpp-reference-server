@@ -39,65 +39,69 @@ const expectedResult = [
     orgId: 'aaax5nTR33811QyQfi',
   },
   {
-    id: 'bbbj4NmBD8lQxmLh2O9FLY',
+    id: 'bbbX7tUB4fPIYB0k1m',
     logoUri: 'string',
     name: 'BBB Example Bank',
     orgId: 'bbbcccUB4fPIYB0k1m',
   },
   {
-    id: 'cccj4NmBD8lQxmLh2O9FLY',
+    id: 'cccbN8iAsMh74sOXhk',
     logoUri: 'string',
     name: 'CCC Example Bank',
     orgId: 'bbbcccUB4fPIYB0k1m',
   },
 ];
 
+const aspspPayload = {
+  Resources: [
+    {
+      'AuthorisationServers': [
+        {
+          Id: 'aaaj4NmBD8lQxmLh2O9FLY',
+          BaseApiDNSUri: 'http://aaa.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'AAA Example Bank',
+          OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
+        },
+      ],
+      'urn:openbanking:organisation:1.0': {
+        OrganisationCommonName: 'AAA Group PLC',
+        OBOrganisationId: 'aaax5nTR33811QyQfi',
+      },
+      'id': 'aaax5nTR33811QyQfi',
+    },
+    {
+      'AuthorisationServers': [
+        {
+          Id: 'bbbX7tUB4fPIYB0k1m',
+          BaseApiDNSUri: 'http://bbb.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'BBB Example Bank',
+          OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
+        },
+        {
+          Id: 'cccbN8iAsMh74sOXhk',
+          BaseApiDNSUri: 'http://ccc.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'CCC Example Bank',
+          OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
+        },
+      ],
+      'urn:openbanking:organisation:1.0': {
+        OrganisationCommonName: 'BBBCCC Group PLC',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+      },
+      'id': 'bbbcccUB4fPIYB0k1m',
+    },
+    {
+      id: 'fPIYB0k1moGhX7tUB4',
+    },
+  ],
+};
+
 nock(/example\.com/, directoryHeaders)
   .get('/scim/v2/OBAccountPaymentServiceProviders/')
-  .reply(200, {
-    Resources: [
-      {
-        'AuthorisationServers': [
-          {
-            Id: 'aaaj4NmBD8lQxmLh2O9FLY',
-            BaseApiDNSUri: 'http://aaa.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'AAA Example Bank',
-            OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
-          },
-        ],
-        'urn:openbanking:organisation:1.0': {
-          OBOrganisationId: 'aaax5nTR33811QyQfi',
-        },
-        'id': 'aaax5nTR33811QyQfi',
-      },
-      {
-        'AuthorisationServers': [
-          {
-            Id: 'bbbj4NmBD8lQxmLh2O9FLY',
-            BaseApiDNSUri: 'http://bbb.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'BBB Example Bank',
-            OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
-          },
-          {
-            Id: 'cccj4NmBD8lQxmLh2O9FLY',
-            BaseApiDNSUri: 'http://ccc.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'CCC Example Bank',
-            OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
-          },
-        ],
-        'urn:openbanking:organisation:1.0': {
-          OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
-        },
-        'id': 'bbbcccUB4fPIYB0k1m',
-      },
-      {
-        id: 'fPIYB0k1moGhX7tUB4',
-      },
-    ],
-  });
+  .reply(200, aspspPayload);
 
 const login = application => request(application)
   .post('/login')

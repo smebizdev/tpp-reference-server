@@ -37,6 +37,10 @@ const extractAuthorisationServers = (data) => {
       const organisation = resource['urn:openbanking:organisation:1.0'];
       r.OBOrganisationId = organisation ? organisation.OBOrganisationId : ''; // eslint-disable-line
       r.OrganisationCommonName = organisation ? organisation.OrganisationCommonName : ''; // eslint-disable-line
+      const authority = resource['urn:openbanking:competentauthorityclaims:1.0'];
+      r.AuthorityId = authority ? authority.AuthorityId : ''; // eslint-disable-line
+      r.MemberState = authority ? authority.MemberState : ''; // eslint-disable-line
+      r.RegistrationId = authority ? authority.RegistrationId : ''; // eslint-disable-line
       return r;
     }))
     .reduce((a, b) => a.concat(b), []); // flatten array

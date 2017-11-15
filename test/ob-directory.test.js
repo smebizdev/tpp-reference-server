@@ -57,6 +57,11 @@ const expectedResult = [
 const aspspPayload = {
   Resources: [
     {
+      'urn:openbanking:competentauthorityclaims:1.0': {
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '123',
+      },
       'AuthorisationServers': [
         {
           Id: 'aaaj4NmBD8lQxmLh2O9FLY',
@@ -73,6 +78,11 @@ const aspspPayload = {
       'id': 'aaax5nTR33811QyQfi',
     },
     {
+      'urn:openbanking:competentauthorityclaims:1.0': {
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
+      },
       'AuthorisationServers': [
         {
           Id: 'bbbX7tUB4fPIYB0k1m',
@@ -113,6 +123,9 @@ describe('extractAuthorisationServers', () => {
         OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
         OBOrganisationId: 'aaax5nTR33811QyQfi',
         OrganisationCommonName: 'AAA Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '123',
       },
       {
         BaseApiDNSUri: 'http://bbb.example.com',
@@ -122,6 +135,9 @@ describe('extractAuthorisationServers', () => {
         OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
         OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
         OrganisationCommonName: 'BBBCCC Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
       },
       {
         BaseApiDNSUri: 'http://ccc.example.com',
@@ -131,6 +147,9 @@ describe('extractAuthorisationServers', () => {
         OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
         OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
         OrganisationCommonName: 'BBBCCC Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
       },
     ];
     assert.deepEqual(list, expected);

@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { drop } = require('../../app/storage.js');
-const { AUTH_SERVER_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
+const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
   storeAuthorisationServers,
@@ -61,12 +61,12 @@ nock(/example\.com/)
 
 describe('updateOpenIdConfigs', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     await storeAuthorisationServers(flattenedObDirectoryAuthServerList);
   });
 
   afterEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('before called openIdConfig not present', async () => {
@@ -86,12 +86,12 @@ describe('updateOpenIdConfigs', () => {
 
 describe('updateClientCredentials', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     await storeAuthorisationServers(flattenedObDirectoryAuthServerList);
   });
 
   afterEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('before called clientCredentials not present', async () => {

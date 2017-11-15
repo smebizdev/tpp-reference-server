@@ -8,7 +8,7 @@ const { drop } = require('../app/storage.js');
 
 const { app } = require('../app/index.js');
 const { session } = require('../app/session.js');
-const { AUTH_SERVER_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
+const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
 
 const assert = require('assert');
 const nock = require('nock');
@@ -94,7 +94,7 @@ const login = application => request(application)
 
 describe('Directory', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     session.setId('foo');
     // set up dummy but valid signing_key to sign jwt
     process.env.SIGNING_KEY = 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ0KTUlJQk9RSUJBQUpCQU1Odng4ZmtUNmJXYk1jNGNqdTc1eC9kdkZvYnBIWjNVU25lbWhCNUxYQVFYb2c0eTVqVA0KaXdvOTVBdWJONDB1Mm1YRDhRVWhCNFJFQ2Q0alAvWmczMlVDQXdFQUFRSkFXRzE2VW9xT002bnZuQkNCTjEvaw0KeXJsVVlOMERCQXNtc1RBa08zSG95andDMVpKUG9COUQ4SGJEYzljWnhjRW5vQTZDK2pvNmxSN2NOWTlDRWthbQ0KZ1FJaEFQR2I1S2UxVEQreTBleW1Sb21KVEk5VzZjdmNmVk85dWlhZnVjbjBvLzNGQWlFQXp4UFhicHIxZGtBeg0KZG45QVlMazFIZU1vaXZqak0zVVpFUGhkNmJaOEZTRUNJRngzcDJrd0Q4Q0pOYUoyZUtTR3NaQmlXUlEyakppUw0KRWo1Wi93YjE1QlZwQWlCdHVoN1N2Z3ZKY0RXVTJkTWNMYWVtd2FMUEdSa1RRRDViRHJCODBqU240UUlnY243cw0KYTRvcFdtMVhLM3V3WGhBcXVqY3FnY1NseEpZQXMwWGtvSUNOV3c0PQ0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0=';
@@ -103,7 +103,7 @@ describe('Directory', () => {
   afterEach(async () => {
     delete process.env.SIGNING_KEY;
     session.deleteAll();
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('returns proxy 200 response for /account-payment-service-provider-authorisation-servers', (done) => {

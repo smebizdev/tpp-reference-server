@@ -2,7 +2,7 @@ const error = require('debug')('error');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
-const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
+const ASPSP_AUTH_SERVERS_COLLECTION = 'aspspAuthorisationServers';
 
 const sortByName = (list) => {
   list.sort((a, b) => {
@@ -29,9 +29,9 @@ const transformServerData = (data) => {
   };
 };
 
-const getAuthServerConfig = async id => get(AUTH_SERVER_COLLECTION, id);
+const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 
-const setAuthServerConfig = async (id, authServer) => set(AUTH_SERVER_COLLECTION, authServer, id);
+const setAuthServerConfig = async (id, authServer) => set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
@@ -46,7 +46,7 @@ const storeAuthorisationServers = async (list) => {
 
 const allAuthorisationServers = async () => {
   try {
-    const list = await getAll(AUTH_SERVER_COLLECTION);
+    const list = await getAll(ASPSP_AUTH_SERVERS_COLLECTION);
     if (!list) {
       return [];
     }
@@ -108,4 +108,4 @@ exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.updateClientCredentials = updateClientCredentials;
-exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;
+exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

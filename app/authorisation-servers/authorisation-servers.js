@@ -108,6 +108,17 @@ const authorisationServersForClient = async () => {
   }
 };
 
+const authorisationEndpoint = async (id) => {
+  try {
+    const config = await getAuthServerConfig(id);
+    return config.openIdConfig ? config.openIdConfig.authorization_endpoint : null;
+  } catch (err) {
+    error(err);
+    return null;
+  }
+};
+
+exports.authorisationEndpoint = authorisationEndpoint;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;

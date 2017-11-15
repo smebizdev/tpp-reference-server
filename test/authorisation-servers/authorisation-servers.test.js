@@ -4,6 +4,7 @@ const { drop, set } = require('../../app/storage.js');
 const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
+  authorisationEndpoint,
   storeAuthorisationServers,
   updateOpenIdConfigs,
   getClientCredentials,
@@ -23,8 +24,9 @@ const flattenedObDirectoryAuthServerList = [
   },
 ];
 
+const expectedAuthEndpoint = 'http://auth.example.com/authorize';
 const openIdConfig = {
-  authorization_endpoint: 'http://auth.example.com/authorize',
+  authorization_endpoint: expectedAuthEndpoint,
   token_endpoint: 'http://auth.example.com/token',
 };
 
@@ -111,6 +113,9 @@ describe('authorisation servers', () => {
       const list = await allAuthorisationServers();
       const authServerConfig = list[0];
       assert.ok(!authServerConfig.openIdConfig, 'openIdConfig not present');
+
+      const authEndpoint = await authorisationEndpoint(authServerId);
+      assert.equal(authEndpoint, null);
     });
 
     it('retrieves openIdConfig and stores in db', async () => {
@@ -119,6 +124,9 @@ describe('authorisation servers', () => {
       const authServerConfig = list[0];
       assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
       assert.deepEqual(authServerConfig, withOpenIdConfig);
+
+      const authEndpoint = await authorisationEndpoint(authServerId);
+      assert.equal(authEndpoint, expectedAuthEndpoint);
     });
   });
 });

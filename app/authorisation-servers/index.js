@@ -1,5 +1,6 @@
 const {
   allAuthorisationServers,
+  authorisationEndpoint,
   authorisationServersForClient,
   storeAuthorisationServers,
   updateOpenIdConfigs,
@@ -9,6 +10,7 @@ const {
 
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
+exports.authorisationEndpoint = authorisationEndpoint;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;

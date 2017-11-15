@@ -1,10 +1,11 @@
 const assert = require('assert');
-const { drop } = require('../../app/storage.js');
+const { drop, set } = require('../../app/storage.js');
 const { AUTH_SERVER_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
   storeAuthorisationServers,
   updateOpenIdConfigs,
+  getClientCredentials,
 } = require('../../app/authorisation-servers');
 
 const nock = require('nock');
@@ -23,6 +24,11 @@ const openIdConfig = {
   token_endpoint: 'http://auth.example.com/token',
 };
 
+const clientCredentials = {
+  clientId: 'a-client-id',
+  clientSecret: 'a-client-secret',
+};
+
 const expectedAuthServerConfig = {
   id: 'aaa-example-org-http://aaa.example.com',
   obDirectoryConfig: {
@@ -37,12 +43,7 @@ const expectedAuthServerConfig = {
     token_endpoint: 'http://auth.example.com/token',
   },
 };
-
-nock(/example\.com/)
-  .get('/openidconfig')
-  .reply(200, openIdConfig);
-
-describe('updateOpenIdConfigs', () => {
+describe('authorisation servers', () => {
   beforeEach(async () => {
     await drop(AUTH_SERVER_COLLECTION);
     await storeAuthorisationServers(flattenedObDirectoryAuthServerList);
@@ -52,17 +53,38 @@ describe('updateOpenIdConfigs', () => {
     await drop(AUTH_SERVER_COLLECTION);
   });
 
-  it('before called openIdConfig not present', async () => {
-    const list = await allAuthorisationServers();
-    const authServerConfig = list[0];
-    assert.ok(!authServerConfig.openIdConfig, 'openIdConfig not present');
+  describe('getClientCredentials', () => {
+    let authorisationServerId;
+    beforeEach(async () => {
+      const list = await allAuthorisationServers();
+      const authServer = list[0];
+      authorisationServerId = list[0].id;
+      await set(AUTH_SERVER_COLLECTION, Object.assign(authServer, { clientCredentials }), authorisationServerId);
+    });
+
+    it('retrieves client credentials for an authorisationServerId', async () => {
+      const found = await getClientCredentials(authorisationServerId);
+      assert.deepEqual(found, clientCredentials);
+    });
   });
 
-  it('retrieves openIdConfig and stores in db', async () => {
-    await updateOpenIdConfigs();
-    const list = await allAuthorisationServers();
-    const authServerConfig = list[0];
-    assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
-    assert.deepEqual(authServerConfig, expectedAuthServerConfig);
+  describe('updateOpenIdConfigs', () => {
+    nock(/example\.com/)
+      .get('/openidconfig')
+      .reply(200, openIdConfig);
+
+    it('before called openIdConfig not present', async () => {
+      const list = await allAuthorisationServers();
+      const authServerConfig = list[0];
+      assert.ok(!authServerConfig.openIdConfig, 'openIdConfig not present');
+    });
+
+    it('retrieves openIdConfig and stores in db', async () => {
+      await updateOpenIdConfigs();
+      const list = await allAuthorisationServers();
+      const authServerConfig = list[0];
+      assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
+      assert.deepEqual(authServerConfig, expectedAuthServerConfig);
+    });
   });
 });

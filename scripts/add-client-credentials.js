@@ -12,7 +12,7 @@ const addClientCredentials = async () => {
     throw new Error('authServerId, clientId, and clientSecret must ALL be present!');
   }
   try {
-    updateClientCredentials(args.authServerId, {
+    await updateClientCredentials(args.authServerId, {
       clientId: args.clientId,
       clientSecret: args.clientSecret,
     });

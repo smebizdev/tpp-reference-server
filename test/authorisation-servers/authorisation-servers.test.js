@@ -10,13 +10,14 @@ const {
 
 const nock = require('nock');
 
+const authServerId = 'aaaj4NmBD8lQxmLh2O9FLY';
 const flattenedObDirectoryAuthServerList = [
   {
-    Id: 'aaaj4NmBD8lQxmLh2O9FLY',
+    Id: authServerId,
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    orgId: 'aaa-example-org',
+    OBOrganisationId: 'aaa-example-org',
   },
 ];
 
@@ -26,13 +27,13 @@ const openIdConfig = {
 };
 
 const expectedAuthServerConfig = {
-  id: 'aaaj4NmBD8lQxmLh2O9FLY',
+  id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    Id: 'aaaj4NmBD8lQxmLh2O9FLY',
-    orgId: 'aaa-example-org',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
   },
   openIdConfig: {
     authorization_endpoint: 'http://auth.example.com/authorize',
@@ -41,13 +42,13 @@ const expectedAuthServerConfig = {
 };
 
 const expectedClientCredentials = {
-  id: 'aaa-example-org-http://aaa.example.com',
+  id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    id: 'aaa-example-org-http://aaa.example.com',
-    orgId: 'aaa-example-org',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
   },
   clientCredentials: {
     clientId: 'abc',
@@ -102,7 +103,7 @@ describe('updateClientCredentials', () => {
   });
 
   it('stores clientCredential in db', async () => {
-    await updateClientCredentials('aaa-example-org-http://aaa.example.com', { clientId: 'abc', clientSecret: 'xyz' });
+    await updateClientCredentials(authServerId, { clientId: 'abc', clientSecret: 'xyz' });
     const list = await allAuthorisationServers();
     const authServerConfig = list[0];
     assert.ok(authServerConfig.clientCredentials, 'clientCredentials present');

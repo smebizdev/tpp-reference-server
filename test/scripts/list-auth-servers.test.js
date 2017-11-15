@@ -7,8 +7,12 @@ const authorisationServersData = [
     id: 'testId',
     obDirectoryConfig: {
       id: 'testId',
-      orgId: 'testOrdId',
+      OBOrganisationId: 'testOrdId',
       CustomerFriendlyName: 'testName',
+      OrganisationCommonName: 'testOrg',
+      AuthorityId: 'FCA',
+      MemberState: 'GB',
+      RegistrationId: '123',
     },
     clientCredentials: { ex: 'ample' },
     openIdConfig: { ex: 'ample' },
@@ -17,8 +21,12 @@ const authorisationServersData = [
     id: 'testId2',
     obDirectoryConfig: {
       id: 'testId2',
-      orgId: 'testOrdId',
+      OBOrganisationId: 'testOrdId',
       CustomerFriendlyName: 'testName2',
+      OrganisationCommonName: 'testOrg2',
+      AuthorityId: 'FCA',
+      MemberState: 'GB',
+      RegistrationId: '456',
     },
   },
 ];
@@ -40,7 +48,7 @@ describe('authServerRows', () => {
     it('returns tsv headers', async () => {
       assert.deepEqual(
         await authServerRows(),
-        ['id\tCustomerFriendlyName\torgId\tclientCredentialsPresent\topenIdConfigPresent'],
+        ['id\tCustomerFriendlyName\tOrganisationCommonName\tAuthority\tOBOrganisationId\tclientCredentialsPresent\topenIdConfigPresent'],
       );
     });
   });
@@ -51,13 +59,18 @@ describe('authServerRows', () => {
     });
 
     it('returns tsv of auth servers', async () => {
+      const rows = await authServerRows();
       assert.deepEqual(
-        await authServerRows(),
-        [
-          'id\tCustomerFriendlyName\torgId\tclientCredentialsPresent\topenIdConfigPresent',
-          'testId\ttestName\ttestOrdId\ttrue\ttrue',
-          'testId2\ttestName2\ttestOrdId\tfalse\tfalse',
-        ],
+        rows[0],
+        'id\tCustomerFriendlyName\tOrganisationCommonName\tAuthority\tOBOrganisationId\tclientCredentialsPresent\topenIdConfigPresent',
+      );
+      assert.deepEqual(
+        rows[1],
+        'testId\ttestName\ttestOrg\tGB:FCA:123\ttestOrdId\ttrue\ttrue',
+      );
+      assert.deepEqual(
+        rows[2],
+        'testId2\ttestName2\ttestOrg2\tGB:FCA:456\ttestOrdId\tfalse\tfalse',
       );
     });
   });

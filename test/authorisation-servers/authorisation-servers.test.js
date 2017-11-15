@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { drop } = require('../../app/storage.js');
-const { AUTH_SERVER_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
+const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
   storeAuthorisationServers,
@@ -10,12 +10,14 @@ const {
 
 const nock = require('nock');
 
+const authServerId = 'aaaj4NmBD8lQxmLh2O9FLY';
 const flattenedObDirectoryAuthServerList = [
   {
+    Id: authServerId,
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    orgId: 'aaa-example-org',
+    OBOrganisationId: 'aaa-example-org',
   },
 ];
 
@@ -25,13 +27,13 @@ const openIdConfig = {
 };
 
 const expectedAuthServerConfig = {
-  id: 'aaa-example-org-http://aaa.example.com',
+  id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    id: 'aaa-example-org-http://aaa.example.com',
-    orgId: 'aaa-example-org',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
   },
   openIdConfig: {
     authorization_endpoint: 'http://auth.example.com/authorize',
@@ -40,13 +42,13 @@ const expectedAuthServerConfig = {
 };
 
 const expectedClientCredentials = {
-  id: 'aaa-example-org-http://aaa.example.com',
+  id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    id: 'aaa-example-org-http://aaa.example.com',
-    orgId: 'aaa-example-org',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
   },
   clientCredentials: {
     clientId: 'abc',
@@ -61,12 +63,12 @@ nock(/example\.com/)
 
 describe('updateOpenIdConfigs', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     await storeAuthorisationServers(flattenedObDirectoryAuthServerList);
   });
 
   afterEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('before called openIdConfig not present', async () => {
@@ -86,12 +88,12 @@ describe('updateOpenIdConfigs', () => {
 
 describe('updateClientCredentials', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     await storeAuthorisationServers(flattenedObDirectoryAuthServerList);
   });
 
   afterEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('before called clientCredentials not present', async () => {
@@ -101,7 +103,7 @@ describe('updateClientCredentials', () => {
   });
 
   it('stores clientCredential in db', async () => {
-    await updateClientCredentials('aaa-example-org-http://aaa.example.com', { clientId: 'abc', clientSecret: 'xyz' });
+    await updateClientCredentials(authServerId, { clientId: 'abc', clientSecret: 'xyz' });
     const list = await allAuthorisationServers();
     const authServerConfig = list[0];
     assert.ok(authServerConfig.clientCredentials, 'clientCredentials present');

@@ -2,13 +2,15 @@ const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 
+const { extractAuthorisationServers } = require('../app/ob-directory');
+
 const accessToken = 'AN_ACCESS_TOKEN';
 
 const { drop } = require('../app/storage.js');
 
 const { app } = require('../app/index.js');
 const { session } = require('../app/session.js');
-const { AUTH_SERVER_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
+const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
 
 const assert = require('assert');
 const nock = require('nock');
@@ -33,59 +35,130 @@ const directoryHeaders = {
 
 const expectedResult = [
   {
-    id: 'aaa-example-org-http://aaa.example.com',
+    id: 'aaaj4NmBD8lQxmLh2O9FLY',
     logoUri: 'string',
     name: 'AAA Example Bank',
-    orgId: 'aaa-example-org',
+    orgId: 'aaax5nTR33811QyQfi',
   },
   {
-    id: 'bbbccc-example-org-http://bbb.example.com',
+    id: 'bbbX7tUB4fPIYB0k1m',
     logoUri: 'string',
     name: 'BBB Example Bank',
-    orgId: 'bbbccc-example-org',
+    orgId: 'bbbcccUB4fPIYB0k1m',
   },
   {
-    id: 'bbbccc-example-org-http://ccc.example.com',
+    id: 'cccbN8iAsMh74sOXhk',
     logoUri: 'string',
     name: 'CCC Example Bank',
-    orgId: 'bbbccc-example-org',
+    orgId: 'bbbcccUB4fPIYB0k1m',
   },
 ];
 
+const aspspPayload = {
+  Resources: [
+    {
+      'urn:openbanking:competentauthorityclaims:1.0': {
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '123',
+      },
+      'AuthorisationServers': [
+        {
+          Id: 'aaaj4NmBD8lQxmLh2O9FLY',
+          BaseApiDNSUri: 'http://aaa.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'AAA Example Bank',
+          OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
+        },
+      ],
+      'urn:openbanking:organisation:1.0': {
+        OrganisationCommonName: 'AAA Group PLC',
+        OBOrganisationId: 'aaax5nTR33811QyQfi',
+      },
+      'id': 'aaax5nTR33811QyQfi',
+    },
+    {
+      'urn:openbanking:competentauthorityclaims:1.0': {
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
+      },
+      'AuthorisationServers': [
+        {
+          Id: 'bbbX7tUB4fPIYB0k1m',
+          BaseApiDNSUri: 'http://bbb.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'BBB Example Bank',
+          OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
+        },
+        {
+          Id: 'cccbN8iAsMh74sOXhk',
+          BaseApiDNSUri: 'http://ccc.example.com',
+          CustomerFriendlyLogoUri: 'string',
+          CustomerFriendlyName: 'CCC Example Bank',
+          OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
+        },
+      ],
+      'urn:openbanking:organisation:1.0': {
+        OrganisationCommonName: 'BBBCCC Group PLC',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+      },
+      'id': 'bbbcccUB4fPIYB0k1m',
+    },
+    {
+      id: 'fPIYB0k1moGhX7tUB4',
+    },
+  ],
+};
+
+describe('extractAuthorisationServers', () => {
+  it('returns flattened ASPSP auth server list', () => {
+    const list = extractAuthorisationServers(aspspPayload);
+    const expected = [
+      {
+        BaseApiDNSUri: 'http://aaa.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'AAA Example Bank',
+        Id: 'aaaj4NmBD8lQxmLh2O9FLY',
+        OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
+        OBOrganisationId: 'aaax5nTR33811QyQfi',
+        OrganisationCommonName: 'AAA Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '123',
+      },
+      {
+        BaseApiDNSUri: 'http://bbb.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'BBB Example Bank',
+        Id: 'bbbX7tUB4fPIYB0k1m',
+        OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+        OrganisationCommonName: 'BBBCCC Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
+      },
+      {
+        BaseApiDNSUri: 'http://ccc.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'CCC Example Bank',
+        Id: 'cccbN8iAsMh74sOXhk',
+        OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+        OrganisationCommonName: 'BBBCCC Group PLC',
+        AuthorityId: 'FCA',
+        MemberState: 'GB',
+        RegistrationId: '456',
+      },
+    ];
+    assert.deepEqual(list, expected);
+  });
+});
+
 nock(/example\.com/, directoryHeaders)
   .get('/scim/v2/OBAccountPaymentServiceProviders/')
-  .reply(200, {
-    Resources: [
-      {
-        AuthorisationServers: [
-          {
-            BaseApiDNSUri: 'http://aaa.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'AAA Example Bank',
-          },
-        ],
-        id: 'aaa-example-org',
-      },
-      {
-        AuthorisationServers: [
-          {
-            BaseApiDNSUri: 'http://bbb.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'BBB Example Bank',
-          },
-          {
-            BaseApiDNSUri: 'http://ccc.example.com',
-            CustomerFriendlyLogoUri: 'string',
-            CustomerFriendlyName: 'CCC Example Bank',
-          },
-        ],
-        id: 'bbbccc-example-org',
-      },
-      {
-        id: 'empty-example-org',
-      },
-    ],
-  });
+  .reply(200, aspspPayload);
 
 const login = application => request(application)
   .post('/login')
@@ -94,7 +167,7 @@ const login = application => request(application)
 
 describe('Directory', () => {
   beforeEach(async () => {
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     session.setId('foo');
     // set up dummy but valid signing_key to sign jwt
     process.env.SIGNING_KEY = 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ0KTUlJQk9RSUJBQUpCQU1Odng4ZmtUNmJXYk1jNGNqdTc1eC9kdkZvYnBIWjNVU25lbWhCNUxYQVFYb2c0eTVqVA0KaXdvOTVBdWJONDB1Mm1YRDhRVWhCNFJFQ2Q0alAvWmczMlVDQXdFQUFRSkFXRzE2VW9xT002bnZuQkNCTjEvaw0KeXJsVVlOMERCQXNtc1RBa08zSG95andDMVpKUG9COUQ4SGJEYzljWnhjRW5vQTZDK2pvNmxSN2NOWTlDRWthbQ0KZ1FJaEFQR2I1S2UxVEQreTBleW1Sb21KVEk5VzZjdmNmVk85dWlhZnVjbjBvLzNGQWlFQXp4UFhicHIxZGtBeg0KZG45QVlMazFIZU1vaXZqak0zVVpFUGhkNmJaOEZTRUNJRngzcDJrd0Q4Q0pOYUoyZUtTR3NaQmlXUlEyakppUw0KRWo1Wi93YjE1QlZwQWlCdHVoN1N2Z3ZKY0RXVTJkTWNMYWVtd2FMUEdSa1RRRDViRHJCODBqU240UUlnY243cw0KYTRvcFdtMVhLM3V3WGhBcXVqY3FnY1NseEpZQXMwWGtvSUNOV3c0PQ0KLS0tLS1FTkQgUlNBIFBSSVZBVEUgS0VZLS0tLS0=';
@@ -103,7 +176,7 @@ describe('Directory', () => {
   afterEach(async () => {
     delete process.env.SIGNING_KEY;
     session.deleteAll();
-    await drop(AUTH_SERVER_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 
   it('returns proxy 200 response for /account-payment-service-provider-authorisation-servers', (done) => {

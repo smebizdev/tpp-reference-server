@@ -1,11 +1,10 @@
 const { postToken } = require('../obtain-access-token');
 const { postAccountRequests } = require('./account-requests');
+const { getClientCredentials } = require('../authorisation-servers');
 const env = require('env-var');
 const debug = require('debug')('debug');
 
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();
-const authServerClientId = env.get('ASPSP_AUTH_SERVER_CLIENT_ID').asString();
-const authServerClientSecret = env.get('ASPSP_AUTH_SERVER_CLIENT_SECRET').asString();
 
 // Todo: lookup auth server via Directory and OpenIdEndpoint responses.
 const authorisationServerHost = async authServerId => (authServerId ? authServer : null);
@@ -19,15 +18,6 @@ const resourceServerPath = async (authorisationServerId) => {
     return `${host}/open-banking/${apiVersion}`;
   }
   return null;
-};
-
-// Todo: retrieve clientCredentials from store keyed by authorisationServerId.
-const clientCredentials = async (authorisationServerId) => {
-  const credentials = {
-    clientId: authServerClientId,
-    clientSecret: authServerClientSecret,
-  };
-  return authorisationServerId ? credentials : null;
 };
 
 const validateParameters = (authorisationServerId, fapiFinancialId) => {
@@ -48,7 +38,7 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
   const authorisationServer = await authorisationServerHost(authorisationServerId);
-  const { clientId, clientSecret } = await clientCredentials(authorisationServerId);
+  const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
   const accessTokenPayload = {
     scope: 'accounts',
     grant_type: 'client_credentials',
@@ -86,4 +76,4 @@ const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
 };
 
 exports.setupAccountRequest = setupAccountRequest;
-exports.clientCredentials = clientCredentials;
+exports.clientCredentials = getClientCredentials;

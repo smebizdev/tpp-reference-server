@@ -17,7 +17,7 @@ const sortByName = (list) => {
 };
 
 const transformServerData = (data) => {
-  const { id } = data;
+  const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
   const { orgId } = data;
@@ -31,14 +31,14 @@ const transformServerData = (data) => {
 
 const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 
-const setAuthServerConfig = async (id, authServer) => set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
+const setAuthServerConfig = async (id, authServer) =>
+  set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
-    const id = `${item.orgId}-${item.BaseApiDNSUri}`;
+    const id = item.Id;
     const existing = await getAuthServerConfig(id);
     const authServer = existing || {};
-    item.id = id; // eslint-disable-line
     authServer.obDirectoryConfig = item;
     await setAuthServerConfig(id, authServer);
   }));

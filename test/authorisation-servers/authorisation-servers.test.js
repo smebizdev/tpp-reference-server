@@ -12,6 +12,7 @@ const nock = require('nock');
 
 const flattenedObDirectoryAuthServerList = [
   {
+    Id: 'aaaj4NmBD8lQxmLh2O9FLY',
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
@@ -25,12 +26,12 @@ const openIdConfig = {
 };
 
 const expectedAuthServerConfig = {
-  id: 'aaa-example-org-http://aaa.example.com',
+  id: 'aaaj4NmBD8lQxmLh2O9FLY',
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    id: 'aaa-example-org-http://aaa.example.com',
+    Id: 'aaaj4NmBD8lQxmLh2O9FLY',
     orgId: 'aaa-example-org',
   },
   openIdConfig: {

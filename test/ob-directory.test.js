@@ -33,22 +33,22 @@ const directoryHeaders = {
 
 const expectedResult = [
   {
-    id: 'aaa-example-org-http://aaa.example.com',
+    id: 'aaaj4NmBD8lQxmLh2O9FLY',
     logoUri: 'string',
     name: 'AAA Example Bank',
-    orgId: 'aaa-example-org',
+    orgId: 'aaax5nTR33811QyQfi',
   },
   {
-    id: 'bbbccc-example-org-http://bbb.example.com',
+    id: 'bbbj4NmBD8lQxmLh2O9FLY',
     logoUri: 'string',
     name: 'BBB Example Bank',
-    orgId: 'bbbccc-example-org',
+    orgId: 'bbbcccUB4fPIYB0k1m',
   },
   {
-    id: 'bbbccc-example-org-http://ccc.example.com',
+    id: 'cccj4NmBD8lQxmLh2O9FLY',
     logoUri: 'string',
     name: 'CCC Example Bank',
-    orgId: 'bbbccc-example-org',
+    orgId: 'bbbcccUB4fPIYB0k1m',
   },
 ];
 
@@ -57,32 +57,44 @@ nock(/example\.com/, directoryHeaders)
   .reply(200, {
     Resources: [
       {
-        AuthorisationServers: [
+        'AuthorisationServers': [
           {
+            Id: 'aaaj4NmBD8lQxmLh2O9FLY',
             BaseApiDNSUri: 'http://aaa.example.com',
             CustomerFriendlyLogoUri: 'string',
             CustomerFriendlyName: 'AAA Example Bank',
+            OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
           },
         ],
-        id: 'aaa-example-org',
+        'urn:openbanking:organisation:1.0': {
+          OBOrganisationId: 'aaax5nTR33811QyQfi',
+        },
+        'id': 'aaax5nTR33811QyQfi',
       },
       {
-        AuthorisationServers: [
+        'AuthorisationServers': [
           {
+            Id: 'bbbj4NmBD8lQxmLh2O9FLY',
             BaseApiDNSUri: 'http://bbb.example.com',
             CustomerFriendlyLogoUri: 'string',
             CustomerFriendlyName: 'BBB Example Bank',
+            OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
           },
           {
+            Id: 'cccj4NmBD8lQxmLh2O9FLY',
             BaseApiDNSUri: 'http://ccc.example.com',
             CustomerFriendlyLogoUri: 'string',
             CustomerFriendlyName: 'CCC Example Bank',
+            OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
           },
         ],
-        id: 'bbbccc-example-org',
+        'urn:openbanking:organisation:1.0': {
+          OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+        },
+        'id': 'bbbcccUB4fPIYB0k1m',
       },
       {
-        id: 'empty-example-org',
+        id: 'fPIYB0k1moGhX7tUB4',
       },
     ],
   });

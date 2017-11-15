@@ -5,6 +5,7 @@ const authServerRows = async () => {
     'id',
     'CustomerFriendlyName',
     'OrganisationCommonName',
+    'Authority',
     'OBOrganisationId',
     'clientCredentialsPresent',
     'openIdConfigPresent',
@@ -13,10 +14,13 @@ const authServerRows = async () => {
   const list = await allAuthorisationServers();
   list.forEach((item) => {
     const config = item.obDirectoryConfig;
+    const authorityPresent = config && config.AuthorityId
+      && config.MemberState && config.RegistrationId;
     const line = [
       item.id,
       config ? config.CustomerFriendlyName : '',
       config ? config.OrganisationCommonName : '',
+      authorityPresent ? `${config.MemberState}:${config.AuthorityId}:${config.RegistrationId}` : '',
       config ? config.OBOrganisationId : '',
       !!item.clientCredentials,
       !!item.openIdConfig,

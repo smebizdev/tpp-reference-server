@@ -35,9 +35,9 @@ const getAuthServerConfig = async id => get(AUTH_SERVER_COLLECTION, id);
 
 const setAuthServerConfig = async (id, authServer) => set(AUTH_SERVER_COLLECTION, authServer, id);
 
-const getClientCredentials = async authServerId => {
+const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
-  return Object.assign({}, authServer.clientCredentials);
+  return authServer.clientCredentials;
 };
 
 const storeAuthorisationServers = async (list) => {

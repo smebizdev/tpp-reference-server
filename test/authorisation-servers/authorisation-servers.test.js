@@ -59,7 +59,11 @@ describe('authorisation servers', () => {
       const list = await allAuthorisationServers();
       const authServer = list[0];
       authorisationServerId = list[0].id;
-      await set(AUTH_SERVER_COLLECTION, Object.assign(authServer, { clientCredentials }), authorisationServerId);
+      await set(
+        AUTH_SERVER_COLLECTION,
+        Object.assign(authServer, { clientCredentials }),
+        authorisationServerId,
+      );
     });
 
     it('retrieves client credentials for an authorisationServerId', async () => {

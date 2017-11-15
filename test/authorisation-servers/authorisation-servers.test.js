@@ -6,6 +6,7 @@ const {
   allAuthorisationServers,
   authorisationEndpoint,
   storeAuthorisationServers,
+  tokenEndpoint,
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
@@ -25,9 +26,10 @@ const flattenedObDirectoryAuthServerList = [
 ];
 
 const expectedAuthEndpoint = 'http://auth.example.com/authorize';
+const expectedTokenEndpoint = 'http://auth.example.com/token';
 const openIdConfig = {
   authorization_endpoint: expectedAuthEndpoint,
-  token_endpoint: 'http://auth.example.com/token',
+  token_endpoint: expectedTokenEndpoint,
 };
 
 const clientCredentials = {
@@ -116,6 +118,9 @@ describe('authorisation servers', () => {
 
       const authEndpoint = await authorisationEndpoint(authServerId);
       assert.equal(authEndpoint, null);
+
+      const tokenUrl = await tokenEndpoint(authServerId);
+      assert.equal(tokenUrl, null);
     });
 
     it('retrieves openIdConfig and stores in db', async () => {
@@ -127,6 +132,9 @@ describe('authorisation servers', () => {
 
       const authEndpoint = await authorisationEndpoint(authServerId);
       assert.equal(authEndpoint, expectedAuthEndpoint);
+
+      const tokenUrl = await tokenEndpoint(authServerId);
+      assert.equal(tokenUrl, expectedTokenEndpoint);
     });
   });
 });

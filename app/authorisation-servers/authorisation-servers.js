@@ -118,10 +118,21 @@ const authorisationEndpoint = async (id) => {
   }
 };
 
+const tokenEndpoint = async (id) => {
+  try {
+    const config = await getAuthServerConfig(id);
+    return config.openIdConfig ? config.openIdConfig.token_endpoint : null;
+  } catch (err) {
+    error(err);
+    return null;
+  }
+};
+
 exports.authorisationEndpoint = authorisationEndpoint;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
+exports.tokenEndpoint = tokenEndpoint;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;

@@ -1,6 +1,8 @@
 // const log = require('debug')('log');
+const debug = require('debug')('debug');
 const error = require('debug')('error');
 const { getAll, get, set } = require('../storage');
+const { getOpenIdConfig } = require('./openid-config');
 
 const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
 
@@ -29,14 +31,18 @@ const transformServerData = (data) => {
   };
 };
 
+const getAuthServerConfig = async id => get(AUTH_SERVER_COLLECTION, id);
+
+const setAuthServerConfig = async (id, authServer) => set(AUTH_SERVER_COLLECTION, authServer, id);
+
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
     const id = `${item.orgId}-${item.BaseApiDNSUri}`;
-    const existing = await get(AUTH_SERVER_COLLECTION, id);
+    const existing = await getAuthServerConfig(id);
     const authServer = existing || {};
     item.id = id; // eslint-disable-line
     authServer.obDirectoryConfig = item;
-    await set(AUTH_SERVER_COLLECTION, authServer, id);
+    await setAuthServerConfig(id, authServer);
   }));
 };
 
@@ -50,6 +56,32 @@ const allAuthorisationServers = async () => {
   } catch (e) {
     error(e);
     return [];
+  }
+};
+
+const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
+  try {
+    const openidConfig = await getOpenIdConfig(openidConfigUrl);
+    debug(openidConfig);
+    const authServer = await getAuthServerConfig(id);
+    authServer.openIdConfig = openidConfig;
+    await setAuthServerConfig(id, authServer);
+  } catch (err) {
+    error(err);
+  }
+};
+
+const updateOpenIdConfigs = async () => {
+  try {
+    const list = await allAuthorisationServers();
+    const toUpdate = list.filter(item => !item.openIdConfig);
+
+    await Promise.all(toUpdate.map(async (authServer) => {
+      const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
+      await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
+    }));
+  } catch (err) {
+    error(err);
   }
 };
 
@@ -67,4 +99,5 @@ const authorisationServersForClient = async () => {
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
+exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;

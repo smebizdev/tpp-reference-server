@@ -107,6 +107,21 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ]
 ```
 
+### Adding Client Credentials
+
+There is a script to input and store client credentials against ASPSP Auth Server Records
+
+Example Usages 
+
+```
+# Locally 
+npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
+
+# Remotely
+heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --env tpp-reference-server
+
+```
+
 ### Proxy requests for upstream backend ASPSP APIs (v1.1)
 
 __NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.

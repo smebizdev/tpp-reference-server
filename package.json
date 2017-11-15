@@ -44,7 +44,8 @@
     "test:debug": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' node --inspect-brk node_modules/mocha/bin/_mocha --recursive --watch --no-timeouts",
     "eslint": "node ./node_modules/eslint/bin/eslint.js .",
     "checks": "node ./node_modules/eslint/bin/eslint.js . && mocha",
-    "listAuthServers": "node ./scripts/list-auth-servers.js"
+    "listAuthServers": "node ./scripts/list-auth-servers.js",
+    "saveCreds": "node ./scripts/add-client-credentials.js"
   },
   "repository": {
     "type": "git",

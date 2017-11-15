@@ -1,8 +1,9 @@
-// const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
+
+debug.enabled = true;
 
 const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
 
@@ -62,13 +63,22 @@ const allAuthorisationServers = async () => {
 const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   try {
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
-    debug(openidConfig);
     const authServer = await getAuthServerConfig(id);
     authServer.openIdConfig = openidConfig;
     await setAuthServerConfig(id, authServer);
   } catch (err) {
     error(err);
   }
+};
+
+const updateClientCredentials = async (id, clientCredentials) => {
+  const authServer = await getAuthServerConfig(id);
+  if (!authServer) {
+    throw new Error('Auth Server Not Found !');
+  }
+  authServer.clientCredentials = clientCredentials;
+  await setAuthServerConfig(id, authServer);
+  return true;
 };
 
 const updateOpenIdConfigs = async () => {
@@ -100,4 +110,5 @@ exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
+exports.updateClientCredentials = updateClientCredentials;
 exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;

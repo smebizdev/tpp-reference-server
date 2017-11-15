@@ -81,28 +81,25 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://loca
 
 Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the Open Banking Directory. It has been adapted to simulate what a typical client app would require.
 
-> __NOTE__: the actual `id` won't be a URI. It'll be an authorisation server id - that is planned to be added to the Directory JSON payload.
-> We are simulating an `id` by combining the ASPSP's `organisation id` with the authorisation server `BaseApiDNSUri`.
-
 ```sh
 [
   {
-    "id": "aaa-example-org-http://aaa.example.com",
+    "id": "aaaj4NmBD8lQxmL",
     "logoUri": "",
     "name": "AAA Example Bank",
-    "orgId": "aaa-example-org",
+    "orgId": "aaax5nTR33811QyQfi",
   },
   {
-    "id": "bbbccc-example-org-http://bbb.example.com",
+    "id": "bbbX7tUB4fPIYB0",
     "logoUri": "",
     "name": "BBB Example Bank",
-    "orgId": "bbbccc-example-org",
+    "orgId": "bbbUB4fPIYB0k1m",
   },
   {
-    "id": "bbbccc-example-org-http://ccc.example.com",
+    "id": "cccbN8iAsMh74sO",
     "logoUri": "",
     "name": "CCC Example Bank",
-    "orgId": "bbbccc-example-org",
+    "orgId": "cccMh74sOXhk",
   }
 ]
 ```
@@ -111,10 +108,10 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 
 There is a script to input and store client credentials against ASPSP Auth Server Records
 
-Example Usages 
+Example Usages
 
 ```
-# Locally 
+# Locally
 npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
 # Remotely
@@ -395,8 +392,8 @@ npm run listAuthServers --silent
 
 Output on terminal is TSV that looks like this:
 ```
-id	CustomerFriendlyName	orgId	clientCredentialsPresent	openIdConfigPresent
-aaa-example-bank-http://aaa-example-bank.example.com	AAA Example Bank	aaa-example-bank	false	true
-ccc-example-bank-http://ccc-example-bank.example.com	CCC Example Bank	ccc-example-bank	false	false
-bbb-example-bank-http://bbb-example-bank.example.com	BBB Example Bank	bbb-example-bank	false	false
+id               CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId   clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmL  AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811QyQfi false                    false
+bbbX7tUB4fPIYB0  BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m    false                    false
+cccbN8iAsMh74sO  CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhk       false                    false
 ```

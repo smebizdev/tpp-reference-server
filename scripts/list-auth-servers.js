@@ -4,7 +4,7 @@ const authServerRows = async () => {
   const header = [
     'id',
     'CustomerFriendlyName',
-    'orgId',
+    'OBOrganisationId',
     'clientCredentialsPresent',
     'openIdConfigPresent',
   ].join('\t');
@@ -14,7 +14,7 @@ const authServerRows = async () => {
     const line = [
       item.id,
       item.obDirectoryConfig ? item.obDirectoryConfig.CustomerFriendlyName : '',
-      item.obDirectoryConfig ? item.obDirectoryConfig.orgId : '',
+      item.obDirectoryConfig ? item.obDirectoryConfig.OBOrganisationId : '',
       !!item.clientCredentials,
       !!item.openIdConfig,
     ].join('\t');

@@ -7,7 +7,7 @@ const authorisationServersData = [
     id: 'testId',
     obDirectoryConfig: {
       id: 'testId',
-      orgId: 'testOrdId',
+      OBOrganisationId: 'testOrdId',
       CustomerFriendlyName: 'testName',
     },
     clientCredentials: { ex: 'ample' },
@@ -17,7 +17,7 @@ const authorisationServersData = [
     id: 'testId2',
     obDirectoryConfig: {
       id: 'testId2',
-      orgId: 'testOrdId',
+      OBOrganisationId: 'testOrdId',
       CustomerFriendlyName: 'testName2',
     },
   },
@@ -40,7 +40,7 @@ describe('authServerRows', () => {
     it('returns tsv headers', async () => {
       assert.deepEqual(
         await authServerRows(),
-        ['id\tCustomerFriendlyName\torgId\tclientCredentialsPresent\topenIdConfigPresent'],
+        ['id\tCustomerFriendlyName\tOBOrganisationId\tclientCredentialsPresent\topenIdConfigPresent'],
       );
     });
   });
@@ -51,13 +51,18 @@ describe('authServerRows', () => {
     });
 
     it('returns tsv of auth servers', async () => {
+      const rows = await authServerRows();
       assert.deepEqual(
-        await authServerRows(),
-        [
-          'id\tCustomerFriendlyName\torgId\tclientCredentialsPresent\topenIdConfigPresent',
-          'testId\ttestName\ttestOrdId\ttrue\ttrue',
-          'testId2\ttestName2\ttestOrdId\tfalse\tfalse',
-        ],
+        rows[0],
+        'id\tCustomerFriendlyName\tOBOrganisationId\tclientCredentialsPresent\topenIdConfigPresent',
+      );
+      assert.deepEqual(
+        rows[1],
+        'testId\ttestName\ttestOrdId\ttrue\ttrue',
+      );
+      assert.deepEqual(
+        rows[2],
+        'testId2\ttestName2\ttestOrdId\tfalse\tfalse',
       );
     });
   });

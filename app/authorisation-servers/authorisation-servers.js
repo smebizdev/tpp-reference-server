@@ -1,9 +1,6 @@
-const debug = require('debug')('debug');
 const error = require('debug')('error');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
-
-debug.enabled = true;
 
 const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
 

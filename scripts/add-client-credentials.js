@@ -7,7 +7,7 @@ const args = process.argv.slice(2).reduce((acc, arg) => {
   return acc;
 }, {});
 
-const addClientCredentials = () => {
+const addClientCredentials = async () => {
   if (!args.authServerId || !args.clientId || !args.clientSecret) {
     throw new Error('authServerId, clientId, and clientSecret must ALL be present!');
   }
@@ -19,9 +19,12 @@ const addClientCredentials = () => {
   } catch (e) {
     error(e);
   }
-  process.exit();
 };
 
-addClientCredentials();
+addClientCredentials().then(() => {
+  if (process.env.NODE_ENV !== 'test') {
+    process.exit();
+  }
+});
 
 exports.addClientCredentials = addClientCredentials;

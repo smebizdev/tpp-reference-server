@@ -4,6 +4,7 @@ const authServerRows = async () => {
   const header = [
     'id',
     'CustomerFriendlyName',
+    'OrganisationCommonName',
     'OBOrganisationId',
     'clientCredentialsPresent',
     'openIdConfigPresent',
@@ -11,10 +12,12 @@ const authServerRows = async () => {
   const rows = [header];
   const list = await allAuthorisationServers();
   list.forEach((item) => {
+    const config = item.obDirectoryConfig;
     const line = [
       item.id,
-      item.obDirectoryConfig ? item.obDirectoryConfig.CustomerFriendlyName : '',
-      item.obDirectoryConfig ? item.obDirectoryConfig.OBOrganisationId : '',
+      config ? config.CustomerFriendlyName : '',
+      config ? config.OrganisationCommonName : '',
+      config ? config.OBOrganisationId : '',
       !!item.clientCredentials,
       !!item.openIdConfig,
     ].join('\t');

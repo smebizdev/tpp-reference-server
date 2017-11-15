@@ -362,3 +362,26 @@ The server has to be configured with
 * `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
 * `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
+
+### Configuration of ASPSP Authorisation Servers
+
+When the `/account-payment-service-provider-authorisation-servers` endpoint is
+called on the server, a list of ASPSP authorisation servers is fetched from
+OB Directory and stored in the server's database.
+
+For each authorisation server the OpenId config is fetched and stored in the
+database.
+
+To list authorisation servers currently in the database, run:
+
+```sh
+npm run listAuthServers --silent
+```
+
+Output on terminal is TSV that looks like this:
+```
+id	CustomerFriendlyName	orgId	clientCredentialsPresent	openIdConfigPresent
+aaa-example-bank-http://aaa-example-bank.example.com	AAA Example Bank	aaa-example-bank	false	true
+ccc-example-bank-http://ccc-example-bank.example.com	CCC Example Bank	ccc-example-bank	false	false
+bbb-example-bank-http://bbb-example-bank.example.com	BBB Example Bank	bbb-example-bank	false	false
+```

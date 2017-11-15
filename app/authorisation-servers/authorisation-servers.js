@@ -20,7 +20,7 @@ const transformServerData = (data) => {
   const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
-  const { orgId } = data;
+  const orgId = data.OBOrganisationId;
   return {
     id,
     logoUri,

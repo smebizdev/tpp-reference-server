@@ -2,6 +2,8 @@ const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 
+const { extractAuthorisationServers } = require('../app/ob-directory');
+
 const accessToken = 'AN_ACCESS_TOKEN';
 
 const { drop } = require('../app/storage.js');
@@ -98,6 +100,42 @@ const aspspPayload = {
     },
   ],
 };
+
+describe('extractAuthorisationServers', () => {
+  it('returns flattened ASPSP auth server list', () => {
+    const list = extractAuthorisationServers(aspspPayload);
+    const expected = [
+      {
+        BaseApiDNSUri: 'http://aaa.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'AAA Example Bank',
+        Id: 'aaaj4NmBD8lQxmLh2O9FLY',
+        OpenIDConfigEndPointUri: 'http://aaa.example.com/openid/config',
+        OBOrganisationId: 'aaax5nTR33811QyQfi',
+        OrganisationCommonName: 'AAA Group PLC',
+      },
+      {
+        BaseApiDNSUri: 'http://bbb.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'BBB Example Bank',
+        Id: 'bbbX7tUB4fPIYB0k1m',
+        OpenIDConfigEndPointUri: 'http://bbb.example.com/openid/config',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+        OrganisationCommonName: 'BBBCCC Group PLC',
+      },
+      {
+        BaseApiDNSUri: 'http://ccc.example.com',
+        CustomerFriendlyLogoUri: 'string',
+        CustomerFriendlyName: 'CCC Example Bank',
+        Id: 'cccbN8iAsMh74sOXhk',
+        OpenIDConfigEndPointUri: 'http://ccc.example.com/openid/config',
+        OBOrganisationId: 'bbbcccUB4fPIYB0k1m',
+        OrganisationCommonName: 'BBBCCC Group PLC',
+      },
+    ];
+    assert.deepEqual(list, expected);
+  });
+});
 
 nock(/example\.com/, directoryHeaders)
   .get('/scim/v2/OBAccountPaymentServiceProviders/')

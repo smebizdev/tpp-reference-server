@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const { drop, set } = require('../../app/storage.js');
+const { drop } = require('../../app/storage.js');
 const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
@@ -72,20 +72,12 @@ describe('authorisation servers', () => {
   });
 
   describe('getClientCredentials', () => {
-    let authorisationServerId;
     beforeEach(async () => {
-      const list = await allAuthorisationServers();
-      const authServer = list[0];
-      authorisationServerId = list[0].id;
-      await set(
-        ASPSP_AUTH_SERVERS_COLLECTION,
-        Object.assign(authServer, { clientCredentials }),
-        authorisationServerId,
-      );
+      await updateClientCredentials(authServerId, clientCredentials);
     });
 
     it('retrieves client credentials for an authorisationServerId', async () => {
-      const found = await getClientCredentials(authorisationServerId);
+      const found = await getClientCredentials(authServerId);
       assert.deepEqual(found, clientCredentials);
     });
   });

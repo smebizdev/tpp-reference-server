@@ -5,7 +5,6 @@ const httpMocks = require('node-mocks-http');
 const sinon = require('sinon');
 
 const redirectionUrl = 'http://localhost:9999/tpp/authorized';
-const authServerHost = 'http://example.com';
 const clientId = 'id';
 const clientSecret = 'secret';
 const authorisationServerId = '123';
@@ -22,14 +21,12 @@ describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
   let getClientCredentialsStub;
-  let authorisationEndpointStub;
   let request;
   let response;
 
   beforeEach(() => {
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    authorisationEndpointStub = sinon.stub().returns(authServerHost);
     redirection = proxyquire('../app/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
@@ -37,7 +34,6 @@ describe('Authorized Code Granted', () => {
       './obtain-access-token': { postToken: postTokenStub },
       './authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
-        authorisationEndpoint: authorisationEndpointStub,
       },
     });
 
@@ -64,7 +60,10 @@ describe('Authorized Code Granted', () => {
 
     it('calls postToken to obtain an access token', async () => {
       await redirection.authorisationCodeGrantedHandler(request, response);
-      assert(postTokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
+      assert(postTokenStub.calledWithExactly(
+        authorisationServerId,
+        clientId, clientSecret, tokenPayload,
+      ));
     });
 
     describe('error handling', () => {
@@ -76,7 +75,6 @@ describe('Authorized Code Granted', () => {
       beforeEach(() => {
         postTokenStub = sinon.stub().throws(error);
         getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-        authorisationEndpointStub = sinon.stub().returns(authServerHost);
         redirection = proxyquire('../app/authorisation-code-granted.js', {
           'env-var': env.mock({
             SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
@@ -84,7 +82,6 @@ describe('Authorized Code Granted', () => {
           './obtain-access-token': { postToken: postTokenStub },
           './authorisation-servers': {
             getClientCredentials: getClientCredentialsStub,
-            authorisationEndpoint: authorisationEndpointStub,
           },
         });
       });

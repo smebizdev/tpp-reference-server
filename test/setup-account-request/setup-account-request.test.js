@@ -33,7 +33,6 @@ describe('setupAccountRequest called with blank fapiFinancialId', () => {
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
-  const authServerHost = 'http://example.com';
   const resourceServer = 'http://example.com/resources';
   const clientId = 'id';
   const clientSecret = 'secret';
@@ -49,7 +48,6 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
-  let authorisationEndpointStub;
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
@@ -62,14 +60,12 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     tokenStub = sinon.stub().returns(tokenResponse);
     accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    authorisationEndpointStub = sinon.stub().returns(authServerHost);
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
       'env-var': envStub,
       '../obtain-access-token': { postToken: tokenStub },
       './account-requests': { postAccountRequests: accountRequestsStub },
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
-        authorisationEndpoint: authorisationEndpointStub,
       },
     }).setupAccountRequest;
   };
@@ -81,7 +77,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
       assert.equal(id, accountRequestId);
 
-      assert(tokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
+      assert(tokenStub.calledWithExactly(
+        authorisationServerId,
+        clientId, clientSecret, tokenPayload,
+      ));
       const resourcePath = `${resourceServer}/open-banking/v1.1`;
       assert(accountRequestsStub.calledWithExactly(resourcePath, accessToken, fapiFinancialId));
     });

@@ -1,6 +1,6 @@
 const { postToken } = require('../obtain-access-token');
 const { postAccountRequests } = require('./account-requests');
-const { getClientCredentials, authorisationEndpoint } = require('../authorisation-servers');
+const { getClientCredentials } = require('../authorisation-servers');
 const env = require('env-var');
 const debug = require('debug')('debug');
 
@@ -32,7 +32,6 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
 
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
-  const authorisationServer = await authorisationEndpoint(authorisationServerId);
   const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
   const accessTokenPayload = {
     scope: 'accounts',
@@ -40,7 +39,7 @@ const createAccessToken = async (authorisationServerId) => {
   };
 
   const response = await postToken(
-    authorisationServer,
+    authorisationServerId,
     clientId,
     clientSecret,
     accessTokenPayload,

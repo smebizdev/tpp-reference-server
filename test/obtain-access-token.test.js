@@ -1,7 +1,9 @@
-const { postToken } = require('../app/obtain-access-token');
+const proxyquire = require('proxyquire');
 const assert = require('assert');
-
 const nock = require('nock');
+const sinon = require('sinon');
+
+const authServerId = 'testAuthServerId';
 
 const clientId = 's6BhdRkqt3';
 const clientSecret = '7Fjfp0ZBr1KtDRbnfVdmIw';
@@ -11,7 +13,15 @@ const samplePayload = {
   grant_type: 'client_credentials',
 };
 
+const postTokenFn = tokenEndpointStub => proxyquire('../app/obtain-access-token', {
+  './authorisation-servers': {
+    tokenEndpoint: tokenEndpointStub,
+  },
+}).postToken;
+
 describe('POST /token 200 response', () => {
+  const tokenEndpointStub = sinon.stub().returns('http://example.com/token');
+  const postToken = postTokenFn(tokenEndpointStub);
   const response = {
     access_token: 'accessToken',
     expires_in: 3600,
@@ -25,12 +35,14 @@ describe('POST /token 200 response', () => {
     .reply(200, response);
 
   it('returns data when 200 OK', async () => {
-    const result = await postToken('http://example.com', clientId, clientSecret, samplePayload);
+    const result = await postToken(authServerId, clientId, clientSecret, samplePayload);
     assert.deepEqual(result, response);
   });
 });
 
 describe('POST /token non 200 response', () => {
+  const tokenEndpointStub = sinon.stub().returns('http://example.com/token');
+  const postToken = postTokenFn(tokenEndpointStub);
   nock(/example\.com/)
     .post('/token')
     .matchHeader('authorization', credentials)
@@ -38,7 +50,7 @@ describe('POST /token non 200 response', () => {
 
   it('throws error with response status', async () => {
     try {
-      await postToken('http://example.com', clientId, clientSecret, samplePayload);
+      await postToken(authServerId, clientId, clientSecret, samplePayload);
       assert.ok(false);
     } catch (error) {
       assert.equal(error.name, 'Error');
@@ -49,13 +61,15 @@ describe('POST /token non 200 response', () => {
 });
 
 describe('POST /token error sending request', () => {
+  const tokenEndpointStub = sinon.stub().returns('bad-url');
+  const postToken = postTokenFn(tokenEndpointStub);
   it('throws error with status set to 500', async () => {
     try {
-      await postToken('bad-uri', clientId, clientSecret, samplePayload);
+      await postToken(authServerId, clientId, clientSecret, samplePayload);
       assert.ok(false);
     } catch (error) {
       assert.equal(error.name, 'Error');
-      assert.equal(error.message, 'getaddrinfo ENOTFOUND bad-uri bad-uri:80');
+      assert.equal(error.message, 'getaddrinfo ENOTFOUND bad-url bad-url:80');
       assert.equal(error.status, 500);
     }
   });

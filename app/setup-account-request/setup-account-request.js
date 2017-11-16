@@ -4,11 +4,6 @@ const { getClientCredentials } = require('../authorisation-servers');
 const env = require('env-var');
 const debug = require('debug')('debug');
 
-const authServer = env.get('ASPSP_AUTH_SERVER').asString();
-
-// Todo: lookup auth server via Directory and OpenIdEndpoint responses.
-const authorisationServerHost = async authServerId => (authServerId ? authServer : null);
-
 // Todo: lookup resource server via Directory and OpenIdEndpoint responses.
 const resourceServerPath = async (authorisationServerId) => {
   if (authorisationServerId) {
@@ -37,7 +32,6 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
 
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
-  const authorisationServer = await authorisationServerHost(authorisationServerId);
   const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
   const accessTokenPayload = {
     scope: 'accounts',
@@ -45,7 +39,7 @@ const createAccessToken = async (authorisationServerId) => {
   };
 
   const response = await postToken(
-    authorisationServer,
+    authorisationServerId,
     clientId,
     clientSecret,
     accessTokenPayload,

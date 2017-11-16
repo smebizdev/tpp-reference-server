@@ -8,7 +8,7 @@ const env = require('env-var');
 
 const authorisationServerId = '123';
 
-const setupApp = (setupAccountRequestStub) => {
+const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId: 'testClientId' });
   const createJsonWebSignatureStub = sinon.stub().returns('testSignedPayload');
   const { accountRequestAuthoriseConsent } = proxyquire(
@@ -24,6 +24,9 @@ const setupApp = (setupAccountRequestStub) => {
       './authorise': {
         createJsonWebSignature: createJsonWebSignatureStub,
       },
+      './authorisation-servers': {
+        authorisationEndpoint: authorisationEndpointStub,
+      },
     },
   );
   const app = express();
@@ -34,9 +37,15 @@ const setupApp = (setupAccountRequestStub) => {
 
 const fapiFinancialId = 'testFapiFinancialId';
 
+const doPost = app => request(app)
+  .post('/account-request-authorise-consent')
+  .set('x-fapi-financial-id', fapiFinancialId)
+  .send({ authorisationServerId });
+
 describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
   const setupAccountRequestStub = sinon.stub();
-  const app = setupApp(setupAccountRequestStub);
+  const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
+  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
   const expectedRedirectUrl =
     'http://example.com/authorize?' +
@@ -47,18 +56,8 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     'request=testSignedPayload&' +
     'scope=openid%20accounts';
 
-  before(() => {
-    process.env.ASPSP_AUTH_SERVER = 'http://example.com';
-  });
-  after(() => {
-    process.env.ASPSP_AUTH_SERVER = null;
-  });
-
   it('returns 302 redirect to /authorize endpoint', (done) => {
-    request(app)
-      .post('/account-request-authorise-consent')
-      .set('x-fapi-financial-id', fapiFinancialId)
-      .send({ authorisationServerId })
+    doPost(app)
       .end((e, r) => {
         assert.equal(r.status, 302);
         const { location } = r.headers;
@@ -71,19 +70,31 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   });
 });
 
+describe('/account-request-authorise-consent with no AuthorisationEndpoint found', () => {
+  const setupAccountRequestStub = sinon.stub();
+  const authorisationEndpointStub = sinon.stub().returns(null);
+  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
+
+  it('returns 500', (done) => {
+    doPost(app)
+      .end((e, r) => {
+        assert.equal(r.status, 500);
+        done();
+      });
+  });
+});
+
 describe('/account-request-authorise-consent with error thrown by setupAccountRequest', () => {
   const status = 403;
   const message = 'message';
   const error = new Error(message);
   error.status = status;
   const setupAccountRequestStub = sinon.stub().throws(error);
-  const app = setupApp(setupAccountRequestStub);
+  const authorisationEndpointStub = sinon.stub();
+  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
   it('returns status from error', (done) => {
-    request(app)
-      .post('/account-request-authorise-consent')
-      .set('x-fapi-financial-id', fapiFinancialId)
-      .send({ authorisationServerId })
+    doPost(app)
       .end((e, r) => {
         assert.equal(r.status, status);
         assert.deepEqual(r.body, { message });

@@ -12,12 +12,7 @@ describe('createClaims', () => {
   const authorisationServerId = 'testAuthorisationServerId';
   const sessionId = 'testSessionId';
   const state = statePayload(authorisationServerId, sessionId);
-  before(() => {
-    process.env.ASPSP_AUTH_SERVER = 'http://example.com';
-  });
-  after(() => {
-    process.env.ASPSP_AUTH_SERVER = 'http://example.com';
-  });
+
   const expectedClaims = issuer => ({
     aud: clientId,
     iss: issuer,

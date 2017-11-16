@@ -235,7 +235,6 @@ Or run with environment variables set on the command line:
 
 ```sh
 DEBUG=error,log \
-  ASPSP_AUTH_SERVER=http://localhost:8001 \
   ASPSP_READWRITE_HOST=localhost:8001 \
   OB_PROVISIONED=false \
   OB_DIRECTORY_HOST=http://localhost:8001 \
@@ -289,7 +288,6 @@ heroku create --region eu <newname>
 heroku addons:create redistogo # or any other redis add-on
 heroku addons:create mongolab:sandbox
 
-heroku config:set ASPSP_AUTH_SERVER=http://aspsp-auth-server.example.com
 heroku config:set ASPSP_READWRITE_HOST=aspsp-resource-server.example.com
 heroku config:set ASPSP_RESOURCE_SERVER=http://aspsp-resource-server.example.com
 heroku config:set AUTHORIZATION=<mock-token>

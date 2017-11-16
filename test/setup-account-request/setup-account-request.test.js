@@ -33,7 +33,6 @@ describe('setupAccountRequest called with blank fapiFinancialId', () => {
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
-  const authServerHost = 'http://example.com';
   const resourceServer = 'http://example.com/resources';
   const clientId = 'id';
   const clientSecret = 'secret';
@@ -43,7 +42,6 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   };
   const accountRequestId = '88379';
   const envStub = env.mock({
-    ASPSP_AUTH_SERVER: authServerHost,
     ASPSP_RESOURCE_SERVER: resourceServer,
   });
   let setupAccountRequestProxy;
@@ -66,7 +64,9 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       'env-var': envStub,
       '../obtain-access-token': { postToken: tokenStub },
       './account-requests': { postAccountRequests: accountRequestsStub },
-      '../authorisation-servers': { getClientCredentials: getClientCredentialsStub },
+      '../authorisation-servers': {
+        getClientCredentials: getClientCredentialsStub,
+      },
     }).setupAccountRequest;
   };
 
@@ -77,7 +77,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
       assert.equal(id, accountRequestId);
 
-      assert(tokenStub.calledWithExactly(authServerHost, clientId, clientSecret, tokenPayload));
+      assert(tokenStub.calledWithExactly(
+        authorisationServerId,
+        clientId, clientSecret, tokenPayload,
+      ));
       const resourcePath = `${resourceServer}/open-banking/v1.1`;
       assert(accountRequestsStub.calledWithExactly(resourcePath, accessToken, fapiFinancialId));
     });

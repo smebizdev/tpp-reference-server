@@ -1,10 +1,12 @@
 const assert = require('assert');
 
-const { drop, set } = require('../../app/storage.js');
+const { drop } = require('../../app/storage.js');
 const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
+  authorisationEndpoint,
   storeAuthorisationServers,
+  tokenEndpoint,
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
@@ -23,9 +25,11 @@ const flattenedObDirectoryAuthServerList = [
   },
 ];
 
+const expectedAuthEndpoint = 'http://auth.example.com/authorize';
+const expectedTokenEndpoint = 'http://auth.example.com/token';
 const openIdConfig = {
-  authorization_endpoint: 'http://auth.example.com/authorize',
-  token_endpoint: 'http://auth.example.com/token',
+  authorization_endpoint: expectedAuthEndpoint,
+  token_endpoint: expectedTokenEndpoint,
 };
 
 const clientCredentials = {
@@ -68,20 +72,23 @@ describe('authorisation servers', () => {
   });
 
   describe('getClientCredentials', () => {
-    let authorisationServerId;
     beforeEach(async () => {
-      const list = await allAuthorisationServers();
-      const authServer = list[0];
-      authorisationServerId = list[0].id;
-      await set(
-        ASPSP_AUTH_SERVERS_COLLECTION,
-        Object.assign(authServer, { clientCredentials }),
-        authorisationServerId,
-      );
+      await updateClientCredentials(authServerId, clientCredentials);
+    });
+
+    describe('called with invalid authServerId', () => {
+      it('throws error', async () => {
+        try {
+          await getClientCredentials('invalid-id');
+          assert.ok(false);
+        } catch (err) {
+          assert.equal(err.status, 500);
+        }
+      });
     });
 
     it('retrieves client credentials for an authorisationServerId', async () => {
-      const found = await getClientCredentials(authorisationServerId);
+      const found = await getClientCredentials(authServerId);
       assert.deepEqual(found, clientCredentials);
     });
   });
@@ -102,6 +109,28 @@ describe('authorisation servers', () => {
     });
   });
 
+  describe('authorisationEndpoint called with invalid authServerId', () => {
+    it('returns null', async () => {
+      try {
+        await authorisationEndpoint('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
+    });
+  });
+
+  describe('tokenEndpoint called with invalid authServerId', () => {
+    it('returns null', async () => {
+      try {
+        await tokenEndpoint('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
+    });
+  });
+
   describe('updateOpenIdConfigs', () => {
     nock(/example\.com/)
       .get('/openidconfig')
@@ -119,6 +148,12 @@ describe('authorisation servers', () => {
       const authServerConfig = list[0];
       assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
       assert.deepEqual(authServerConfig, withOpenIdConfig);
+
+      const authEndpoint = await authorisationEndpoint(authServerId);
+      assert.equal(authEndpoint, expectedAuthEndpoint);
+
+      const tokenUrl = await tokenEndpoint(authServerId);
+      assert.equal(tokenUrl, expectedTokenEndpoint);
     });
   });
 });

@@ -36,7 +36,12 @@ const setAuthServerConfig = async (id, authServer) =>
 
 const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
-  return authServer.clientCredentials;
+  if (authServer && authServer.clientCredentials) {
+    return authServer.clientCredentials;
+  }
+  const err = new Error(`clientCredentials not found for ${authServerId}`);
+  err.status = 500;
+  throw err;
 };
 
 const storeAuthorisationServers = async (list) => {
@@ -108,9 +113,43 @@ const authorisationServersForClient = async () => {
   }
 };
 
+const openIdConfig = async (id) => {
+  try {
+    const config = await getAuthServerConfig(id);
+    return (config && config.openIdConfig) ? config.openIdConfig : null;
+  } catch (err) {
+    error(err);
+    return null;
+  }
+};
+
+const authorisationEndpoint = async (id) => {
+  const config = await openIdConfig(id);
+  const endpoint = config ? config.authorization_endpoint : null;
+  if (endpoint === null) {
+    const err = new Error(`authorisation endpoint for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return endpoint;
+};
+
+const tokenEndpoint = async (id) => {
+  const config = await openIdConfig(id);
+  const endpoint = config ? config.token_endpoint : null;
+  if (endpoint === null) {
+    const err = new Error(`token endpoint for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return endpoint;
+};
+
+exports.authorisationEndpoint = authorisationEndpoint;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
+exports.tokenEndpoint = tokenEndpoint;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;

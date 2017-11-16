@@ -1,6 +1,8 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('./certs-util');
+const { tokenEndpoint } = require('./authorisation-servers');
 const log = require('debug')('log');
+const error = require('debug')('error');
 
 // Use Basic Authentication Scheme: https://tools.ietf.org/html/rfc2617#section-2
 const credentials = (userid, password) => {
@@ -15,21 +17,21 @@ const credentials = (userid, password) => {
  * Assume authentication using a client_id and client_secret:
  * https://tools.ietf.org/html/rfc6749#section-2.3
  */
-const postToken = async (authorisationServerHost, clientId, clientSecret, payload) => {
+const postToken = async (authorisationServerId, clientId, clientSecret, payload) => {
   try {
-    const tokenUri = `${authorisationServerHost}/token`;
+    const tokenUri = await tokenEndpoint(authorisationServerId);
     const authCredentials = credentials(clientId, clientSecret);
     log(`POST to ${tokenUri}`);
-    const response = await setupMutualTLS(request)
-      .post(tokenUri)
+    const response = await setupMutualTLS(request.post(tokenUri))
       .set('authorization', authCredentials)
       .set('content-type', 'application/x-www-form-urlencoded')
       .send(payload);
     return response.body;
   } catch (err) {
-    const error = new Error(err.message);
-    error.status = err.response ? err.response.status : 500;
-    throw error;
+    error(err);
+    const e = new Error(err.message);
+    e.status = err.response ? err.response.status : 500;
+    throw e;
   }
 };
 

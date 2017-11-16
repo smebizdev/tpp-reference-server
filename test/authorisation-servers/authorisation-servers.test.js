@@ -76,6 +76,17 @@ describe('authorisation servers', () => {
       await updateClientCredentials(authServerId, clientCredentials);
     });
 
+    describe('called with invalid authServerId', () => {
+      it('throws error', async () => {
+        try {
+          await getClientCredentials('invalid-id');
+          assert.ok(false);
+        } catch (err) {
+          assert.equal(err.status, 500);
+        }
+      });
+    });
+
     it('retrieves client credentials for an authorisationServerId', async () => {
       const found = await getClientCredentials(authServerId);
       assert.deepEqual(found, clientCredentials);

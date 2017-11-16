@@ -36,7 +36,12 @@ const setAuthServerConfig = async (id, authServer) =>
 
 const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
-  return authServer.clientCredentials;
+  if (authServer && authServer.clientCredentials) {
+    return authServer.clientCredentials;
+  }
+  const err = new Error(`clientCredentials not found for ${authServerId}`);
+  err.status = 500;
+  throw err;
 };
 
 const storeAuthorisationServers = async (list) => {

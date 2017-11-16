@@ -33,7 +33,7 @@ const clientCredentials = {
   clientSecret: 'a-client-secret',
 };
 
-const expectedAuthServerConfig = {
+const withOpenIdConfig = {
   id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
@@ -42,13 +42,10 @@ const expectedAuthServerConfig = {
     Id: authServerId,
     OBOrganisationId: 'aaa-example-org',
   },
-  openIdConfig: {
-    authorization_endpoint: 'http://auth.example.com/authorize',
-    token_endpoint: 'http://auth.example.com/token',
-  },
+  openIdConfig,
 };
 
-const expectedClientCredentials = {
+const withClientCredsConfig = {
   id: authServerId,
   obDirectoryConfig: {
     BaseApiDNSUri: 'http://aaa.example.com',
@@ -101,7 +98,7 @@ describe('authorisation servers', () => {
       const list = await allAuthorisationServers();
       const authServerConfig = list[0];
       assert.ok(authServerConfig.clientCredentials, 'clientCredentials present');
-      assert.deepEqual(authServerConfig, expectedClientCredentials);
+      assert.deepEqual(authServerConfig, withClientCredsConfig);
     });
   });
 
@@ -121,7 +118,7 @@ describe('authorisation servers', () => {
       const list = await allAuthorisationServers();
       const authServerConfig = list[0];
       assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
-      assert.deepEqual(authServerConfig, expectedAuthServerConfig);
+      assert.deepEqual(authServerConfig, withOpenIdConfig);
     });
   });
 });

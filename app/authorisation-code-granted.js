@@ -2,7 +2,7 @@ const env = require('env-var');
 const { postToken } = require('./obtain-access-token');
 const { getClientCredentials } = require('./authorisation-servers');
 
-const redirectionUrl = `${env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString()}`;
+const redirectionUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 const authServer = env.get('ASPSP_AUTH_SERVER').asString();
 
 const authorisationServerHost = async authServerId => (authServerId ? authServer : null);

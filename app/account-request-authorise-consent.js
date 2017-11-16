@@ -62,3 +62,4 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 
 exports.statePayload = statePayload;
 exports.accountRequestAuthoriseConsent = accountRequestAuthoriseConsent;
+exports.authorisationServerEndpoint = authorisationServerEndpoint;

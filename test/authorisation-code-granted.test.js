@@ -90,17 +90,4 @@ describe('Authorized Code Granted', () => {
       });
     });
   });
-
-  describe('redirect url missing', () => {
-    it('throws an error', () => {
-      try {
-        redirection = proxyquire('../app/authorisation-code-granted.js', {});
-      } catch (e) {
-        assert(
-          e.message.match(/"REGISTERED_REDIRECT_URL" is a required variable/),
-          'error message should indicate REGISTERED_REDIRECT_URL is missing',
-        );
-      }
-    });
-  });
 });

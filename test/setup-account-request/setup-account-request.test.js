@@ -43,13 +43,13 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   };
   const accountRequestId = '88379';
   const envStub = env.mock({
-    ASPSP_AUTH_SERVER: authServerHost,
     ASPSP_RESOURCE_SERVER: resourceServer,
   });
   let setupAccountRequestProxy;
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
+  let authorisationServerEndpointStub;
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
@@ -62,11 +62,13 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     tokenStub = sinon.stub().returns(tokenResponse);
     accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
+    authorisationServerEndpointStub = sinon.stub().returns(authServerHost);
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
       'env-var': envStub,
       '../obtain-access-token': { postToken: tokenStub },
       './account-requests': { postAccountRequests: accountRequestsStub },
       '../authorisation-servers': { getClientCredentials: getClientCredentialsStub },
+      '../account-request-authorise-consent': { authorisationServerEndpoint: authorisationServerEndpointStub },
     }).setupAccountRequest;
   };
 

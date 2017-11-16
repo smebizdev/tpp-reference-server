@@ -108,24 +108,24 @@ const authorisationServersForClient = async () => {
   }
 };
 
-const authorisationEndpoint = async (id) => {
+const openIdConfig = async (id) => {
   try {
     const config = await getAuthServerConfig(id);
-    return config.openIdConfig ? config.openIdConfig.authorization_endpoint : null;
+    return (config && config.openIdConfig) ? config.openIdConfig : null;
   } catch (err) {
     error(err);
     return null;
   }
 };
 
+const authorisationEndpoint = async (id) => {
+  const config = await openIdConfig(id);
+  return config ? config.authorization_endpoint : null;
+};
+
 const tokenEndpoint = async (id) => {
-  try {
-    const config = await getAuthServerConfig(id);
-    return config.openIdConfig ? config.openIdConfig.token_endpoint : null;
-  } catch (err) {
-    error(err);
-    return null;
-  }
+  const config = await openIdConfig(id);
+  return config ? config.token_endpoint : null;
 };
 
 exports.authorisationEndpoint = authorisationEndpoint;

@@ -106,6 +106,20 @@ describe('authorisation servers', () => {
     });
   });
 
+  describe('authorisationEndpoint called with invalid authServerId', () => {
+    it('returns null', async () => {
+      assert.equal(await authorisationEndpoint(null), null);
+      assert.equal(await authorisationEndpoint('invalid-id'), null);
+    });
+  });
+
+  describe('tokenEndpoint called with invalid authServerId', () => {
+    it('returns null', async () => {
+      assert.equal(await tokenEndpoint(null), null);
+      assert.equal(await tokenEndpoint('invalid-id'), null);
+    });
+  });
+
   describe('updateOpenIdConfigs', () => {
     nock(/example\.com/)
       .get('/openidconfig')

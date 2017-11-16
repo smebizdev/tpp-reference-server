@@ -1,9 +1,8 @@
 const { postToken } = require('../obtain-access-token');
 const { postAccountRequests } = require('./account-requests');
-const { getClientCredentials } = require('../authorisation-servers');
+const { getClientCredentials, authorisationEndpoint } = require('../authorisation-servers');
 const env = require('env-var');
 const debug = require('debug')('debug');
-const { authorisationServerEndpoint } = require('../account-request-authorise-consent');
 
 // Todo: lookup resource server via Directory and OpenIdEndpoint responses.
 const resourceServerPath = async (authorisationServerId) => {
@@ -33,7 +32,7 @@ const validateParameters = (authorisationServerId, fapiFinancialId) => {
 
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
-  const authorisationServer = await authorisationServerEndpoint(authorisationServerId);
+  const authorisationServer = await authorisationEndpoint(authorisationServerId);
   const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
   const accessTokenPayload = {
     scope: 'accounts',

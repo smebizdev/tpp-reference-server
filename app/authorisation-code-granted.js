@@ -1,7 +1,6 @@
 const env = require('env-var');
 const { postToken } = require('./obtain-access-token');
-const { getClientCredentials } = require('./authorisation-servers');
-const { authorisationServerEndpoint } = require('./account-request-authorise-consent');
+const { getClientCredentials, authorisationEndpoint } = require('./authorisation-servers');
 
 const redirectionUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
@@ -9,7 +8,7 @@ const handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId, code } = req.query;
-    const authorisationUrl = await authorisationServerEndpoint(authorisationServerId);
+    const authorisationUrl = await authorisationEndpoint(authorisationServerId);
     const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
     const accessTokenPayload = {
       grant_type: 'authorization_code',

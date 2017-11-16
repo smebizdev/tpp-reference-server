@@ -15,16 +15,6 @@ const statePayload = (authorisationServerId, sessionId) => {
   return Buffer.from(JSON.stringify(state)).toString('base64');
 };
 
-const authorisationServerEndpoint = async (authServerId) => {
-  const url = await authorisationEndpoint(authServerId);
-  if (url === null) {
-    const err = new Error(`authorisationEndpoint for ${authServerId} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return url;
-};
-
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
@@ -37,7 +27,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 
     const state = statePayload(authorisationServerId, sessionId);
     const scope = 'openid accounts';
-    const authServerEndpoint = await authorisationServerEndpoint(authorisationServerId);
+    const authServerEndpoint = await authorisationEndpoint(authorisationServerId);
     const payload = createClaims(
       scope, accountRequestId, clientId, authServerEndpoint,
       registeredRedirectUrl, state, createClaims,
@@ -62,4 +52,3 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 
 exports.statePayload = statePayload;
 exports.accountRequestAuthoriseConsent = accountRequestAuthoriseConsent;
-exports.authorisationServerEndpoint = authorisationServerEndpoint;

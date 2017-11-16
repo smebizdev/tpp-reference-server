@@ -125,12 +125,24 @@ const openIdConfig = async (id) => {
 
 const authorisationEndpoint = async (id) => {
   const config = await openIdConfig(id);
-  return config ? config.authorization_endpoint : null;
+  const endpoint = config ? config.authorization_endpoint : null;
+  if (endpoint === null) {
+    const err = new Error(`authorisation endpoint for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return endpoint;
 };
 
 const tokenEndpoint = async (id) => {
   const config = await openIdConfig(id);
-  return config ? config.token_endpoint : null;
+  const endpoint = config ? config.token_endpoint : null;
+  if (endpoint === null) {
+    const err = new Error(`token endpoint for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return endpoint;
 };
 
 exports.authorisationEndpoint = authorisationEndpoint;

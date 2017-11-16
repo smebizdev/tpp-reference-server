@@ -111,15 +111,23 @@ describe('authorisation servers', () => {
 
   describe('authorisationEndpoint called with invalid authServerId', () => {
     it('returns null', async () => {
-      assert.equal(await authorisationEndpoint(null), null);
-      assert.equal(await authorisationEndpoint('invalid-id'), null);
+      try {
+        await authorisationEndpoint('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
     });
   });
 
   describe('tokenEndpoint called with invalid authServerId', () => {
     it('returns null', async () => {
-      assert.equal(await tokenEndpoint(null), null);
-      assert.equal(await tokenEndpoint('invalid-id'), null);
+      try {
+        await tokenEndpoint('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
     });
   });
 
@@ -132,12 +140,6 @@ describe('authorisation servers', () => {
       const list = await allAuthorisationServers();
       const authServerConfig = list[0];
       assert.ok(!authServerConfig.openIdConfig, 'openIdConfig not present');
-
-      const authEndpoint = await authorisationEndpoint(authServerId);
-      assert.equal(authEndpoint, null);
-
-      const tokenUrl = await tokenEndpoint(authServerId);
-      assert.equal(tokenUrl, null);
     });
 
     it('retrieves openIdConfig and stores in db', async () => {

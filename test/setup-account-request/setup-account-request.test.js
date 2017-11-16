@@ -49,7 +49,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
-  let authorisationServerEndpointStub;
+  let authorisationEndpointStub;
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
@@ -62,13 +62,15 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     tokenStub = sinon.stub().returns(tokenResponse);
     accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    authorisationServerEndpointStub = sinon.stub().returns(authServerHost);
+    authorisationEndpointStub = sinon.stub().returns(authServerHost);
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
       'env-var': envStub,
       '../obtain-access-token': { postToken: tokenStub },
       './account-requests': { postAccountRequests: accountRequestsStub },
-      '../authorisation-servers': { getClientCredentials: getClientCredentialsStub },
-      '../account-request-authorise-consent': { authorisationServerEndpoint: authorisationServerEndpointStub },
+      '../authorisation-servers': {
+        getClientCredentials: getClientCredentialsStub,
+        authorisationEndpoint: authorisationEndpointStub,
+      },
     }).setupAccountRequest;
   };
 

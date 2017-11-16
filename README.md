@@ -366,7 +366,7 @@ database.
 To list authorisation servers currently in the database, run:
 
 ```sh
-npm run listAuthServers --silent
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
 ```
 
 Output on terminal is TSV that looks like this:
@@ -385,7 +385,7 @@ Example Usages
 
 ```
 # Locally
-npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
 # Remotely
 heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
@@ -396,9 +396,9 @@ heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --re
 To save client credentials for the Reference Mock Server locally:
 
 ```
-npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O9FLY clientId=spoofClientId clientSecret=spoofClientSecret
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O9FLY clientId=spoofClientId clientSecret=spoofClientSecret
 
-npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
 
-npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```

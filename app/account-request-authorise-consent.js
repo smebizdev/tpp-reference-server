@@ -1,5 +1,6 @@
 const { setupAccountRequest, clientCredentials } = require('./setup-account-request');
 const { createClaims, createJsonWebSignature } = require('./authorise');
+const { authorisationEndpoint } = require('./authorisation-servers');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');
@@ -14,8 +15,15 @@ const statePayload = (authorisationServerId, sessionId) => {
   return Buffer.from(JSON.stringify(state)).toString('base64');
 };
 
-// Todo: lookup auth server via Directory and OpenIdEndpoint responses.
-const authorisationServerEndpoint = async authServerId => (authServerId ? `${process.env.ASPSP_AUTH_SERVER}/authorize` : null);
+const authorisationServerEndpoint = async (authServerId) => {
+  const url = await authorisationEndpoint(authServerId);
+  if (url === null) {
+    const err = new Error(`authorisationEndpoint for ${authServerId} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return url;
+};
 
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

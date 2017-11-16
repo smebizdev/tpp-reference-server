@@ -104,21 +104,6 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ]
 ```
 
-### Adding Client Credentials
-
-There is a script to input and store client credentials against ASPSP Auth Server Records
-
-Example Usages
-
-```
-# Locally
-npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
-
-# Remotely
-heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --env tpp-reference-server
-
-```
-
 ### Proxy requests for upstream backend ASPSP APIs (v1.1)
 
 __NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.
@@ -387,7 +372,33 @@ npm run listAuthServers --silent
 Output on terminal is TSV that looks like this:
 ```
 id               CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId   clientCredentialsPresent openIdConfigPresent
-aaaj4NmBD8lQxmL  AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811QyQfi false                    false
-bbbX7tUB4fPIYB0  BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m    false                    false
-cccbN8iAsMh74sO  CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhk       false                    false
+aaaj4NmBD8lQxmLh2O9FLY  AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811QyQfi false                    false
+bbbX7tUB4fPIYB0k1m     BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m    false                    false
+cccbN8iAsMh74sOXhk     CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhk       false                    false
+```
+
+### Adding Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Example Usages
+
+```
+# Locally
+npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
+
+# Remotely
+heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
+```
+
+#### Setting client credentials for running against Reference Mock Server
+
+To save client credentials for the Reference Mock Server locally:
+
+```
+npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O9FLY clientId=spoofClientId clientSecret=spoofClientSecret
+
+npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```

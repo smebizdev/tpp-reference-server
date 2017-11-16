@@ -21,19 +21,20 @@ const tokenPayload = {
 describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
+  let getClientCredentialsStub;
   let request;
   let response;
 
   beforeEach(() => {
     postTokenStub = sinon.stub().returns({ access_token: accessToken });
+    getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
     redirection = proxyquire('../app/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
         ASPSP_AUTH_SERVER: authServerHost,
-        ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
-        ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
       }),
       './obtain-access-token': { postToken: postTokenStub },
+      './authorisation-servers': { getClientCredentials: getClientCredentialsStub },
     });
 
     request = httpMocks.createRequest({
@@ -70,14 +71,14 @@ describe('Authorized Code Granted', () => {
 
       beforeEach(() => {
         postTokenStub = sinon.stub().throws(error);
+        getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
         redirection = proxyquire('../app/authorisation-code-granted.js', {
           'env-var': env.mock({
             SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
             ASPSP_AUTH_SERVER: authServerHost,
-            ASPSP_AUTH_SERVER_CLIENT_ID: clientId,
-            ASPSP_AUTH_SERVER_CLIENT_SECRET: clientSecret,
           }),
           './obtain-access-token': { postToken: postTokenStub },
+          './authorisation-servers': { getClientCredentials: getClientCredentialsStub },
         });
       });
 

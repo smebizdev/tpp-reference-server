@@ -34,6 +34,11 @@ const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 const setAuthServerConfig = async (id, authServer) =>
   set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
+const getClientCredentials = async (authServerId) => {
+  const authServer = await getAuthServerConfig(authServerId);
+  return authServer.clientCredentials;
+};
+
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
     const id = item.Id;
@@ -107,5 +112,6 @@ exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
+exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

@@ -34,7 +34,13 @@ const extractAuthorisationServers = (data) => {
   const authServers = data.Resources
     .filter(resource => !!resource.AuthorisationServers)
     .map(resource => resource.AuthorisationServers.map((r) => {
-      r.orgId = resource.id; // eslint-disable-line
+      const organisation = resource['urn:openbanking:organisation:1.0'];
+      r.OBOrganisationId = organisation ? organisation.OBOrganisationId : ''; // eslint-disable-line
+      r.OrganisationCommonName = organisation ? organisation.OrganisationCommonName : ''; // eslint-disable-line
+      const authority = resource['urn:openbanking:competentauthorityclaims:1.0'];
+      r.AuthorityId = authority ? authority.AuthorityId : ''; // eslint-disable-line
+      r.MemberState = authority ? authority.MemberState : ''; // eslint-disable-line
+      r.RegistrationId = authority ? authority.RegistrationId : ''; // eslint-disable-line
       return r;
     }))
     .reduce((a, b) => a.concat(b), []); // flatten array
@@ -98,7 +104,7 @@ const fetchOBAccountPaymentServiceProviders = async () => {
     log(`response: ${response.status}`);
     if (response.status === 200) {
       const authServers = extractAuthorisationServers(response.body);
-      debug(`data: ${JSON.stringify(authServers)}`);
+      debug(`authServers: ${JSON.stringify(authServers)}`);
       await storeAuthorisationServers(authServers);
       return authorisationServersForClient();
     }
@@ -111,7 +117,8 @@ const fetchOBAccountPaymentServiceProviders = async () => {
 
 const OBAccountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  let servers = authorisationServersForClient();
+  let servers = await authorisationServersForClient();
+  log(`servers length: ${servers.length}`);
   if (servers.length > 0) {
     fetchOBAccountPaymentServiceProviders() // async update auth servers
       .then(() => updateOpenIdConfigs()); // async update openId configs
@@ -122,4 +129,5 @@ const OBAccountPaymentServiceProviders = async (req, res) => {
   return res.json(servers);
 };
 
+exports.extractAuthorisationServers = extractAuthorisationServers;
 exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;

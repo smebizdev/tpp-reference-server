@@ -4,17 +4,24 @@ const authServerRows = async () => {
   const header = [
     'id',
     'CustomerFriendlyName',
-    'orgId',
+    'OrganisationCommonName',
+    'Authority',
+    'OBOrganisationId',
     'clientCredentialsPresent',
     'openIdConfigPresent',
   ].join('\t');
   const rows = [header];
   const list = await allAuthorisationServers();
   list.forEach((item) => {
+    const config = item.obDirectoryConfig;
+    const authorityPresent = config && config.AuthorityId
+      && config.MemberState && config.RegistrationId;
     const line = [
       item.id,
-      item.obDirectoryConfig ? item.obDirectoryConfig.CustomerFriendlyName : '',
-      item.obDirectoryConfig ? item.obDirectoryConfig.orgId : '',
+      config ? config.CustomerFriendlyName : '',
+      config ? config.OrganisationCommonName : '',
+      authorityPresent ? `${config.MemberState}:${config.AuthorityId}:${config.RegistrationId}` : '',
+      config ? config.OBOrganisationId : '',
       !!item.clientCredentials,
       !!item.openIdConfig,
     ].join('\t');

@@ -1,10 +1,8 @@
-// const log = require('debug')('log');
-const debug = require('debug')('debug');
 const error = require('debug')('error');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
-const AUTH_SERVER_COLLECTION = 'aspspAuthorisationServers';
+const ASPSP_AUTH_SERVERS_COLLECTION = 'aspspAuthorisationServers';
 
 const sortByName = (list) => {
   list.sort((a, b) => {
@@ -19,10 +17,10 @@ const sortByName = (list) => {
 };
 
 const transformServerData = (data) => {
-  const { id } = data;
+  const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
-  const { orgId } = data;
+  const orgId = data.OBOrganisationId;
   return {
     id,
     logoUri,
@@ -31,9 +29,10 @@ const transformServerData = (data) => {
   };
 };
 
-const getAuthServerConfig = async id => get(AUTH_SERVER_COLLECTION, id);
+const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 
-const setAuthServerConfig = async (id, authServer) => set(AUTH_SERVER_COLLECTION, authServer, id);
+const setAuthServerConfig = async (id, authServer) =>
+  set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
 const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
@@ -42,10 +41,9 @@ const getClientCredentials = async (authServerId) => {
 
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
-    const id = `${item.orgId}-${item.BaseApiDNSUri}`;
+    const id = item.Id;
     const existing = await getAuthServerConfig(id);
     const authServer = existing || {};
-    item.id = id; // eslint-disable-line
     authServer.obDirectoryConfig = item;
     await setAuthServerConfig(id, authServer);
   }));
@@ -53,7 +51,7 @@ const storeAuthorisationServers = async (list) => {
 
 const allAuthorisationServers = async () => {
   try {
-    const list = await getAll(AUTH_SERVER_COLLECTION);
+    const list = await getAll(ASPSP_AUTH_SERVERS_COLLECTION);
     if (!list) {
       return [];
     }
@@ -67,13 +65,22 @@ const allAuthorisationServers = async () => {
 const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   try {
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
-    debug(openidConfig);
     const authServer = await getAuthServerConfig(id);
     authServer.openIdConfig = openidConfig;
     await setAuthServerConfig(id, authServer);
   } catch (err) {
     error(err);
   }
+};
+
+const updateClientCredentials = async (id, clientCredentials) => {
+  const authServer = await getAuthServerConfig(id);
+  if (!authServer) {
+    throw new Error('Auth Server Not Found !');
+  }
+  authServer.clientCredentials = clientCredentials;
+  await setAuthServerConfig(id, authServer);
+  return true;
 };
 
 const updateOpenIdConfigs = async () => {
@@ -106,4 +113,5 @@ exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
-exports.AUTH_SERVER_COLLECTION = AUTH_SERVER_COLLECTION;
+exports.updateClientCredentials = updateClientCredentials;
+exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

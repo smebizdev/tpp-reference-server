@@ -1,6 +1,6 @@
-const { setupAccountRequest, clientCredentials } = require('./setup-account-request');
+const { setupAccountRequest } = require('./setup-account-request');
 const { createClaims, createJsonWebSignature } = require('./authorise');
-const { authorisationEndpoint } = require('./authorisation-servers');
+const { authorisationEndpoint, getClientCredentials } = require('./authorisation-servers');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');
@@ -23,7 +23,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const fapiFinancialId = req.headers['x-fapi-financial-id'];
     debug(`authorisationServerId: ${authorisationServerId}`);
     const accountRequestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);
-    const { clientId } = await clientCredentials(authorisationServerId);
+    const { clientId } = await getClientCredentials(authorisationServerId);
 
     const state = statePayload(authorisationServerId, sessionId);
     const scope = 'openid accounts';

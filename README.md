@@ -84,39 +84,24 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ```sh
 [
   {
-    "id": "aaaj4NmBD8lQxmL",
+    "id": "aaaj4NmBD8lQxmLh2O",
     "logoUri": "",
     "name": "AAA Example Bank",
-    "orgId": "aaax5nTR33811QyQfi",
+    "orgId": "aaax5nTR33811Qy",
   },
   {
-    "id": "bbbX7tUB4fPIYB0",
+    "id": "bbbX7tUB4fPIYB0k1m",
     "logoUri": "",
     "name": "BBB Example Bank",
     "orgId": "bbbUB4fPIYB0k1m",
   },
   {
-    "id": "cccbN8iAsMh74sO",
+    "id": "cccbN8iAsMh74sOXhk",
     "logoUri": "",
     "name": "CCC Example Bank",
-    "orgId": "cccMh74sOXhk",
+    "orgId": "cccMh74sOXhkQfi",
   }
 ]
-```
-
-### Adding Client Credentials
-
-There is a script to input and store client credentials against ASPSP Auth Server Records
-
-Example Usages
-
-```
-# Locally
-npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
-
-# Remotely
-heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --env tpp-reference-server
-
 ```
 
 ### Proxy requests for upstream backend ASPSP APIs (v1.1)
@@ -381,13 +366,39 @@ database.
 To list authorisation servers currently in the database, run:
 
 ```sh
-npm run listAuthServers --silent
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
 ```
 
 Output on terminal is TSV that looks like this:
 ```
-id               CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId   clientCredentialsPresent openIdConfigPresent
-aaaj4NmBD8lQxmL  AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811QyQfi false                    false
-bbbX7tUB4fPIYB0  BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m    false                    false
-cccbN8iAsMh74sO  CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhk       false                    false
+id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
+bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
+cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
+```
+
+### Adding Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Example Usages
+
+```
+# Locally
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
+
+# Remotely
+heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
+```
+
+#### Setting client credentials for running against Reference Mock Server
+
+To save client credentials for the Reference Mock Server locally:
+
+```
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```

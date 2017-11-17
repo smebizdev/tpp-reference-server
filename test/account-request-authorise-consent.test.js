@@ -9,7 +9,7 @@ const env = require('env-var');
 const authorisationServerId = '123';
 
 const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
-  const clientCredentialsStub = sinon.stub().returns({ clientId: 'testClientId' });
+  const clientCredentialsStub = sinon.stub().returns({ clientId: 'testClientId', clientSecret: 'testClientSecret' });
   const createJsonWebSignatureStub = sinon.stub().returns('testSignedPayload');
   const { accountRequestAuthoriseConsent } = proxyquire(
     '../app/account-request-authorise-consent',
@@ -19,13 +19,13 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       }),
       './setup-account-request': {
         setupAccountRequest: setupAccountRequestStub,
-        clientCredentials: clientCredentialsStub,
       },
       './authorise': {
         createJsonWebSignature: createJsonWebSignatureStub,
       },
       './authorisation-servers': {
         authorisationEndpoint: authorisationEndpointStub,
+        getClientCredentials: clientCredentialsStub,
       },
     },
   );

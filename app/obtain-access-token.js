@@ -2,6 +2,7 @@ const request = require('superagent');
 const { setupMutualTLS } = require('./certs-util');
 const { tokenEndpoint } = require('./authorisation-servers');
 const log = require('debug')('log');
+const debug = require('debug')('debug');
 const error = require('debug')('error');
 
 // Use Basic Authentication Scheme: https://tools.ietf.org/html/rfc2617#section-2
@@ -26,7 +27,9 @@ const postToken = async (authorisationServerId, clientId, clientSecret, payload)
       .set('authorization', authCredentials)
       .set('content-type', 'application/x-www-form-urlencoded')
       .send(payload);
-    return response.body;
+    const data = response.body;
+    debug(`token response: ${JSON.stringify(data)}`);
+    return data;
   } catch (err) {
     error(err);
     const e = new Error(err.message);

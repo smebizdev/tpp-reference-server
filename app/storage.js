@@ -1,10 +1,12 @@
 const monk = require('monk');
 const error = require('debug')('error');
+const log = require('debug')('log');
 
 let mongodbUri = 'localhost:27017/sample-tpp-server';
 if (process.env.MONGODB_URI) {
   mongodbUri = process.env.MONGODB_URI.replace('mongodb://', '');
 }
+log(`MONGODB_URI: ${mongodbUri}`);
 const db = monk(mongodbUri);
 
 /**

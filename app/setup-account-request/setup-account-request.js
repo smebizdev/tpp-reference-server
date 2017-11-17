@@ -70,4 +70,3 @@ const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
 };
 
 exports.setupAccountRequest = setupAccountRequest;
-exports.clientCredentials = getClientCredentials;

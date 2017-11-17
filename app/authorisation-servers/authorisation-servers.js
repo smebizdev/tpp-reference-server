@@ -104,8 +104,9 @@ const updateOpenIdConfigs = async () => {
 
 const authorisationServersForClient = async () => {
   try {
-    const list = await allAuthorisationServers();
-    const servers = list.map(a => transformServerData(a.obDirectoryConfig));
+    const allServers = await allAuthorisationServers();
+    const registeredServers = allServers.filter(s => s.clientCredentials);
+    const servers = registeredServers.map(s => transformServerData(s.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
     error(e);

@@ -1,5 +1,4 @@
 const assert = require('assert');
-const env = require('env-var');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const { setupAccountRequest } = require('../../app/setup-account-request/setup-account-request'); // eslint-disable-line

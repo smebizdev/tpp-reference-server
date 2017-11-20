@@ -5,17 +5,22 @@ const sinon = require('sinon');
 const express = require('express');
 const bodyParser = require('body-parser');
 const env = require('env-var');
+const qs = require('qs');
 
 const authorisationServerId = '123';
+const clientId = 'testClientId';
+const clientSecret = 'testClientSecret';
+const redirectUrl = 'http://example.com/redirect';
+const jsonWebSignature = 'testSignedPayload';
 
 const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
-  const clientCredentialsStub = sinon.stub().returns({ clientId: 'testClientId', clientSecret: 'testClientSecret' });
-  const createJsonWebSignatureStub = sinon.stub().returns('testSignedPayload');
+  const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
+  const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const { accountRequestAuthoriseConsent } = proxyquire(
     '../app/account-request-authorise-consent',
     {
       'env-var': env.mock({
-        SOFTWARE_STATEMENT_REDIRECT_URL: 'http://example.com/redirect',
+        SOFTWARE_STATEMENT_REDIRECT_URL: redirectUrl,
       }),
       './setup-account-request': {
         setupAccountRequest: setupAccountRequestStub,
@@ -47,21 +52,26 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
-  const expectedRedirectUrl =
-    'http://example.com/authorize?' +
-    'redirect_url=http://example.com/redirect&' +
-    'state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMifQ==&' +
-    'clientId=testClientId&' +
-    'response_type=code&' +
-    'request=testSignedPayload&' +
-    'scope=openid%20accounts';
+  const expectedRedirectHost = 'http://example.com/authorize';
+  const expectedParams = {
+    clientId,
+    redirect_url: redirectUrl,
+    request: jsonWebSignature,
+    response_type: 'code',
+    scope: 'openid accounts',
+    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMifQ==',
+  };
 
   it('returns 302 redirect to /authorize endpoint', (done) => {
     doPost(app)
       .end((e, r) => {
         assert.equal(r.status, 302);
         const { location } = r.headers;
-        assert.equal(location, expectedRedirectUrl);
+        const parts = location.split('?');
+        const host = parts[0];
+        const params = qs.parse(parts[1]);
+        assert.equal(host, expectedRedirectHost);
+        assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(authorisationServerId, fapiFinancialId));

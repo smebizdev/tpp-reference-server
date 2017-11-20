@@ -1,6 +1,7 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
 const log = require('debug')('log');
+const debug = require('debug')('debug');
 
 const buildAccountRequestData = () => ({
   Data: {
@@ -32,14 +33,14 @@ const postAccountRequests = async (resourceServerPath, accessToken,
     const body = buildAccountRequestData();
     const accountRequestsUri = `${resourceServerPath}/account-requests`;
     log(`POST to ${accountRequestsUri}`);
-    const response = await setupMutualTLS(request)
-      .post(accountRequestsUri)
+    const response = await setupMutualTLS(request.post(accountRequestsUri))
       .set('authorization', `Bearer ${accessToken}`)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8')
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .send(body);
+    debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {
     const error = new Error(err.message);

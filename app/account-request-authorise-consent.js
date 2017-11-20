@@ -4,6 +4,7 @@ const { authorisationEndpoint, getClientCredentials } = require('./authorisation
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');
+const qs = require('qs');
 
 const registeredRedirectUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
@@ -34,14 +35,15 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     );
     const signature = createJsonWebSignature(payload);
     const uri =
-      `${authServerEndpoint}?` +
-      `redirect_url=${registeredRedirectUrl}&` +
-      `state=${state}&` +
-      `clientId=${clientId}&` +
-      'response_type=code&' +
-      `request=${signature}&` +
-      `scope=${scope}`;
-
+      `${authServerEndpoint}?${qs.stringify({
+        redirect_url: registeredRedirectUrl,
+        state,
+        clientId,
+        response_type: 'code',
+        request: signature,
+        scope,
+      })}`;
+    debug(`authorize URL is: ${uri}`);
     return res.redirect(302, uri);
   } catch (err) {
     error(err);

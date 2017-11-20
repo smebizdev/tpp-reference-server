@@ -274,7 +274,6 @@ heroku addons:create redistogo # or any other redis add-on
 heroku addons:create mongolab:sandbox
 
 heroku config:set ASPSP_READWRITE_HOST=aspsp-resource-server.example.com
-heroku config:set ASPSP_RESOURCE_SERVER=http://aspsp-resource-server.example.com
 heroku config:set AUTHORIZATION=<mock-token>
 heroku config:set X_FAPI_FINANCIAL_ID=<mock-id>
 heroku config:set DEBUG=error,log

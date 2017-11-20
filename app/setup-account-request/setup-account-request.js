@@ -1,14 +1,14 @@
 const { postToken } = require('../obtain-access-token');
 const { postAccountRequests } = require('./account-requests');
-const { getClientCredentials } = require('../authorisation-servers');
-const env = require('env-var');
+const {
+  getClientCredentials,
+  resourceServerHost,
+} = require('../authorisation-servers');
 const debug = require('debug')('debug');
 
-// Todo: lookup resource server via Directory and OpenIdEndpoint responses.
 const resourceServerPath = async (authorisationServerId) => {
   if (authorisationServerId) {
-    // todo store and retrieve host and apiVersion in config keyed by authorisationServerId
-    const host = env.get('ASPSP_RESOURCE_SERVER').asString();
+    const host = await resourceServerHost(authorisationServerId);
     const apiVersion = 'v1.1';
     return `${host}/open-banking/${apiVersion}`;
   }

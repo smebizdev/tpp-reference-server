@@ -1,5 +1,4 @@
 const assert = require('assert');
-const env = require('env-var');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const { setupAccountRequest } = require('../../app/setup-account-request/setup-account-request'); // eslint-disable-line
@@ -33,7 +32,7 @@ describe('setupAccountRequest called with blank fapiFinancialId', () => {
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
-  const resourceServer = 'http://example.com/resources';
+  const resourceServer = 'http://resource-server.com';
   const clientId = 'id';
   const clientSecret = 'secret';
   const tokenPayload = {
@@ -41,13 +40,11 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     grant_type: 'client_credentials',
   };
   const accountRequestId = '88379';
-  const envStub = env.mock({
-    ASPSP_RESOURCE_SERVER: resourceServer,
-  });
   let setupAccountRequestProxy;
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
+  let resourceServerHostStub;
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
@@ -60,12 +57,13 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     tokenStub = sinon.stub().returns(tokenResponse);
     accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
+    resourceServerHostStub = sinon.stub().returns(resourceServer);
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
-      'env-var': envStub,
       '../obtain-access-token': { postToken: tokenStub },
       './account-requests': { postAccountRequests: accountRequestsStub },
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
+        resourceServerHost: resourceServerHostStub,
       },
     }).setupAccountRequest;
   };

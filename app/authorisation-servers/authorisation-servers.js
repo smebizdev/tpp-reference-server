@@ -44,6 +44,16 @@ const getClientCredentials = async (authServerId) => {
   throw err;
 };
 
+const resourceServerHost = async (authServerId) => {
+  const authServer = await getAuthServerConfig(authServerId);
+  if (authServer && authServer.obDirectoryConfig && authServer.obDirectoryConfig.BaseApiDNSUri) {
+    return authServer.obDirectoryConfig.BaseApiDNSUri;
+  }
+  const err = new Error(`resource server host for ${authServerId} not found`);
+  err.status = 500;
+  throw err;
+};
+
 const storeAuthorisationServers = async (list) => {
   await Promise.all(list.map(async (item) => {
     const id = item.Id;
@@ -151,6 +161,7 @@ exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.tokenEndpoint = tokenEndpoint;
+exports.resourceServerHost = resourceServerHost;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;

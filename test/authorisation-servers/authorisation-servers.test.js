@@ -7,6 +7,7 @@ const {
   authorisationEndpoint,
   storeAuthorisationServers,
   tokenEndpoint,
+  resourceServerHost,
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
@@ -124,6 +125,17 @@ describe('authorisation servers', () => {
     it('returns null', async () => {
       try {
         await tokenEndpoint('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
+    });
+  });
+
+  describe('resourceServerHost called with invalid authServerId', () => {
+    it('returns null', async () => {
+      try {
+        await resourceServerHost('invalid-id');
         assert.ok(false);
       } catch (err) {
         assert.equal(err.status, 500);

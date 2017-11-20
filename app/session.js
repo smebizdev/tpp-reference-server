@@ -37,8 +37,8 @@ const session = (() => {
     });
   };
 
-  const deleteAll = () => {
-    store.deleteAll();
+  const deleteAll = async () => {
+    await store.deleteAll();
   };
 
   return {

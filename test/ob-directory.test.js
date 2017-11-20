@@ -175,7 +175,7 @@ describe('Directory', () => {
 
   afterEach(async () => {
     delete process.env.SIGNING_KEY;
-    session.deleteAll();
+    await session.deleteAll();
     await drop(ASPSP_AUTH_SERVERS_COLLECTION);
   });
 

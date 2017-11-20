@@ -120,8 +120,8 @@ describe('Session Deletion (Logout)', () => {
       });
   });
 
-  after(() => {
-    session.deleteAll();
+  after(async () => {
+    await session.deleteAll();
   });
 });
 
@@ -199,8 +199,8 @@ describe('Proxy', () => {
     });
   });
 
-  after(() => {
-    session.deleteAll();
+  after(async () => {
+    await session.deleteAll();
     delete process.env.DEBUG;
     delete process.env.ASPSP_READWRITE_HOST;
     delete process.env.OB_DIRECTORY_HOST;

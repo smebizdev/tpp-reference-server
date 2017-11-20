@@ -4,16 +4,18 @@ const url = require('url');
 
 let redisPort = process.env.REDIS_PORT || 6379;
 let redisHost = process.env.REDIS_HOST || 'localhost';
-let client;
 
 if (process.env.REDISTOGO_URL) {
   const rtg = url.parse(process.env.REDISTOGO_URL);
   redisPort = rtg.port;
   redisHost = rtg.hostname;
-  client = redis.createClient(redisPort, redisHost);
+}
+
+const client = redis.createClient(redisPort, redisHost);
+
+if (process.env.REDISTOGO_URL) {
+  const rtg = url.parse(process.env.REDISTOGO_URL);
   client.auth(rtg.auth.split(':')[1]);
-} else {
-  client = redis.createClient(redisPort, redisHost);
 }
 
 const noop = () => {};
@@ -46,7 +48,8 @@ const store = (() => {
     client.keys('*', cbk);
   };
 
-  const deleteAll = () => client.flushall(noop);
+  const deleteAll = async () =>
+    new Promise(resolve => client.flushall(resolve));
 
   return {
     set,

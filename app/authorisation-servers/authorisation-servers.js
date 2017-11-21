@@ -84,8 +84,9 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
     authServer.openIdConfig = openidConfig;
     await setAuthServerConfig(id, authServer);
   } catch (err) {
-    error(err);
+    error(`Error getting ${openidConfigUrl} : ${err.message}`);
   }
+  return null;
 };
 
 const updateClientCredentials = async (id, clientCredentials) => {

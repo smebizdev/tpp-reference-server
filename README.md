@@ -377,7 +377,11 @@ database.
 To list authorisation servers currently in the database, run:
 
 ```sh
+# Locally
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
+
+# Remotely on Heroku
+heroku run npm run listAuthServers --remote heroku
 ```
 
 Output on terminal is TSV that looks like this:
@@ -398,7 +402,7 @@ Example Usages
 # Locally
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
-# Remotely
+# Remotely on Heroku
 heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
 ```
 
@@ -417,8 +421,6 @@ MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=c
 ##### Remotely on Heroku
 
 ```sh
-heroku run npm run listAuthServers
-
 heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
 
 heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret

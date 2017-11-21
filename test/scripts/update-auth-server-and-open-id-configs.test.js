@@ -12,11 +12,11 @@ describe('cacheLatestConfigs', () => {
     const cacheLatestConfigs = proxyquire('../../scripts/update-auth-server-and-open-id-configs', // eslint-disable-line
       {
         '../app/authorisation-servers': {
-          updateOpenIdConfigs: fakeUpdateOpenIdConfigs
+          updateOpenIdConfigs: fakeUpdateOpenIdConfigs,
         },
         '../app/ob-directory': {
-          fetchOBAccountPaymentServiceProviders: fakeFetchOBAccountPaymentServiceProviders
-        }
+          fetchOBAccountPaymentServiceProviders: fakeFetchOBAccountPaymentServiceProviders,
+        },
       },
     ).cacheLatestConfigs;
 

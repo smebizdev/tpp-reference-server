@@ -306,33 +306,6 @@ git push heroku master
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
-## Testing
-
-Run unit tests with:
-
-```sh
-npm run test
-```
-
-Run tests continuously on file changes in watch mode via:
-
-```sh
-npm run test:watch
-```
-
-
-Manual Testing  
-Sending Form Data to login with POstman - use `x-www-form-urlencoded`
-
-
-## eslint
-
-Run eslint checks with:
-
-```sh
-npm run eslint
-```
-
 ## Using mTLS
 
 The OpenBanking specification requires parties to use [Mutual TLS authentication](https://en.wikipedia.org/wiki/Mutual_authentication) for every connection. OpenBanking uses its own Certification Authority (certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
@@ -365,7 +338,7 @@ The server has to be configured with
 * `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
 
-### Configuration of ASPSP Authorisation Servers
+## Configuration of ASPSP Authorisation Servers
 
 When the `/account-payment-service-provider-authorisation-servers` endpoint is
 called on the server, a list of ASPSP authorisation servers is fetched from
@@ -426,4 +399,31 @@ heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClien
 heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
 
 heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+## Testing
+
+Run unit tests with:
+
+```sh
+npm run test
+```
+
+Run tests continuously on file changes in watch mode via:
+
+```sh
+npm run test:watch
+```
+
+
+Manual Testing  
+Sending Form Data to login with POstman - use `x-www-form-urlencoded`
+
+
+## eslint
+
+Run eslint checks with:
+
+```sh
+npm run eslint
 ```

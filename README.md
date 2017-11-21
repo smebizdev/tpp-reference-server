@@ -14,7 +14,7 @@ and
 __Work in progress__ - so far we provide,
 
 * Authenticating with the server.
-* List ASPSP Authorisation and Resource Servers - actual & simulated based on ENVs.
+* List ASPSP Authorisation Servers - actual & simulated based on ENVs.
 * Proxy requests for upstream backend [ASPSP Read/Write APIs](https://www.openbanking.org.uk/read-write-apis/).
 
 ### Authenticating with the server.
@@ -45,7 +45,7 @@ This destroys the session established by the `sid` token obtained after login.
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://localhost:8003/logout
 ```
 
-### List ASPSP Authorisation and Resource Servers
+### List ASPSP Authorisation Servers
 
 #### OB Directory provisioned TPP
 
@@ -71,9 +71,17 @@ Here we work around encrypted OB Directory communication. The mock server return
 
 Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
 
-#### Curl command
+#### Available ASPSP servers with configured client credentials
 
-Please __change__ the `Authorization` header to use the `sid` obtained after logging in.
+Having configured client credentials means that you have previously authorised with an ASPSP. And, that the ASPSP has issued the necessary `clientId` and `clientSecret`.
+
+If you are running against the [mock server](#the-reference-mock-server), then [here's how to add the required credentials](#adding-client-credentials-for-aspsp-authorisation-servers).
+
+> __NOTE__
+
+> If you don't add client credentials you will get an EMPTY ASPSP server list.
+
+Please __change__ the `Authorization` header to use the `sid` obtained after logging inT.
 
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://localhost:8003/account-payment-service-provider-authorisation-servers
@@ -205,7 +213,13 @@ Install npm packages:
 npm install
 ```
 
-## To run locally
+## Running server
+
+The following are instructions to set up server either locally or on Heroku.
+
+[Follow instructions here](#available-aspsp-servers-with-configured-client-credentials) to confirm that you're setup correctly and can retrieve a list of ASPSP Authorisation servers.
+
+### Run locally
 
 To run using .env file, make a local .env, and run using foreman:
 
@@ -245,11 +259,11 @@ DEBUG=error,log \
 * Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
 Set the environment variables `MONGODB_URI` as per your mongodb instance.
 
-### Already provisioned with OB Directory
+#### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
-## Deploy to heroku
+### Deploy to heroku
 
 To deploy to heroku for the first time:
 
@@ -286,33 +300,7 @@ heroku config:set TRANSPORT_CERT=''
 heroku config:set TRANSPORT_KEY=''
 
 git push heroku master
-
-heroku open # opens client in browser
 ```
-
-In browser, login, you should see a blank bank selection list. By doing this
-in the client, it triggers the backend server to load ASPSP auth server config
-from OB Directory (or mock server when running against mock server).
-
-To configure clientId and clientSecret for mock server ASPSP auth servers:
-
-```sh
-heroku run npm run listAuthServers
-
-heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
-
-heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
-
-heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
-
-heroku open # opens client in browser
-```
-
-In browser, login, you should see a bank selection list of the ASPSP
-authorisation servers you configured with client credentials.
-
-Edit `./Procfile` if you need to change what command should be executed
-to start the app.
 
 ### Already provisioned with OB Directory
 
@@ -406,7 +394,7 @@ There is a script to input and store client credentials against ASPSP Auth Serve
 
 Example Usages
 
-```
+```sh
 # Locally
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
@@ -416,12 +404,24 @@ heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --re
 
 #### Setting client credentials for running against Reference Mock Server
 
-To save client credentials for the Reference Mock Server locally:
+##### Locally
 
-```
+```sh
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
 
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
 
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+##### Remotely on Heroku
+
+```sh
+heroku run npm run listAuthServers
+
+heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```

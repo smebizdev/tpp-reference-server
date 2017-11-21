@@ -54,8 +54,8 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
 
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
-    clientId,
-    redirect_url: redirectUrl,
+    client_id: clientId,
+    redirect_uri: redirectUrl,
     request: jsonWebSignature,
     response_type: 'code',
     scope: 'openid accounts',

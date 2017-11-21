@@ -36,9 +36,9 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const signature = createJsonWebSignature(payload);
     const uri =
       `${authServerEndpoint}?${qs.stringify({
-        redirect_url: registeredRedirectUrl,
+        redirect_uri: registeredRedirectUrl,
         state,
-        clientId,
+        client_id: clientId,
         response_type: 'code',
         request: signature,
         scope,

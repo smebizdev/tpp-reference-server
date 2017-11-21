@@ -1,6 +1,6 @@
 const { setupAccountRequest } = require('./setup-account-request');
 const { createClaims, createJsonWebSignature } = require('./authorise');
-const { authorisationEndpoint, getClientCredentials } = require('./authorisation-servers');
+const { authorisationEndpoint, getClientCredentials, issuer } = require('./authorisation-servers');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');
@@ -29,8 +29,9 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const state = statePayload(authorisationServerId, sessionId);
     const scope = 'openid accounts';
     const authServerEndpoint = await authorisationEndpoint(authorisationServerId);
+    const authServerIssuer = await issuer(authorisationServerId);
     const payload = createClaims(
-      scope, accountRequestId, clientId, authServerEndpoint,
+      scope, accountRequestId, clientId, authServerIssuer,
       registeredRedirectUrl, state, createClaims,
     );
     const signature = createJsonWebSignature(payload);

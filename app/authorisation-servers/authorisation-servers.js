@@ -149,6 +149,17 @@ const authorisationEndpoint = async (id) => {
   return endpoint;
 };
 
+const issuer = async (id) => {
+  const config = await openIdConfig(id);
+  const uri = config ? config.issuer : null;
+  if (uri === null) {
+    const err = new Error(`issuer for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return uri;
+};
+
 const tokenEndpoint = async (id) => {
   const config = await openIdConfig(id);
   const endpoint = config ? config.token_endpoint : null;
@@ -161,6 +172,7 @@ const tokenEndpoint = async (id) => {
 };
 
 exports.authorisationEndpoint = authorisationEndpoint;
+exports.issuer = issuer;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;

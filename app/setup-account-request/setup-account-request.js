@@ -4,7 +4,6 @@ const {
   getClientCredentials,
   resourceServerHost,
 } = require('../authorisation-servers');
-const debug = require('debug')('debug');
 
 const resourceServerPath = async (authorisationServerId) => {
   if (authorisationServerId) {
@@ -54,9 +53,8 @@ const createAccessToken = async (authorisationServerId) => {
 const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
   const resourcePath = await resourceServerPath(authorisationServerId);
   const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
-  if (response.Data && response.Data.Status === 'AwaitingAuthorisation') {
-    debug(`account-requests response: ${JSON.stringify(response.Data)}`);
-    return response.Data.AccountRequestId;
+  if (response.Data && response.Status === 'AwaitingAuthorisation') {
+    return response.AccountRequestId;
   }
   return null;
 };

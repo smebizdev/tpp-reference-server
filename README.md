@@ -286,9 +286,33 @@ heroku config:set TRANSPORT_CERT=''
 heroku config:set TRANSPORT_KEY=''
 
 git push heroku master
+
+heroku open # opens client in browser
 ```
 
-Edit `./Procfile` to change what command should be executed to start the app.
+In browser, login, you should see a blank bank selection list. By doing this
+in the client, it triggers the backend server to load ASPSP auth server config
+from OB Directory (or mock server when running against mock server).
+
+To configure clientId and clientSecret for mock server ASPSP auth servers:
+
+```sh
+heroku run npm run listAuthServers
+
+heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku open # opens client in browser
+```
+
+In browser, login, you should see a bank selection list of the ASPSP
+authorisation servers you configured with client credentials.
+
+Edit `./Procfile` if you need to change what command should be executed
+to start the app.
 
 ### Already provisioned with OB Directory
 

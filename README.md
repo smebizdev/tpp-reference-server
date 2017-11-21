@@ -340,12 +340,27 @@ The server has to be configured with
 
 ## Configuration of ASPSP Authorisation Servers
 
-When the `/account-payment-service-provider-authorisation-servers` endpoint is
-called on the server, a list of ASPSP authorisation servers is fetched from
-OB Directory and stored in the server's database.
+### Adding and Updating ASPSP authorisation servers
 
-For each authorisation server the OpenId config is fetched and stored in the
-database.
+Bootstrapping or updating the list of ASPSP authorisation servers in MongoDB is a manual task. For each authorisation server the OpenId config is also fetched and stored in the database.
+
+You have to ensure all the necessary ENVs are configured correctly and then run:
+
+```sh
+# Locally
+MONGODB_URI='localhost:27017/sample-tpp-server' npm run updateAuthServersAndOpenIds
+
+# Remotely on Heroku
+heroku run npm run updateAuthServersAndOpenIds --remote heroku
+```
+
+Now calling the `/account-payment-service-provider-authorisation-servers` endpoint returns the correctly formatted list of ASPSP authorisation servers previously fetched from OB Directory.
+
+> __NOTE__
+
+> If you don't add client credentials you will get an EMPTY ASPSP server list.
+
+### Listing available ASPSP authorisation servers
 
 To list authorisation servers currently in the database, run:
 

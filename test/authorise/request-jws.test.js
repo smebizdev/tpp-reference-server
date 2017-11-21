@@ -6,8 +6,7 @@ describe('createClaims', () => {
   const accountRequestId = 'testAccountRequestId';
   const clientId = 'testClientId';
   const scope = 'openid accounts';
-  const authorisationEndpoint = 'http://aspsp.example.com/authorise';
-  const authorisationOrigin = 'http://aspsp.example.com/';
+  const authServerIssuer = 'http://aspsp.example.com';
   const registeredRedirectUrl = 'http://tpp.example.com/handle-authorise';
   const authorisationServerId = 'testAuthorisationServerId';
   const sessionId = 'testSessionId';
@@ -16,7 +15,7 @@ describe('createClaims', () => {
   const expectedClaims = audience => ({
     aud: audience,
     iss: clientId,
-    response_type: 'code id_token',
+    response_type: 'code',
     client_id: clientId,
     redirect_uri: registeredRedirectUrl,
     scope,
@@ -42,18 +41,18 @@ describe('createClaims', () => {
   it('creates claims JSON successfully when useOpenidConnect is false', () => {
     const useOpenidConnect = false;
     const claims = createClaims(
-      scope, accountRequestId, clientId, authorisationEndpoint,
+      scope, accountRequestId, clientId, authServerIssuer,
       registeredRedirectUrl, state, useOpenidConnect,
     );
-    assert.deepEqual(claims, expectedClaims(authorisationEndpoint));
+    assert.deepEqual(claims, expectedClaims(authServerIssuer));
   });
 
   it('creates claims JSON successfully when useOpenidConnect is true', () => {
     const useOpenidConnect = true;
     const claims = createClaims(
-      scope, accountRequestId, clientId, authorisationEndpoint,
+      scope, accountRequestId, clientId, authServerIssuer,
       registeredRedirectUrl, state, useOpenidConnect,
     );
-    assert.deepEqual(claims, expectedClaims(authorisationOrigin));
+    assert.deepEqual(claims, expectedClaims(authServerIssuer));
   });
 });

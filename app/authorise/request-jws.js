@@ -1,6 +1,4 @@
 const jws = require('jws');
-const { URL } = require('url');
-const debug = require('debug')('debug');
 
 /**
  * Issuer of the token.
@@ -17,13 +15,10 @@ const issuer = clientId => clientId;
  * When a pure OAuth 2.0 is used, the value is the redirection URI.
  * When OpenID Connect is used, the value is the issuer value of the authorization server.
  */
-const audience = (authorisationEndpoint, useOpenidConnect) => {
-  debug(`authorisationEndpoint: ${authorisationEndpoint}`);
-  const { origin } = new URL(authorisationEndpoint);
-  const issuerValue = `${origin}/`; // todo: confirm this is correct
-  const redirectionUri = authorisationEndpoint;
-  return useOpenidConnect ? issuerValue : redirectionUri;
-};
+// const audience = (authServerIssuer, useOpenidConnect) => {
+//   todo: implement this function
+//   return useOpenidConnect ? authServerIssuer : redirectionUri;
+// };
 
 /**
  * Used to help mitigate against replay attacks.
@@ -53,12 +48,12 @@ const claims = accountRequestId => ({
 });
 
 const createClaims = (
-  scope, accountRequestId, clientId, authorisationEndpoint,
-  registeredRedirectUrl, state, useOpenidConnect,
+  scope, accountRequestId, clientId, authServerIssuer,
+  registeredRedirectUrl, state, useOpenidConnect, // eslint-disable-line
 ) => ({
-  aud: audience(authorisationEndpoint, useOpenidConnect),
+  aud: authServerIssuer,
   iss: issuer(clientId),
-  response_type: 'code id_token',
+  response_type: 'code',
   client_id: clientId,
   redirect_uri: registeredRedirectUrl,
   scope,
@@ -74,7 +69,7 @@ const createJsonWebSignature = (payload) => {
     header: { alg: 'none' },
     payload,
   });
-  return signature.body;
+  return signature;
 };
 
 exports.createClaims = createClaims;

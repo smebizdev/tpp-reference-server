@@ -14,7 +14,7 @@ and
 __Work in progress__ - so far we provide,
 
 * Authenticating with the server.
-* List ASPSP Authorisation and Resource Servers - actual & simulated based on ENVs.
+* List ASPSP Authorisation Servers - actual & simulated based on ENVs.
 * Proxy requests for upstream backend [ASPSP Read/Write APIs](https://www.openbanking.org.uk/read-write-apis/).
 
 ### Authenticating with the server.
@@ -45,7 +45,7 @@ This destroys the session established by the `sid` token obtained after login.
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://localhost:8003/logout
 ```
 
-### List ASPSP Authorisation and Resource Servers
+### List ASPSP Authorisation Servers
 
 #### OB Directory provisioned TPP
 
@@ -71,9 +71,17 @@ Here we work around encrypted OB Directory communication. The mock server return
 
 Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
 
-#### Curl command
+#### Available ASPSP servers with configured client credentials
 
-Please __change__ the `Authorization` header to use the `sid` obtained after logging in.
+Having configured client credentials means that you have previously authorised with an ASPSP. And, that the ASPSP has issued the necessary `clientId` and `clientSecret`.
+
+If you are running against the [mock server](#the-reference-mock-server), then [here's how to add the required credentials](#adding-client-credentials-for-aspsp-authorisation-servers).
+
+> __NOTE__
+
+> If you don't add client credentials you will get an EMPTY ASPSP server list.
+
+Please __change__ the `Authorization` header to use the `sid` obtained after logging inT.
 
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://localhost:8003/account-payment-service-provider-authorisation-servers
@@ -205,7 +213,13 @@ Install npm packages:
 npm install
 ```
 
-## To run locally
+## Running server
+
+The following are instructions to set up server either locally or on Heroku.
+
+[Follow instructions here](#available-aspsp-servers-with-configured-client-credentials) to confirm that you're setup correctly and can retrieve a list of ASPSP Authorisation servers.
+
+### Run locally
 
 To run using .env file, make a local .env, and run using foreman:
 
@@ -245,11 +259,11 @@ DEBUG=error,log \
 * Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
 Set the environment variables `MONGODB_URI` as per your mongodb instance.
 
-### Already provisioned with OB Directory
+#### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
-## Deploy to heroku
+### Deploy to heroku
 
 To deploy to heroku for the first time:
 
@@ -288,38 +302,9 @@ heroku config:set TRANSPORT_KEY=''
 git push heroku master
 ```
 
-Edit `./Procfile` to change what command should be executed to start the app.
-
 ### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
-
-## Testing
-
-Run unit tests with:
-
-```sh
-npm run test
-```
-
-Run tests continuously on file changes in watch mode via:
-
-```sh
-npm run test:watch
-```
-
-
-Manual Testing  
-Sending Form Data to login with POstman - use `x-www-form-urlencoded`
-
-
-## eslint
-
-Run eslint checks with:
-
-```sh
-npm run eslint
-```
 
 ## Using mTLS
 
@@ -353,7 +338,7 @@ The server has to be configured with
 * `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
 
-### Configuration of ASPSP Authorisation Servers
+## Configuration of ASPSP Authorisation Servers
 
 When the `/account-payment-service-provider-authorisation-servers` endpoint is
 called on the server, a list of ASPSP authorisation servers is fetched from
@@ -365,7 +350,11 @@ database.
 To list authorisation servers currently in the database, run:
 
 ```sh
+# Locally
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
+
+# Remotely on Heroku
+heroku run npm run listAuthServers --remote heroku
 ```
 
 Output on terminal is TSV that looks like this:
@@ -382,22 +371,59 @@ There is a script to input and store client credentials against ASPSP Auth Serve
 
 Example Usages
 
-```
+```sh
 # Locally
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
-# Remotely
+# Remotely on Heroku
 heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
 ```
 
 #### Setting client credentials for running against Reference Mock Server
 
-To save client credentials for the Reference Mock Server locally:
+##### Locally
 
-```
+```sh
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
 
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
 
 MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+##### Remotely on Heroku
+
+```sh
+heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+## Testing
+
+Run unit tests with:
+
+```sh
+npm run test
+```
+
+Run tests continuously on file changes in watch mode via:
+
+```sh
+npm run test:watch
+```
+
+
+Manual Testing  
+Sending Form Data to login with POstman - use `x-www-form-urlencoded`
+
+
+## eslint
+
+Run eslint checks with:
+
+```sh
+npm run eslint
 ```

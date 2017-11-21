@@ -10,7 +10,6 @@ const error = require('debug')('error');
 const {
   authorisationServersForClient,
   storeAuthorisationServers,
-  updateOpenIdConfigs,
 } = require('./authorisation-servers');
 
 const NOT_PROVISIONED_FOR_OB_TOKEN = 'NO_TOKEN';
@@ -115,17 +114,11 @@ const fetchOBAccountPaymentServiceProviders = async () => {
 
 const OBAccountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  let servers = await authorisationServersForClient();
+  const servers = await authorisationServersForClient();
   log(`servers length: ${servers.length}`);
-  if (servers.length > 0) {
-    fetchOBAccountPaymentServiceProviders() // async update auth servers
-      .then(() => updateOpenIdConfigs()); // async update openId configs
-  } else {
-    servers = await fetchOBAccountPaymentServiceProviders(); // fetch auth servers
-    await updateOpenIdConfigs(); // fetch openid configs
-  }
   return res.json(servers);
 };
 
 exports.extractAuthorisationServers = extractAuthorisationServers;
+exports.fetchOBAccountPaymentServiceProviders = fetchOBAccountPaymentServiceProviders;
 exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;

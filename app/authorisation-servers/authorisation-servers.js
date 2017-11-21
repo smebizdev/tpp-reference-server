@@ -79,13 +79,17 @@ const allAuthorisationServers = async () => {
 
 const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   try {
+    if (openidConfigUrl === 'https://redirect.openbanking.org.uk') {
+      return null; // ignore
+    }
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
     const authServer = await getAuthServerConfig(id);
     authServer.openIdConfig = openidConfig;
     await setAuthServerConfig(id, authServer);
   } catch (err) {
-    error(err);
+    error(`Error getting ${openidConfigUrl} : ${err.message}`);
   }
+  return null;
 };
 
 const updateClientCredentials = async (id, clientCredentials) => {

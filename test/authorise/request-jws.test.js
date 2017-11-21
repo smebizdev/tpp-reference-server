@@ -13,9 +13,9 @@ describe('createClaims', () => {
   const sessionId = 'testSessionId';
   const state = statePayload(authorisationServerId, sessionId);
 
-  const expectedClaims = issuer => ({
-    aud: clientId,
-    iss: issuer,
+  const expectedClaims = audience => ({
+    aud: audience,
+    iss: clientId,
     response_type: 'code id_token',
     client_id: clientId,
     redirect_uri: registeredRedirectUrl,

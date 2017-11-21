@@ -3,21 +3,21 @@ const { URL } = require('url');
 const debug = require('debug')('debug');
 
 /**
- * Audience that the ID token is intended for.
+ * Issuer of the token.
  * OpenID Connect protocol mandates this MUST include the client ID of the TPP.
  * Should contain the ClientID of the TPP’s OAuth Client.
  * Required as per FAPI RW / OpenID Standard.
  * For now return raw clientId
  */
-const audience = clientId => clientId;
+const issuer = clientId => clientId;
 
 /**
- * Issuer of the token.
- * Represents the issuer identifier of the authorization server as defined in RFC7519.
+ * Audience that the ID token is intended for.
+ * Represents the identifier of the authorization server as defined in RFC7519.
  * When a pure OAuth 2.0 is used, the value is the redirection URI.
  * When OpenID Connect is used, the value is the issuer value of the authorization server.
  */
-const issuer = (authorisationEndpoint, useOpenidConnect) => {
+const audience = (authorisationEndpoint, useOpenidConnect) => {
   debug(`authorisationEndpoint: ${authorisationEndpoint}`);
   const { origin } = new URL(authorisationEndpoint);
   const issuerValue = `${origin}/`; // todo: confirm this is correct
@@ -56,8 +56,8 @@ const createClaims = (
   scope, accountRequestId, clientId, authorisationEndpoint,
   registeredRedirectUrl, state, useOpenidConnect,
 ) => ({
-  aud: audience(clientId),
-  iss: issuer(authorisationEndpoint, useOpenidConnect),
+  aud: audience(authorisationEndpoint, useOpenidConnect),
+  iss: issuer(clientId),
   response_type: 'code id_token',
   client_id: clientId,
   redirect_uri: registeredRedirectUrl,

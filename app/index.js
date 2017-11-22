@@ -34,6 +34,7 @@ app.use(
 app.all('/account-request-authorise-consent', requireAuthorization);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
 
+app.all('/tpp/authorized', requireAuthorization);
 app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization);

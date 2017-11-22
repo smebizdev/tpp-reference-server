@@ -48,14 +48,18 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
+      AccountRequestId: accountRequestId,
+      Status: status,
     },
-    AccountRequestId: accountRequestId,
-    Status: status,
   });
 
   const setup = status => () => {
     tokenStub = sinon.stub().returns(tokenResponse);
-    accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
+    if (status) {
+      accountRequestsStub = sinon.stub().returns(accountRequestsResponse(status));
+    } else {
+      accountRequestsStub = sinon.stub().returns({});
+    }
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
     resourceServerHostStub = sinon.stub().returns(resourceServer);
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
@@ -84,12 +88,57 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     });
   });
 
+  describe('when Authorised', () => {
+    before(setup('Authorised'));
+
+    it('returns accountRequestId from postAccountRequests call', async () => {
+      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+      assert.equal(id, accountRequestId);
+    });
+  });
+
   describe('when Rejected', () => {
     before(setup('Rejected'));
 
-    it('returns null', async () => {
-      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
-      assert.equal(id, null);
+    it('throws error for now', async () => {
+      try {
+        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+        assert.ok(false);
+      } catch (err) {
+        if (err.code && err.code === 'ERR_ASSERTION') throw err;
+        assert.equal(err.message, 'account request response status: "Rejected"');
+        assert.equal(err.status, 500);
+      }
+    });
+  });
+
+  describe('when Revoked', () => {
+    before(setup('Revoked'));
+
+    it('throws error for now', async () => {
+      try {
+        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+        assert.ok(false);
+      } catch (err) {
+        if (err.code && err.code === 'ERR_ASSERTION') throw err;
+        assert.equal(err.message, 'account request response status: "Revoked"');
+        assert.equal(err.status, 500);
+      }
+    });
+  });
+
+  describe('when AccountRequestId not found in payload', () => {
+    before(setup(null));
+
+    it('throws error', async () => {
+      try {
+        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+        assert.ok(false);
+      } catch (err) {
+        if (err.code && err.code === 'ERR_ASSERTION') throw err;
+        assert.equal(err.message, 'Account request response missing payload');
+        assert.equal(err.status, 500);
+      }
     });
   });
 });

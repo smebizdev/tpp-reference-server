@@ -53,10 +53,22 @@ const createAccessToken = async (authorisationServerId) => {
 const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
   const resourcePath = await resourceServerPath(authorisationServerId);
   const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
-  if (response.Data && response.Status === 'AwaitingAuthorisation') {
-    return response.AccountRequestId;
+  let error;
+  if (response.Data) {
+    const status = response.Data.Status;
+    if (status === 'AwaitingAuthorisation' || status === 'Authorised') {
+      if (response.Data.AccountRequestId) {
+        return response.Data.AccountRequestId;
+      }
+    } else {
+      error = new Error(`account request response status: "${status}"`);
+      error.status = 500;
+      throw error;
+    }
   }
-  return null;
+  error = new Error('Account request response missing payload');
+  error.status = 500;
+  throw error;
 };
 
 const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {

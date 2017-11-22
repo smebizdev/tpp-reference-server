@@ -45,7 +45,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
         scope,
       })}`;
     debug(`authorize URL is: ${uri}`);
-    return res.send(201, { uri }); // We can't intercept a 302 !
+    return res.send(200, { uri }); // We can't intercept a 302 !
   } catch (err) {
     error(err);
     const status = err.status ? err.status : 500;

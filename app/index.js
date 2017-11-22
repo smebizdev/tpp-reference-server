@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const { session } = require('./session');
 const { requireAuthorization } = require('./authorization');
 const { login } = require('./login');
-const { proxyMiddleware } = require('./proxy.js');
+const { resourceRequestHandler } = require('./ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./account-request-authorise-consent');
 const { authorisationCodeGrantedHandler } = require('./authorisation-code-granted');
@@ -38,7 +38,7 @@ app.all('/tpp/authorized', requireAuthorization);
 app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization);
-app.use('/open-banking', proxyMiddleware);
+app.use('/open-banking', resourceRequestHandler);
 app.use('/session/check', session.check);
 
 exports.app = app;

@@ -48,9 +48,9 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   const tokenResponse = { access_token: accessToken };
   const accountRequestsResponse = status => ({
     Data: {
+      AccountRequestId: accountRequestId,
+      Status: status,
     },
-    AccountRequestId: accountRequestId,
-    Status: status,
   });
 
   const setup = status => () => {

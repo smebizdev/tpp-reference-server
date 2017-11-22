@@ -53,8 +53,8 @@ const createAccessToken = async (authorisationServerId) => {
 const createAccountRequest = async (authorisationServerId, accessToken, fapiFinancialId) => {
   const resourcePath = await resourceServerPath(authorisationServerId);
   const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
-  if (response.Data && response.Status === 'AwaitingAuthorisation') {
-    return response.AccountRequestId;
+  if (response.Data && response.Data.Status === 'AwaitingAuthorisation') {
+    return response.Data.AccountRequestId;
   }
   return null;
 };

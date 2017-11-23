@@ -7,7 +7,6 @@ const {
 const { getAuthFromSession } = require('./authorization');
 
 const { ASPSP_READWRITE_HOST } = process.env;
-const xFapiFinancialId = process.env.X_FAPI_FINANCIAL_ID;
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 

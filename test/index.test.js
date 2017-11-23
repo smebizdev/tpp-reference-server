@@ -5,9 +5,7 @@ const fapiFinancialId = 'xyz';
 const authServerId = 'testAuthServerId';
 
 process.env.DEBUG = 'error';
-// process.env.ASPSP_READWRITE_HOST = 'example.com';
 process.env.AUTHORIZATION = authorization;
-process.env.X_FAPI_FINANCIAL_ID = fapiFinancialId;
 process.env.OB_DIRECTORY_HOST = 'http://example.com';
 
 const { app } = require('../app/index.js');
@@ -157,7 +155,6 @@ describe('Proxy', () => {
     delete process.env.DEBUG;
     delete process.env.OB_DIRECTORY_HOST;
     delete process.env.AUTHORIZATION;
-    delete process.env.X_FAPI_FINANCIAL_ID;
   });
 
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {

@@ -126,9 +126,6 @@ For example `/open-banking/v1.1` gives access to the 1.1 Read write Apis.
 
 We have a hardcoded demo user `alice` with bank `abcbank` setup in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
 
-* `AUTHORIZATION=alice`.
-* `X_FAPI_FINANCIAL_ID=abcbank`.
-
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts
 ```
@@ -203,7 +200,7 @@ We have a [reference mock server](https://github.com/OpenBankingUK/reference-moc
 
 > Make sure you run the mock API against v1.1, e.g. `VERSION=v1.1 npm run start`.
 
-Then ensure you point to the above server by configuring the `ASPSP_READWRITE_HOST` endpoint either directly or using in the [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample) file. Find details in the [To run locally](https://github.com/OpenBankingUK/tpp-reference-server#to-run-locally) section.
+Find details in the [To run locally](https://github.com/OpenBankingUK/tpp-reference-server#to-run-locally) section.
 
 ### Server setup
 
@@ -234,7 +231,6 @@ Or run with environment variables set on the command line:
 
 ```sh
 DEBUG=error,log \
-  ASPSP_READWRITE_HOST=localhost:8001 \
   OB_PROVISIONED=false \
   OB_DIRECTORY_HOST=http://localhost:8001 \
   MTLS_ENABLED=false \
@@ -242,7 +238,6 @@ DEBUG=error,log \
   TRANSPORT_CERT='' \
   TRANSPORT_KEY='' \
   AUTHORIZATION=alice \
-  X_FAPI_FINANCIAL_ID=abcbank \
   MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
   PORT=8003 \
   npm start
@@ -250,7 +245,6 @@ DEBUG=error,log \
 ```
 
 * Set debug log levels using `DEBUG` env var.
-* Set API host using `ASPSP_READWRITE_HOST` env var.
 * Set hardcoded auth token using `AUTHORIZATION` env var.
 * Set OB Provisioned status using `OB_PROVISIONED` env var.
 * Set OB Directory host using `OB_DIRECTORY_HOST` env var.
@@ -287,9 +281,7 @@ heroku create --region eu <newname>
 heroku addons:create redistogo # or any other redis add-on
 heroku addons:create mongolab:sandbox
 
-heroku config:set ASPSP_READWRITE_HOST=aspsp-resource-server.example.com
 heroku config:set AUTHORIZATION=<mock-token>
-heroku config:set X_FAPI_FINANCIAL_ID=<mock-id>
 heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com

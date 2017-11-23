@@ -1,12 +1,11 @@
 const request = require('supertest');
 
 const authorization = 'abc';
-const xFapiFinancialId = 'xyz';
+const fapiFinancialId = 'xyz';
+const authServerId = 'testAuthServerId';
 
 process.env.DEBUG = 'error';
-process.env.ASPSP_READWRITE_HOST = 'example.com';
 process.env.AUTHORIZATION = authorization;
-process.env.X_FAPI_FINANCIAL_ID = xFapiFinancialId;
 process.env.OB_DIRECTORY_HOST = 'http://example.com';
 
 const { app } = require('../app/index.js');
@@ -18,7 +17,8 @@ const nock = require('nock');
 const requestHeaders = {
   reqheaders: {
     'authorization': authorization,
-    'x-fapi-financial-id': xFapiFinancialId,
+    'x-fapi-financial-id': fapiFinancialId,
+    'x-authorization-server-id': authServerId,
   },
 };
 
@@ -125,48 +125,122 @@ describe('Session Deletion (Logout)', () => {
   });
 });
 
+const token = 'testAccessToken';
+const tokenPayload = {
+  access_token: token,
+  expires_in: 3600,
+};
+
+const { ACCESS_TOKENS_COLLECTION } = require('../app/authorise/access-tokens');
+const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
+const { setTokenPayload } = require('../app/authorise');
+const { setAuthServerConfig } = require('../app/authorisation-servers/authorisation-servers');
+const { drop } = require('../app/storage.js');
+
+const resourceApiHost = 'http://example.com';
+
 describe('Proxy', () => {
+  beforeEach(async () => {
+    await setAuthServerConfig(authServerId, {
+      obDirectoryConfig: {
+        BaseApiDNSUri: resourceApiHost,
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await session.deleteAll();
+    await drop(ACCESS_TOKENS_COLLECTION);
+    await drop(ASPSP_AUTH_SERVERS_COLLECTION);
+    delete process.env.DEBUG;
+    delete process.env.OB_DIRECTORY_HOST;
+    delete process.env.AUTHORIZATION;
+  });
+
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 200);
+            assert.equal(r.body.hi, 'ya');
+            done();
+          });
+      });
+    });
+  });
 
-      request(app)
-        .get('/open-banking/v1.1/accounts')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .end((e, r) => {
-          assert.equal(r.status, 200);
-          assert.equal(r.body.hi, 'ya');
-          done();
-        });
+  it('returns 500 response for missing x-fapi-financial-id', (done) => {
+    login(app).end((err, res) => {
+      const sessionId = res.body.sid;
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 500);
+            done();
+          });
+      });
+    });
+  });
+
+  it('returns 500 response for missing x-authorization-server-id', (done) => {
+    login(app).end((err, res) => {
+      const sessionId = res.body.sid;
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .end((e, r) => {
+            assert.equal(r.status, 500);
+            done();
+          });
+      });
     });
   });
 
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      request(app)
-        .get('/open-banking/non-existing')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .end((e, r) => {
-          assert.equal(r.status, 404);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/non-existing')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 404);
+            done();
+          });
+      });
     });
   });
 
   it('should return 404 for path != /open-banking', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      request(app)
-        .get('/open-banking-invalid')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .end((e, r) => {
-          assert.equal(r.status, 404);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking-invalid')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .end((e, r) => {
+            assert.equal(r.status, 404);
+            done();
+          });
+      });
     });
   });
 
@@ -175,6 +249,8 @@ describe('Proxy', () => {
       request(app)
         .get('/open-banking/v1.1/balances')
         .set('Accept', 'application/json')
+        .set('x-fapi-financial-id', fapiFinancialId)
+        .set('x-authorization-server-id', authServerId)
         .end((e, r) => {
           assert.equal(r.status, 401);
           const header = r.headers['access-control-allow-origin'];
@@ -190,6 +266,8 @@ describe('Proxy', () => {
         .get('/open-banking/v1.1/products')
         .set('Accept', 'application/json')
         .set('authorization', 'invalid-token')
+        .set('x-fapi-financial-id', fapiFinancialId)
+        .set('x-authorization-server-id', authServerId)
         .end((e, r) => {
           assert.equal(r.status, 401);
           const header = r.headers['access-control-allow-origin'];
@@ -197,14 +275,5 @@ describe('Proxy', () => {
           done();
         });
     });
-  });
-
-  after(async () => {
-    await session.deleteAll();
-    delete process.env.DEBUG;
-    delete process.env.ASPSP_READWRITE_HOST;
-    delete process.env.OB_DIRECTORY_HOST;
-    delete process.env.AUTHORIZATION;
-    delete process.env.X_FAPI_FINANCIAL_ID;
   });
 });

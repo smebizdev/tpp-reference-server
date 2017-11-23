@@ -1,8 +1,8 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('./certs-util');
-const { resourceServerHost } = require('./authorisation-servers');
+const { setupMutualTLS } = require('../certs-util');
+const { resourceServerHost } = require('../authorisation-servers');
 const { URL } = require('url');
-const { accessToken } = require('./authorise');
+const { accessToken } = require('../authorise');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 

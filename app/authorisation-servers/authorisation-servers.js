@@ -181,4 +181,5 @@ exports.resourceServerHost = resourceServerHost;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
+exports.setAuthServerConfig = setAuthServerConfig;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

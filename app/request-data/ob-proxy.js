@@ -11,10 +11,15 @@ const resourceRequestHandler = async (req, res) => {
   const authServerId = req.headers['x-authorization-server-id'];
   const xFapiFinancialId = req.headers['x-fapi-financial-id'];
   const sessionId = req.headers.authorization;
-
+  let host;
+  try {
+    host = await resourceServerHost(authServerId);
+    host = host.split('/open-banking')[0]; // eslint-disable-line
+  } catch (err) {
+    const status = err.response ? err.response.status : 500;
+    return res.status(status).send(err.message);
+  }
   const path = `/open-banking${req.path}`;
-  let host = await resourceServerHost(authServerId);
-  host = host.split('/open-banking')[0]; // eslint-disable-line
   const proxiedUrl = new URL(path, host);
   const token = await accessToken(sessionId);
   const bearerToken = `Bearer ${token}`;

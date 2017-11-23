@@ -140,7 +140,7 @@ const { drop } = require('../app/storage.js');
 const resourceApiHost = 'http://example.com';
 
 describe('Proxy', () => {
-  before(async () => {
+  beforeEach(async () => {
     await setAuthServerConfig(authServerId, {
       obDirectoryConfig: {
         BaseApiDNSUri: resourceApiHost,
@@ -148,7 +148,7 @@ describe('Proxy', () => {
     });
   });
 
-  after(async () => {
+  afterEach(async () => {
     await session.deleteAll();
     await drop(ACCESS_TOKENS_COLLECTION);
     await drop(ASPSP_AUTH_SERVERS_COLLECTION);
@@ -160,87 +160,87 @@ describe('Proxy', () => {
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload);
-
-      request(app)
-        .get('/open-banking/v1.1/accounts')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .set('x-fapi-financial-id', fapiFinancialId)
-        .set('x-authorization-server-id', authServerId)
-        .end((e, r) => {
-          assert.equal(r.status, 200);
-          assert.equal(r.body.hi, 'ya');
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 200);
+            assert.equal(r.body.hi, 'ya');
+            done();
+          });
+      });
     });
   });
 
   it('returns 500 response for missing x-fapi-financial-id', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload);
-
-      request(app)
-        .get('/open-banking/v1.1/accounts')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .set('x-authorization-server-id', authServerId)
-        .end((e, r) => {
-          assert.equal(r.status, 500);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 500);
+            done();
+          });
+      });
     });
   });
 
   it('returns 500 response for missing x-authorization-server-id', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload);
-
-      request(app)
-        .get('/open-banking/v1.1/accounts')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .set('x-fapi-financial-id', fapiFinancialId)
-        .end((e, r) => {
-          assert.equal(r.status, 500);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/v1.1/accounts')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .end((e, r) => {
+            assert.equal(r.status, 500);
+            done();
+          });
+      });
     });
   });
 
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload);
-
-      request(app)
-        .get('/open-banking/non-existing')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .set('x-fapi-financial-id', fapiFinancialId)
-        .set('x-authorization-server-id', authServerId)
-        .end((e, r) => {
-          assert.equal(r.status, 404);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking/non-existing')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .set('x-fapi-financial-id', fapiFinancialId)
+          .set('x-authorization-server-id', authServerId)
+          .end((e, r) => {
+            assert.equal(r.status, 404);
+            done();
+          });
+      });
     });
   });
 
   it('should return 404 for path != /open-banking', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload);
-
-      request(app)
-        .get('/open-banking-invalid')
-        .set('Accept', 'application/json')
-        .set('authorization', sessionId)
-        .end((e, r) => {
-          assert.equal(r.status, 404);
-          done();
-        });
+      setTokenPayload(sessionId, tokenPayload).then(() => {
+        request(app)
+          .get('/open-banking-invalid')
+          .set('Accept', 'application/json')
+          .set('authorization', sessionId)
+          .end((e, r) => {
+            assert.equal(r.status, 404);
+            done();
+          });
+      });
     });
   });
 

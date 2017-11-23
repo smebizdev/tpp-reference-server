@@ -65,11 +65,11 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMifQ==',
   };
 
-  it('returns 302 redirect to /authorize endpoint', (done) => {
+  it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {
     doPost(app)
       .end((e, r) => {
-        assert.equal(r.status, 302);
-        const { location } = r.headers;
+        assert.equal(r.status, 200);
+        const location = r.body.uri;
         const parts = location.split('?');
         const host = parts[0];
         const params = qs.parse(parts[1]);

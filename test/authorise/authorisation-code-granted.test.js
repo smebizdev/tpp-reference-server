@@ -43,7 +43,7 @@ describe('Authorized Code Granted', () => {
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
       },
-      '../authorise': { setTokenPayload: setTokenPayloadStub },
+      './access-tokens': { setTokenPayload: setTokenPayloadStub },
     });
 
     request = httpMocks.createRequest({

@@ -1,6 +1,6 @@
 const { setupAccountRequest } = require('./setup-account-request');
-const { createClaims, createJsonWebSignature } = require('./authorise');
-const { authorisationEndpoint, getClientCredentials, issuer } = require('./authorisation-servers');
+const { createClaims, createJsonWebSignature } = require('../authorise');
+const { authorisationEndpoint, getClientCredentials, issuer } = require('../authorisation-servers');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const env = require('env-var');

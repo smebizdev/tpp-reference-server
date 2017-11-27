@@ -19,7 +19,7 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
   const { accountRequestAuthoriseConsent } = proxyquire(
-    '../app/account-request-authorise-consent',
+    '../../app/setup-account-request/account-request-authorise-consent.js',
     {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectUrl,
@@ -27,10 +27,10 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       './setup-account-request': {
         setupAccountRequest: setupAccountRequestStub,
       },
-      './authorise': {
+      '../authorise': {
         createJsonWebSignature: createJsonWebSignatureStub,
       },
-      './authorisation-servers': {
+      '../authorisation-servers': {
         authorisationEndpoint: authorisationEndpointStub,
         getClientCredentials: clientCredentialsStub,
         issuer: issuerStub,

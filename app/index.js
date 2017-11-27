@@ -9,7 +9,7 @@ const { requireAuthorization } = require('./session/index.js');
 const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
-const { accountRequestAuthoriseConsent } = require('./account-request-authorise-consent');
+const { accountRequestAuthoriseConsent } = require('./setup-account-request');
 const { authorisationCodeGrantedHandler } = require('./authorise');
 
 const app = express();

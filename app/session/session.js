@@ -1,5 +1,5 @@
 const uuidv1 = require('uuid/v1'); // Timestamp based UUID
-const { store } = require('./persistence.js');
+const { store } = require('../persistence.js');
 const log = require('debug')('log');
 
 const session = (() => {

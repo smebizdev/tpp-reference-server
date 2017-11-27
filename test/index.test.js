@@ -9,7 +9,7 @@ process.env.AUTHORIZATION = authorization;
 process.env.OB_DIRECTORY_HOST = 'http://example.com';
 
 const { app } = require('../app/index.js');
-const { session } = require('../app/session.js');
+const { session } = require('../app/session');
 const assert = require('assert');
 
 const nock = require('nock');

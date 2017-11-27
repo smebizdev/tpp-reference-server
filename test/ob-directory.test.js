@@ -9,7 +9,7 @@ const accessToken = 'AN_ACCESS_TOKEN';
 const { drop } = require('../app/storage.js');
 
 const { app } = require('../app/index.js');
-const { session } = require('../app/session.js');
+const { session } = require('../app/session');
 const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
 
 const assert = require('assert');

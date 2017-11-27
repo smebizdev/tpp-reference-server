@@ -35,15 +35,15 @@ describe('Authorized Code Granted', () => {
     setTokenPayloadStub = sinon.stub();
     postTokenStub = sinon.stub().returns(tokenResponsePayload);
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    redirection = proxyquire('../app/authorisation-code-granted.js', {
+    redirection = proxyquire('../../app/authorise/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
       }),
-      './obtain-access-token': { postToken: postTokenStub },
-      './authorisation-servers': {
+      '../obtain-access-token': { postToken: postTokenStub },
+      '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
       },
-      './authorise': { setTokenPayload: setTokenPayloadStub },
+      './access-tokens': { setTokenPayload: setTokenPayloadStub },
     });
 
     request = httpMocks.createRequest({
@@ -88,12 +88,12 @@ describe('Authorized Code Granted', () => {
       beforeEach(() => {
         postTokenStub = sinon.stub().throws(error);
         getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-        redirection = proxyquire('../app/authorisation-code-granted.js', {
+        redirection = proxyquire('../../app/authorise/authorisation-code-granted.js', {
           'env-var': env.mock({
             SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
           }),
-          './obtain-access-token': { postToken: postTokenStub },
-          './authorisation-servers': {
+          '../obtain-access-token': { postToken: postTokenStub },
+          '../authorisation-servers': {
             getClientCredentials: getClientCredentialsStub,
           },
         });

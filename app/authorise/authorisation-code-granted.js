@@ -1,7 +1,7 @@
 const env = require('env-var');
-const { setTokenPayload } = require('./authorise');
-const { postToken } = require('./obtain-access-token');
-const { getClientCredentials } = require('./authorisation-servers');
+const { setTokenPayload } = require('./access-tokens');
+const { postToken } = require('../obtain-access-token');
+const { getClientCredentials } = require('../authorisation-servers');
 const debug = require('debug')('debug');
 
 const redirectionUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();

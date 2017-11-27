@@ -5,12 +5,12 @@ const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { session } = require('./session');
-const { requireAuthorization } = require('./authorization');
-const { login } = require('./login');
+const { requireAuthorization } = require('./session');
+const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
-const { accountRequestAuthoriseConsent } = require('./account-request-authorise-consent');
-const { authorisationCodeGrantedHandler } = require('./authorisation-code-granted');
+const { accountRequestAuthoriseConsent } = require('./setup-account-request');
+const { authorisationCodeGrantedHandler } = require('./authorise');
 
 const app = express();
 

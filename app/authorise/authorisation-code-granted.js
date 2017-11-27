@@ -1,5 +1,5 @@
 const env = require('env-var');
-const { setTokenPayload } = require('../authorise');
+const { setTokenPayload } = require('./access-tokens');
 const { postToken } = require('../obtain-access-token');
 const { getClientCredentials } = require('../authorisation-servers');
 const debug = require('debug')('debug');

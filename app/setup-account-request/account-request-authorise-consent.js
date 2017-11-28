@@ -16,6 +16,28 @@ const statePayload = (authorisationServerId, sessionId) => {
   return Buffer.from(JSON.stringify(state)).toString('base64');
 };
 
+const generateRedirectUri = async (authorisationServerId, requestId, scope, sessionId) => {
+  const { clientId } = await getClientCredentials(authorisationServerId);
+  const state = statePayload(authorisationServerId, sessionId);
+  const authServerEndpoint = await authorisationEndpoint(authorisationServerId);
+  const authServerIssuer = await issuer(authorisationServerId);
+  const payload = createClaims(
+    scope, requestId, clientId, authServerIssuer,
+    registeredRedirectUrl, state, createClaims,
+  );
+  const signature = createJsonWebSignature(payload);
+  const uri =
+    `${authServerEndpoint}?${qs.stringify({
+      redirect_uri: registeredRedirectUrl,
+      state,
+      client_id: clientId,
+      response_type: 'code',
+      request: signature,
+      scope,
+    })}`;
+  return uri;
+};
+
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
@@ -23,27 +45,10 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const { authorisationServerId } = req.body;
     const fapiFinancialId = req.headers['x-fapi-financial-id'];
     debug(`authorisationServerId: ${authorisationServerId}`);
-    const accountRequestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);
-    const { clientId } = await getClientCredentials(authorisationServerId);
+    const requestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);
 
-    const state = statePayload(authorisationServerId, sessionId);
-    const scope = 'openid accounts';
-    const authServerEndpoint = await authorisationEndpoint(authorisationServerId);
-    const authServerIssuer = await issuer(authorisationServerId);
-    const payload = createClaims(
-      scope, accountRequestId, clientId, authServerIssuer,
-      registeredRedirectUrl, state, createClaims,
-    );
-    const signature = createJsonWebSignature(payload);
-    const uri =
-      `${authServerEndpoint}?${qs.stringify({
-        redirect_uri: registeredRedirectUrl,
-        state,
-        client_id: clientId,
-        response_type: 'code',
-        request: signature,
-        scope,
-      })}`;
+    const uri = await generateRedirectUri(authorisationServerId, requestId, 'openid accounts', sessionId);
+
     debug(`authorize URL is: ${uri}`);
     return res.send(200, { uri }); // We can't intercept a 302 !
   } catch (err) {

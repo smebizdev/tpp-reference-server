@@ -29,16 +29,16 @@ const issuer = clientId => clientId;
  */
 const nonce = () => 'dummy-nonce';
 
-const claims = accountRequestId => ({
+const claims = requestId => ({
   userinfo: {
     openbanking_intent_id: {
-      value: accountRequestId, // not sure this
+      value: requestId, // not sure this
       essential: true,
     },
   },
   id_token: {
     openbanking_intent_id: {
-      value: accountRequestId,
+      value: requestId,
       essential: true,
     },
     acr: {
@@ -48,7 +48,7 @@ const claims = accountRequestId => ({
 });
 
 const createClaims = (
-  scope, accountRequestId, clientId, authServerIssuer,
+  scope, requestId, clientId, authServerIssuer,
   registeredRedirectUrl, state, useOpenidConnect, // eslint-disable-line
 ) => ({
   aud: authServerIssuer,
@@ -60,7 +60,7 @@ const createClaims = (
   state,
   nonce: nonce(),
   max_age: 86400,
-  claims: claims(accountRequestId),
+  claims: claims(requestId),
 });
 
 // Use alg: 'none' for now when signing.

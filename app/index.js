@@ -35,7 +35,7 @@ app.use(
 app.all('/account-request-authorise-consent', requireAuthorization);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
 
-// app.all('/payment-authorise-consent', requireAuthorization);
+app.all('/payment-authorise-consent', requireAuthorization);
 app.post('/payment-authorise-consent', paymentAuthoriseConsent);
 
 app.all('/tpp/authorized', requireAuthorization);

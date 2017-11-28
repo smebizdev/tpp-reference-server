@@ -1,4 +1,4 @@
-const { buildPaymentsData, postPayments } = require('../../app/setup-payments/payments');
+const { buildPaymentsData, postPayments } = require('../../app/setup-payment/payments');
 const assert = require('assert');
 const nock = require('nock');
 

@@ -1,6 +1,6 @@
 const uuidv4 = require('uuid/v4');
 const { makeRequest } = require('../setup-request');
-const { postPayments } = require('../setup-payments/payments');
+const { postPayments } = require('./payments');
 
 const createRequest = (
   CreditorAccount,

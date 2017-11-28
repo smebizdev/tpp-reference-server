@@ -1,28 +1,36 @@
-const { buildPaymentstData, postPayments } = require('../../app/setup-payments/payments');
+const { buildPaymentsData, postPayments } = require('../../app/setup-payments/payments');
 const assert = require('assert');
 const nock = require('nock');
 
+const instructedAmount = {
+  Amount: '100.45',
+  Currency: 'GBP',
+};
+
+const creditorAccount = {
+  SchemeName: 'SortCodeAccountNumber',
+  Identification: '01122313235478',
+  Name: 'Mr Kevin',
+  SecondaryIdentification: '002',
+};
+
+const amount = instructedAmount.Amount;
+const currency = instructedAmount.Currency;
+const identification = creditorAccount.Identification;
+const name = creditorAccount.Name;
+const secondaryIdentification = creditorAccount.SecondaryIdentification;
+
+const paymentId = '44673';
+
 describe('buildPaymentstData and then postPayments', () => {
-  const paymentId = '44673';
   const instructionIdentification = 'ghghg';
   const endToEndIdentification = 'XXXgHTg';
-  const amount = 100.45;
-  const currency = 'GBP';
-  const identification = '01122313235478';
-  const name = 'Mr Kevin';
-  const secondaryIdentification = 'Bills';
   const reference = 'Things';
   const unstructured = 'XXX';
 
   const opts = {
-    paymentId,
     instructionIdentification,
     endToEndIdentification,
-    amount,
-    currency,
-    identification,
-    name,
-    secondaryIdentification,
     reference,
     unstructured,
   };
@@ -40,15 +48,12 @@ describe('buildPaymentstData and then postPayments', () => {
   const jwsSignature = 'not-required-swagger-to-be-changed';
 
   const headers = {
-    idempotencyKey,
-    fapiFinancialId,
     interactionId,
     customerIp,
     customerLastLogged,
   };
 
   const data = {
-    PaymentId: paymentId,
     Initiation: {
       InstructionIdentification: instructionIdentification,
       EndToEndIdentification: endToEndIdentification,
@@ -70,7 +75,10 @@ describe('buildPaymentstData and then postPayments', () => {
   };
 
   const expectedResponse = {
-    Data: data,
+    Data: {
+      PaymentId: paymentId,
+      Initiation: data.Initiation,
+    },
     Risk: risk,
     Links: {
       self: `/open-banking/v1.1/payments/${paymentId}`,
@@ -92,7 +100,7 @@ describe('buildPaymentstData and then postPayments', () => {
     .reply(201, expectedResponse);
 
   it('returns a body payload of the correct shape', async () => {
-    const paymentsPayload = buildPaymentstData(opts, risk);
+    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
     const expectedPayload = {
       Data: data,
       Risk: risk,
@@ -108,6 +116,7 @@ describe('buildPaymentstData and then postPayments', () => {
       headers,
       opts,
       risk,
+      creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey,
     );
 
     assert.deepEqual(result, expectedResponse);
@@ -115,25 +124,13 @@ describe('buildPaymentstData and then postPayments', () => {
 });
 
 describe('buildPaymentstData with optionality', () => {
-  const paymentId = '33776';
   const instructionIdentification = 'ttttt';
   const endToEndIdentification = 'RRR';
-  const amount = 333.22;
-  const currency = 'GBP';
-  const identification = '01122313235478';
-  const name = 'Ms Lidell';
-  const secondaryIdentification = 'household';
   const reference = 'Ref2';
 
   const opts = {
-    paymentId,
     instructionIdentification,
     endToEndIdentification,
-    amount,
-    currency,
-    identification,
-    name,
-    secondaryIdentification,
     reference,
   };
 
@@ -142,7 +139,6 @@ describe('buildPaymentstData with optionality', () => {
   };
 
   const data = {
-    PaymentId: paymentId,
     Initiation: {
       InstructionIdentification: instructionIdentification,
       EndToEndIdentification: endToEndIdentification,
@@ -163,9 +159,11 @@ describe('buildPaymentstData with optionality', () => {
   };
 
   it('returns a body payload of the correct shape: with missing unstructured field', () => {
-    const paymentsPayload = buildPaymentstData(opts, risk);
+    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
     const expectedPayload = {
-      Data: data,
+      Data: {
+        Initiation: data.Initiation,
+      },
       Risk: risk,
     };
     assert.deepEqual(paymentsPayload, expectedPayload);
@@ -177,7 +175,7 @@ describe('buildPaymentstData with optionality', () => {
     data.Initiation.RemittanceInformation = {
       Unstructured: opts.unstructured,
     };
-    const paymentsPayload = buildPaymentstData(opts, risk);
+    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
     const expectedPayload = {
       Data: data,
       Risk: risk,
@@ -189,7 +187,7 @@ describe('buildPaymentstData with optionality', () => {
     delete opts.reference;
     delete opts.unstructured;
     delete data.Initiation.RemittanceInformation;
-    const paymentsPayload = buildPaymentstData(opts, risk);
+    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
     const expectedPayload = {
       Data: data,
       Risk: risk,

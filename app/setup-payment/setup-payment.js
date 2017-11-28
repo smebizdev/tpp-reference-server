@@ -1,3 +1,4 @@
+const uuidv4 = require('uuid/v4');
 const { makeRequest } = require('../setup-request');
 const { postPayments } = require('../setup-payments/payments');
 
@@ -5,13 +6,15 @@ const createRequest = (
   CreditorAccount,
   InstructedAmount,
 ) => async (resourcePath, accessToken, fapiFinancialId) => {
+  const idempotencyKey = uuidv4();
   const response = await postPayments(
     resourcePath,
     accessToken,
     {}, // headers
     {}, // opts
     {}, // risk
-    CreditorAccount, InstructedAmount, fapiFinancialId,
+    CreditorAccount, InstructedAmount,
+    fapiFinancialId, idempotencyKey,
   );
   let error;
   if (response.Data) {

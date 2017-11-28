@@ -19,7 +19,7 @@ const statePayload = (authorisationServerId, sessionId) => {
 const generateRedirectUri = async (authorisationServerId, requestId, scope, sessionId) => {
   const { clientId } = await getClientCredentials(authorisationServerId);
   const state = statePayload(authorisationServerId, sessionId);
-  const authServerEndpoint = await authorisationEndpoint(authorisationServerId);
+  const authEndpoint = await authorisationEndpoint(authorisationServerId);
   const authServerIssuer = await issuer(authorisationServerId);
   const payload = createClaims(
     scope, requestId, clientId, authServerIssuer,
@@ -27,7 +27,7 @@ const generateRedirectUri = async (authorisationServerId, requestId, scope, sess
   );
   const signature = createJsonWebSignature(payload);
   const uri =
-    `${authServerEndpoint}?${qs.stringify({
+    `${authEndpoint}?${qs.stringify({
       redirect_uri: registeredRedirectUrl,
       state,
       client_id: clientId,
@@ -60,3 +60,4 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 
 exports.statePayload = statePayload;
 exports.accountRequestAuthoriseConsent = accountRequestAuthoriseConsent;
+exports.generateRedirectUri = generateRedirectUri;

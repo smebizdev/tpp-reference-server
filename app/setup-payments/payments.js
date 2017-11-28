@@ -16,8 +16,7 @@ const buildPaymentstData = (opts, risk) => {
     endToEndIdentification,
     amount,
     currency,
-    sortCode,
-    accountNumber,
+    identification,
     name,
     secondaryIdentification,
     reference,
@@ -25,10 +24,8 @@ const buildPaymentstData = (opts, risk) => {
   } = opts;
 
   if (allowedCurrencies.indexOf(currency) === -1) throw new Error('Disallowed currency');
-  const identification = sortCode.toString() + accountNumber.toString();
 
-  // Assume only SortCodeAccountNumber for scheme at the moment
-  return {
+  const payload = {
     Data: {
       PaymentId: paymentId,
       Initiation: {
@@ -44,14 +41,21 @@ const buildPaymentstData = (opts, risk) => {
           Name: name,
           SecondaryIdentification: secondaryIdentification,
         },
-        RemittanceInformation: {
-          Reference: reference,
-          Unstructured: unstructured,
-        },
       },
     },
     Risk: risk || {},
   };
+
+  // Optional Fields
+  let remittanceInformation;
+  if (reference || unstructured) {
+    remittanceInformation = {};
+    if (reference) remittanceInformation.Reference = reference;
+    if (unstructured) remittanceInformation.Unstructured = unstructured;
+  }
+  if (remittanceInformation) payload.Data.Initiation.RemittanceInformation = remittanceInformation;
+
+  return payload;
 };
 
 const postPayments =
@@ -61,17 +65,18 @@ const postPayments =
       const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
       const paymentsUri = new URL('/open-banking/v1.1/payments', host);
       log(`POST to ${paymentsUri}`);
-      const response = await setupMutualTLS(request.post(paymentsUri))
+      const payment = setupMutualTLS(request.post(paymentsUri))
         .set('authorization', `Bearer ${accessToken}`)
         .set('x-idempotency-key', headers.idempotencyKey)
         .set('x-jws-signature', 'not-required-swagger-to-be-changed')
         .set('x-fapi-financial-id', headers.fapiFinancialId)
-        .set('x-fapi-customer-last-logged-time', headers.customerLastLogged)
-        .set('x-fapi-customer-ip-address', headers.customerIp)
-        .set('x-fapi-interaction-id', headers.interactionId)
         .set('content-type', 'application/json; charset=utf-8')
-        .set('accept', 'application/json; charset=utf-8')
-        .send(body);
+        .set('accept', 'application/json; charset=utf-8');
+      if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
+      if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
+      if (headers.interactionId) payment.set('x-fapi-interaction-id', headers.interactionId);
+      payment.send(body);
+      const response = await payment;
       debug(`${response.status} response for ${paymentsUri}`);
       return response.body;
     } catch (err) {

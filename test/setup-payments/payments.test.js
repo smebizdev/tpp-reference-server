@@ -8,8 +8,7 @@ describe('buildPaymentstData and then postPayments', () => {
   const endToEndIdentification = 'XXXgHTg';
   const amount = 100.45;
   const currency = 'GBP';
-  const sortCode = '011223';
-  const accountNumber = '13235478';
+  const identification = '01122313235478';
   const name = 'Mr Kevin';
   const secondaryIdentification = 'Bills';
   const reference = 'Things';
@@ -21,8 +20,7 @@ describe('buildPaymentstData and then postPayments', () => {
     endToEndIdentification,
     amount,
     currency,
-    sortCode,
-    accountNumber,
+    identification,
     name,
     secondaryIdentification,
     reference,
@@ -60,7 +58,7 @@ describe('buildPaymentstData and then postPayments', () => {
       },
       CreditorAccount: {
         SchemeName: 'SortCodeAccountNumber',
-        Identification: sortCode.toString() + accountNumber.toString(),
+        Identification: identification,
         Name: name,
         SecondaryIdentification: secondaryIdentification,
       },
@@ -113,5 +111,89 @@ describe('buildPaymentstData and then postPayments', () => {
     );
 
     assert.deepEqual(result, expectedResponse);
+  });
+});
+
+describe('buildPaymentstData with optionality', () => {
+  const paymentId = '33776';
+  const instructionIdentification = 'ttttt';
+  const endToEndIdentification = 'RRR';
+  const amount = 333.22;
+  const currency = 'GBP';
+  const identification = '01122313235478';
+  const name = 'Ms Lidell';
+  const secondaryIdentification = 'household';
+  const reference = 'Ref2';
+
+  const opts = {
+    paymentId,
+    instructionIdentification,
+    endToEndIdentification,
+    amount,
+    currency,
+    identification,
+    name,
+    secondaryIdentification,
+    reference,
+  };
+
+  const risk = {
+    foo: 'bar',
+  };
+
+  const data = {
+    PaymentId: paymentId,
+    Initiation: {
+      InstructionIdentification: instructionIdentification,
+      EndToEndIdentification: endToEndIdentification,
+      InstructedAmount: {
+        Amount: amount,
+        Currency: currency,
+      },
+      CreditorAccount: {
+        SchemeName: 'SortCodeAccountNumber',
+        Identification: identification,
+        Name: name,
+        SecondaryIdentification: secondaryIdentification,
+      },
+      RemittanceInformation: {
+        Reference: reference,
+      },
+    },
+  };
+
+  it('returns a body payload of the correct shape: with missing unstructured field', () => {
+    const paymentsPayload = buildPaymentstData(opts, risk);
+    const expectedPayload = {
+      Data: data,
+      Risk: risk,
+    };
+    assert.deepEqual(paymentsPayload, expectedPayload);
+  });
+
+  it('returns a body payload of the correct shape: with missing reference field', () => {
+    opts.unstructured = 'blah';
+    delete opts.reference;
+    data.Initiation.RemittanceInformation = {
+      Unstructured: opts.unstructured,
+    };
+    const paymentsPayload = buildPaymentstData(opts, risk);
+    const expectedPayload = {
+      Data: data,
+      Risk: risk,
+    };
+    assert.deepEqual(paymentsPayload, expectedPayload);
+  });
+
+  it('returns a body payload of the correct shape: with missing reference AND unstructured fields', () => {
+    delete opts.reference;
+    delete opts.unstructured;
+    delete data.Initiation.RemittanceInformation;
+    const paymentsPayload = buildPaymentstData(opts, risk);
+    const expectedPayload = {
+      Data: data,
+      Risk: risk,
+    };
+    assert.deepEqual(paymentsPayload, expectedPayload);
   });
 });

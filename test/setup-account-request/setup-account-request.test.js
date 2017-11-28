@@ -36,11 +36,12 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   const clientId = 'id';
   const clientSecret = 'secret';
   const tokenPayload = {
-    scope: 'accounts',
+    scope: 'accounts payments',
     grant_type: 'client_credentials',
   };
   const accountRequestId = '88379';
   let setupAccountRequestProxy;
+  let makeRequestProxy;
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
@@ -62,13 +63,16 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     }
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
     resourceServerHostStub = sinon.stub().returns(resourceServer);
-    setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
+    makeRequestProxy = proxyquire('../../app/setup-request/setup-request', {
       '../obtain-access-token': { postToken: tokenStub },
-      './account-requests': { postAccountRequests: accountRequestsStub },
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
         resourceServerHost: resourceServerHostStub,
       },
+    }).makeRequest;
+    setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
+      '../setup-request': { makeRequest: makeRequestProxy },
+      './account-requests': { postAccountRequests: accountRequestsStub },
     }).setupAccountRequest;
   };
 
@@ -106,7 +110,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
         assert.ok(false);
       } catch (err) {
         if (err.code && err.code === 'ERR_ASSERTION') throw err;
-        assert.equal(err.message, 'account request response status: "Rejected"');
+        assert.equal(err.message, 'Account request response status: "Rejected"');
         assert.equal(err.status, 500);
       }
     });
@@ -121,7 +125,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
         assert.ok(false);
       } catch (err) {
         if (err.code && err.code === 'ERR_ASSERTION') throw err;
-        assert.equal(err.message, 'account request response status: "Revoked"');
+        assert.equal(err.message, 'Account request response status: "Revoked"');
         assert.equal(err.status, 500);
       }
     });

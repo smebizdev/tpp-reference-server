@@ -8,11 +8,16 @@ const paymentAuthoriseConsent = async (req, res) => {
   try {
     const sessionId = req.headers['authorization'];
     const { authorisationServerId } = req.body;
+    const { CreditorAccount } = req.body;
+    const { InstructedAmount } = req.body;
     const fapiFinancialId = req.headers['x-fapi-financial-id'];
     debug(`authorisationServerId: ${authorisationServerId}`);
-    const requestId = await setupPayment(authorisationServerId, fapiFinancialId);
+    const requestId = await setupPayment(
+      authorisationServerId,
+      fapiFinancialId, CreditorAccount, InstructedAmount,
+    );
 
-    const uri = await generateRedirectUri(authorisationServerId, requestId, 'openid accounts', sessionId);
+    const uri = await generateRedirectUri(authorisationServerId, requestId, 'openid payments', sessionId);
 
     debug(`authorize URL is: ${uri}`);
     return res.send(200, { uri }); // We can't intercept a 302 !

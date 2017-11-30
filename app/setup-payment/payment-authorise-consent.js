@@ -1,5 +1,5 @@
 const { setupPayment } = require('./setup-payment');
-const { generateRedirectUri } = require('../setup-account-request');
+const { generateRedirectUri } = require('../authorise');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 

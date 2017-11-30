@@ -1,11 +1,9 @@
-const uuidv4 = require('uuid/v4');
 const { accessTokenAndResourcePath } = require('../setup-request');
 const { postPayments } = require('./payments');
 const debug = require('debug')('debug');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId,
-  CreditorAccount, InstructedAmount) => {
-  const idempotencyKey = uuidv4();
+  CreditorAccount, InstructedAmount, idempotencyKey) => {
   const response = await postPayments(
     resourcePath,
     accessToken,
@@ -18,7 +16,8 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
   let error;
   if (response.Data) {
     const status = response.Data.Status;
-    if (status) {
+    debug(`/payments repsonse Data: ${JSON.stringify(response.Data)}`);
+    if (status === 'AcceptedTechnicalValidation' || status === 'AcceptedCustomerProfile') {
       if (response.Data.PaymentId) {
         return response.Data.PaymentId;
       }
@@ -34,7 +33,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
 };
 
 const setupPayment = async (authorisationServerId,
-  fapiFinancialId, CreditorAccount, InstructedAmount) => {
+  fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
@@ -42,7 +41,7 @@ const setupPayment = async (authorisationServerId,
 
   const paymentId = await createRequest(
     resourcePath, accessToken, fapiFinancialId,
-    CreditorAccount, InstructedAmount,
+    CreditorAccount, InstructedAmount, idempotencyKey,
   );
   return paymentId;
 };

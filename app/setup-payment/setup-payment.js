@@ -1,11 +1,10 @@
 const uuidv4 = require('uuid/v4');
 const { accessTokenAndResourcePath } = require('../setup-request');
 const { postPayments } = require('./payments');
+const debug = require('debug')('debug');
 
-const createRequest = (
-  CreditorAccount,
-  InstructedAmount,
-) => async (resourcePath, accessToken, fapiFinancialId) => {
+const createRequest = async (resourcePath, accessToken, fapiFinancialId,
+  CreditorAccount, InstructedAmount) => {
   const idempotencyKey = uuidv4();
   const response = await postPayments(
     resourcePath,
@@ -41,7 +40,10 @@ const setupPayment = async (authorisationServerId,
     fapiFinancialId,
   );
 
-  const paymentId = await createRequest(CreditorAccount, InstructedAmount)(resourcePath, accessToken, fapiFinancialId); // eslint-disable-line
+  const paymentId = await createRequest(
+    resourcePath, accessToken, fapiFinancialId,
+    CreditorAccount, InstructedAmount,
+  );
   return paymentId;
 };
 

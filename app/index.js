@@ -10,6 +10,7 @@ const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./setup-account-request');
+const { paymentAuthoriseConsent } = require('./setup-payment');
 const { authorisationCodeGrantedHandler } = require('./authorise');
 
 const app = express();
@@ -33,6 +34,9 @@ app.use(
 
 app.all('/account-request-authorise-consent', requireAuthorization);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
+
+app.all('/payment-authorise-consent', requireAuthorization);
+app.post('/payment-authorise-consent', paymentAuthoriseConsent);
 
 app.all('/tpp/authorized', requireAuthorization);
 app.get('/tpp/authorized', authorisationCodeGrantedHandler);

@@ -1,5 +1,5 @@
 const { createClaims } = require('../../app/authorise/request-jws');
-const { statePayload } = require('../../app/setup-account-request');
+const { statePayload } = require('../../app/authorise/authorise-uri');
 const assert = require('assert');
 
 describe('createClaims', () => {

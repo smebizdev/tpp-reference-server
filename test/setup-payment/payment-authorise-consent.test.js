@@ -14,7 +14,7 @@ const redirectUrl = 'http://example.com/redirect';
 const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
 
-const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
+const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
@@ -34,11 +34,11 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       },
     },
   );
-  const { accountRequestAuthoriseConsent } = proxyquire(
-    '../../app/setup-account-request/account-request-authorise-consent.js',
+  const { paymentAuthoriseConsent } = proxyquire(
+    '../../app/setup-payment/payment-authorise-consent.js',
     {
-      './setup-account-request': {
-        setupAccountRequest: setupAccountRequestStub,
+      './setup-payment': {
+        setupPayment: setupPaymentStub,
       },
       '../authorise': {
         generateRedirectUri,
@@ -47,21 +47,21 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   );
   const app = express();
   app.use(bodyParser.json());
-  app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
+  app.post('/payment-authorise-consent', paymentAuthoriseConsent);
   return app;
 };
 
 const fapiFinancialId = 'testFapiFinancialId';
 
 const doPost = app => request(app)
-  .post('/account-request-authorise-consent')
+  .post('/payment-authorise-consent')
   .set('x-fapi-financial-id', fapiFinancialId)
   .send({ authorisationServerId });
 
-describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
-  const setupAccountRequestStub = sinon.stub();
+describe('/payment-authorise-consent with successful setupPayment', () => {
+  const setupPaymentStub = sinon.stub();
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
-  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
+  const app = setupApp(setupPaymentStub, authorisationEndpointStub);
 
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
@@ -69,8 +69,8 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     redirect_uri: redirectUrl,
     request: jsonWebSignature,
     response_type: 'code',
-    scope: 'openid accounts',
-    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBhY2NvdW50cyJ9',
+    scope: 'openid payments',
+    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBwYXltZW50cyJ9',
   };
 
   it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {
@@ -85,20 +85,19 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(authorisationServerId, fapiFinancialId));
         done();
       });
   });
 });
 
-describe('/account-request-authorise-consent with error thrown by setupAccountRequest', () => {
+describe('/payment-authorise-consent with error thrown by setupPayment', () => {
   const status = 403;
   const message = 'message';
   const error = new Error(message);
   error.status = status;
-  const setupAccountRequestStub = sinon.stub().throws(error);
+  const setupPaymentStub = sinon.stub().throws(error);
   const authorisationEndpointStub = sinon.stub();
-  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
+  const app = setupApp(setupPaymentStub, authorisationEndpointStub);
 
   it('returns status from error', (done) => {
     doPost(app)
@@ -107,7 +106,6 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.deepEqual(r.body, { message });
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(authorisationServerId, fapiFinancialId));
         done();
       });
   });

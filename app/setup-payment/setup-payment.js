@@ -1,5 +1,5 @@
 const uuidv4 = require('uuid/v4');
-const { makeRequest } = require('../setup-request');
+const { accessTokenAndResourcePath } = require('../setup-request');
 const { postPayments } = require('./payments');
 
 const createRequest = (
@@ -36,11 +36,12 @@ const createRequest = (
 
 const setupPayment = async (authorisationServerId,
   fapiFinancialId, CreditorAccount, InstructedAmount) => {
-  const paymentId = await makeRequest(
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
-    createRequest(CreditorAccount, InstructedAmount),
   );
+
+  const paymentId = await createRequest(CreditorAccount, InstructedAmount)(resourcePath, accessToken, fapiFinancialId); // eslint-disable-line
   return paymentId;
 };
 

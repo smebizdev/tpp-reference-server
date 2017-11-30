@@ -1,3 +1,3 @@
-const { makeRequest } = require('./setup-request');
+const { accessTokenAndResourcePath } = require('./setup-request');
 
-exports.makeRequest = makeRequest;
+exports.accessTokenAndResourcePath = accessTokenAndResourcePath;

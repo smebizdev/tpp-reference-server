@@ -18,7 +18,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   };
   const accountRequestId = '88379';
   let setupAccountRequestProxy;
-  let makeRequestProxy;
+  let accessTokenAndResourcePathProxy;
   let tokenStub;
   let accountRequestsStub;
   let getClientCredentialsStub;
@@ -40,15 +40,15 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     }
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
     resourceServerHostStub = sinon.stub().returns(resourceServer);
-    makeRequestProxy = proxyquire('../../app/setup-request/setup-request', {
+    accessTokenAndResourcePathProxy = proxyquire('../../app/setup-request/setup-request', {
       '../obtain-access-token': { postToken: tokenStub },
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
         resourceServerHost: resourceServerHostStub,
       },
-    }).makeRequest;
+    }).accessTokenAndResourcePath;
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
-      '../setup-request': { makeRequest: makeRequestProxy },
+      '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
       './account-requests': { postAccountRequests: accountRequestsStub },
     }).setupAccountRequest;
   };

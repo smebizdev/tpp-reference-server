@@ -48,16 +48,11 @@ const createAccessToken = async (authorisationServerId) => {
   return response.access_token;
 };
 
-const makeRequest = async (authorisationServerId, fapiFinancialId, createRequestFn) => {
+const accessTokenAndResourcePath = async (authorisationServerId, fapiFinancialId) => {
   validateParameters(authorisationServerId, fapiFinancialId);
   const accessToken = await createAccessToken(authorisationServerId);
   const resourcePath = await resourceServerPath(authorisationServerId);
-  const requestId = await createRequestFn(
-    resourcePath,
-    accessToken,
-    fapiFinancialId,
-  );
-  return requestId;
+  return { accessToken, resourcePath };
 };
 
-exports.makeRequest = makeRequest;
+exports.accessTokenAndResourcePath = accessTokenAndResourcePath;

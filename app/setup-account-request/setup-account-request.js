@@ -1,4 +1,4 @@
-const { makeRequest } = require('../setup-request');
+const { accessTokenAndResourcePath } = require('../setup-request');
 const { postAccountRequests } = require('./account-requests');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
@@ -22,10 +22,14 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
 };
 
 const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
-  const accountRequestId = await makeRequest(
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
-    createRequest,
+  );
+  const accountRequestId = await createRequest(
+    resourcePath,
+    accessToken,
+    fapiFinancialId,
   );
   return accountRequestId;
 };

@@ -1,32 +1,27 @@
 const assert = require('assert');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const { setupAccountRequest } = require('../../app/setup-account-request/setup-account-request'); // eslint-disable-line
+const { checkErrorThrown } = require('../utils');
+const { setupAccountRequest } = require('../../app/setup-account-request'); // eslint-disable-line
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
 
 describe('setupAccountRequest called with blank authorisationServerId', () => {
   it('throws error with 400 status set', async () => {
-    try {
-      await setupAccountRequest(null, fapiFinancialId);
-      assert.ok(false);
-    } catch (error) {
-      assert.equal(error.message, 'authorisationServerId missing from request payload');
-      assert.equal(error.status, 400);
-    }
+    await checkErrorThrown(
+      async () => setupAccountRequest(null, fapiFinancialId),
+      400, 'authorisationServerId missing from request payload',
+    );
   });
 });
 
 describe('setupAccountRequest called with blank fapiFinancialId', () => {
   it('throws error with 400 status set', async () => {
-    try {
-      await setupAccountRequest(authorisationServerId, null);
-      assert.ok(false);
-    } catch (error) {
-      assert.equal(error.message, 'fapiFinancialId missing from request payload');
-      assert.equal(error.status, 400);
-    }
+    await checkErrorThrown(
+      async () => setupAccountRequest(authorisationServerId, null),
+      400, 'fapiFinancialId missing from request payload',
+    );
   });
 });
 
@@ -105,14 +100,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('Rejected'));
 
     it('throws error for now', async () => {
-      try {
-        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
-        assert.ok(false);
-      } catch (err) {
-        if (err.code && err.code === 'ERR_ASSERTION') throw err;
-        assert.equal(err.message, 'Account request response status: "Rejected"');
-        assert.equal(err.status, 500);
-      }
+      await checkErrorThrown(
+        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        500, 'Account request response status: "Rejected"',
+      );
     });
   });
 
@@ -120,14 +111,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('Revoked'));
 
     it('throws error for now', async () => {
-      try {
-        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
-        assert.ok(false);
-      } catch (err) {
-        if (err.code && err.code === 'ERR_ASSERTION') throw err;
-        assert.equal(err.message, 'Account request response status: "Revoked"');
-        assert.equal(err.status, 500);
-      }
+      await checkErrorThrown(
+        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        500, 'Account request response status: "Revoked"',
+      );
     });
   });
 
@@ -135,14 +122,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup(null));
 
     it('throws error', async () => {
-      try {
-        await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
-        assert.ok(false);
-      } catch (err) {
-        if (err.code && err.code === 'ERR_ASSERTION') throw err;
-        assert.equal(err.message, 'Account request response missing payload');
-        assert.equal(err.status, 500);
-      }
+      await checkErrorThrown(
+        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        500, 'Account request response missing payload',
+      );
     });
   });
 });

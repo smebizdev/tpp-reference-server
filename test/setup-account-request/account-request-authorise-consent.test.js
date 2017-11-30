@@ -70,7 +70,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     request: jsonWebSignature,
     response_type: 'code',
     scope: 'openid accounts',
-    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMifQ==',
+    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBhY2NvdW50cyJ9',
   };
 
   it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {

@@ -7,24 +7,6 @@ const { setupAccountRequest } = require('../../app/setup-account-request'); // e
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
 
-describe('setupAccountRequest called with blank authorisationServerId', () => {
-  it('throws error with 400 status set', async () => {
-    await checkErrorThrown(
-      async () => setupAccountRequest(null, fapiFinancialId),
-      400, 'authorisationServerId missing from request payload',
-    );
-  });
-});
-
-describe('setupAccountRequest called with blank fapiFinancialId', () => {
-  it('throws error with 400 status set', async () => {
-    await checkErrorThrown(
-      async () => setupAccountRequest(authorisationServerId, null),
-      400, 'fapiFinancialId missing from request payload',
-    );
-  });
-});
-
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
   const resourceServer = 'http://resource-server.com';

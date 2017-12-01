@@ -1,5 +1,6 @@
 const { accessTokenAndResourcePath } = require('../setup-request');
 const { postPayments } = require('./payments');
+const { persistPaymentDetails } = require('./persistence');
 const debug = require('debug')('debug');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId,
@@ -43,6 +44,9 @@ const setupPayment = async (authorisationServerId,
     resourcePath, accessToken, fapiFinancialId,
     CreditorAccount, InstructedAmount, idempotencyKey,
   );
+
+  persistPaymentDetails(authorisationServerId, paymentId, CreditorAccount, InstructedAmount);
+
   return paymentId;
 };
 

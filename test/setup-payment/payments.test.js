@@ -21,6 +21,7 @@ const name = creditorAccount.Name;
 const secondaryIdentification = creditorAccount.SecondaryIdentification;
 
 const paymentId = '44673';
+const paymentSubmissionId = '44673-001';
 
 describe('buildPaymentstData and then postPayments', () => {
   const instructionIdentification = 'ghghg';
@@ -53,7 +54,7 @@ describe('buildPaymentstData and then postPayments', () => {
     customerLastLogged,
   };
 
-  const data = {
+  const paymentData = {
     Initiation: {
       InstructionIdentification: instructionIdentification,
       EndToEndIdentification: endToEndIdentification,
@@ -74,10 +75,13 @@ describe('buildPaymentstData and then postPayments', () => {
     },
   };
 
-  const expectedResponse = {
+  const paymentSubmissionData = Object.assign({}, paymentData);
+  paymentSubmissionData.PaymentId = paymentId;
+
+  const expectedPaymentResponse = {
     Data: {
       PaymentId: paymentId,
-      Initiation: data.Initiation,
+      Initiation: paymentData.Initiation,
     },
     Risk: risk,
     Links: {
@@ -88,6 +92,20 @@ describe('buildPaymentstData and then postPayments', () => {
     },
   };
 
+  const expectedPaymentSubmissionResponse = {
+    Data: {
+      PaymentId: paymentId,
+      PaymentSubmissionId: paymentSubmissionId,
+    },
+    Links: {
+      self: `/open-banking/v1.1/payment-submissions/${paymentSubmissionId}`,
+    },
+    Meta: {},
+  };
+
+
+  // Request / response Mocks
+  // Payment
   nock(/example\.com/)
     .post('/open-banking/v1.1/payments')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
@@ -97,29 +115,73 @@ describe('buildPaymentstData and then postPayments', () => {
     .matchHeader('x-fapi-customer-ip-address', customerIp)
     .matchHeader('x-fapi-customer-last-logged-time', customerLastLogged)
     .matchHeader('x-jws-signature', jwsSignature) // required in v1.1.0 ( not v1.1.1 )
-    .reply(201, expectedResponse);
+    .reply(201, expectedPaymentResponse);
 
-  it('returns a body payload of the correct shape', async () => {
-    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
-    const expectedPayload = {
-      Data: data,
-      Risk: risk,
-    };
-    assert.deepEqual(paymentsPayload, expectedPayload);
+  nock(/example\.com/)
+    .post('/open-banking/v1.1/payment-submissions')
+    .matchHeader('authorization', `Bearer ${accessToken}`) // required
+    .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
+    .matchHeader('x-idempotency-key', idempotencyKey) // required
+    .matchHeader('x-fapi-interaction-id', interactionId)
+    .matchHeader('x-fapi-customer-ip-address', customerIp)
+    .matchHeader('x-fapi-customer-last-logged-time', customerLastLogged)
+    .matchHeader('x-jws-signature', jwsSignature) // required in v1.1.0 ( not v1.1.1 )
+    .reply(201, expectedPaymentSubmissionResponse);
+
+
+  describe(' For the /payments endpoint', () => {
+    it('returns a body payload of the correct shape', async () => {
+      const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
+      const expectedPayload = {
+        Data: paymentData,
+        Risk: risk,
+      };
+      assert.deepEqual(paymentsPayload, expectedPayload);
+    });
+
+    it('returns data when 201 OK', async () => {
+      const resourceServerPath = 'http://example.com/open-banking/v1.1';
+      const result = await postPayments(
+        resourceServerPath,
+        accessToken,
+        headers,
+        opts,
+        risk,
+        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey,
+      );
+      assert.deepEqual(result, expectedPaymentResponse);
+    });
   });
 
-  it('returns data when 201 OK', async () => {
-    const resourceServerPath = 'http://example.com/open-banking/v1.1';
-    const result = await postPayments(
-      resourceServerPath,
-      accessToken,
-      headers,
-      opts,
-      risk,
-      creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey,
-    );
+  describe(' For the /payment-submissions endpoint', () => {
+    it('returns a body payload of the correct shape', async () => {
+      const paymentSubmissionsPayload = buildPaymentsData(
+        opts, risk,
+        creditorAccount, instructedAmount, paymentId,
+      );
+      const expectedPayload = {
+        Data: paymentSubmissionData,
+        Risk: risk,
+      };
+      assert.deepEqual(paymentSubmissionsPayload, expectedPayload);
+    });
 
-    assert.deepEqual(result, expectedResponse);
+    it('returns data when 201 OK', async () => {
+      const resourceServerPath = 'http://example.com/open-banking/v1.1';
+      const result = await postPayments(
+        resourceServerPath,
+        accessToken,
+        headers,
+        opts,
+        risk,
+        creditorAccount,
+        instructedAmount,
+        fapiFinancialId,
+        idempotencyKey,
+        paymentId,
+      );
+      assert.deepEqual(result, expectedPaymentSubmissionResponse);
+    });
   });
 });
 

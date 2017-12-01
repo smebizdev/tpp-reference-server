@@ -11,7 +11,7 @@ const allowedCurrencies = ['GBP', 'EUR']; // TODO - refactor out of here
 // For detailed spec see
 // https://openbanking.atlassian.net/wiki/spaces/WOR/pages/23266217/Payment+Initiation+API+Specification+-+v1.1.1#PaymentInitiationAPISpecification-v1.1.1-POST/paymentsrequest
 
-const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount) => {
+const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymentId) => {
   if (!instructedAmount.Amount) throw new Error('InstructedAmount Amount missing');
   if (!instructedAmount.Currency) throw new Error('InstructedAmount Currency missing');
   if (!creditorAccount.SchemeName) throw new Error('CreditorAccount SchemeName missing');
@@ -46,18 +46,36 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount) => {
     if (unstructured) remittanceInformation.Unstructured = unstructured;
   }
   if (remittanceInformation) payload.Data.Initiation.RemittanceInformation = remittanceInformation;
+  if (paymentId) payload.Data.PaymentId = paymentId;
 
   return payload;
 };
 
+/**
+ * @description Dual purpose: payments and payment-submissions
+ * @param resourceServerPath
+ * @param accessToken
+ * @param headers
+ * @param opts
+ * @param risk
+ * @param CreditorAccount
+ * @param InstructedAmount
+ * @param fapiFinancialId
+ * @param idempotencyKey
+ * @param paymentId < optional - only used for Payment Submission
+ * @returns {Promise.<void>}
+ */
 const postPayments = async (resourceServerPath, accessToken,
   headers, opts, risk, CreditorAccount, InstructedAmount, fapiFinancialId,
-  idempotencyKey) => {
+  idempotencyKey, paymentId) => {
   try {
-    const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount);
+    const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount, paymentId);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
-
-    const paymentsUri = new URL('/open-banking/v1.1/payments', host);
+    // if there is NO paymentId then it's a payments request
+    // if there IS a paymentId it's a payment-submission request
+    const paymentsUri = paymentId
+      ? new URL('/open-banking/v1.1/payment-submissions', host)
+      : new URL('/open-banking/v1.1/payments', host);
     log(`POST to ${paymentsUri}`);
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${accessToken}`)

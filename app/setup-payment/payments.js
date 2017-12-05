@@ -3,7 +3,6 @@ const { setupMutualTLS } = require('../certs-util');
 const { URL } = require('url');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
-const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
 
 const allowedCurrencies = ['GBP', 'EUR']; // TODO - refactor out of here
@@ -29,9 +28,7 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
   const payload = {
     Data: {
       Initiation: {
-        // InstructionIdentification: instructionIdentification || uuidv4().slice(0, 34),
         InstructionIdentification: instructionIdentification || 'XX-InstructionIdentification-ZZ',
-        // EndToEndIdentification: endToEndIdentification || uuidv4().slice(0, 34),
         EndToEndIdentification: endToEndIdentification || 'AA-EndToEndIdentification-BB',
         InstructedAmount: instructedAmount,
         CreditorAccount: creditorAccount,

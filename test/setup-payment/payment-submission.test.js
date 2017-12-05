@@ -16,7 +16,7 @@ const setupApp = (submitPaymentStub) => {
   );
   const app = express();
   app.use(bodyParser.json());
-  app.post('/payments/submissions', paymentSubmission);
+  app.post('/payment-submissions', paymentSubmission);
   return app;
 };
 
@@ -25,7 +25,7 @@ const fapiInteractionId = 'testInteractionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 const doPost = app => request(app)
-  .post('/payments/submissions')
+  .post('/payment-submissions')
   .set('x-fapi-financial-id', fapiFinancialId)
   .set('x-fapi-interaction-id', fapiInteractionId)
   .send();

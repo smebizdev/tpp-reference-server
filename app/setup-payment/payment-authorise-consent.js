@@ -13,11 +13,12 @@ const paymentAuthoriseConsent = async (req, res) => {
     const { InstructedAmount } = req.body;
     const fapiFinancialId = req.headers['x-fapi-financial-id'];
     debug(`authorisationServerId: ${authorisationServerId}`);
+    const idempotencyKey = uuidv4();
     const interactionId = uuidv4();
 
     const paymentId = await setupPayment(
       authorisationServerId,
-      fapiFinancialId, CreditorAccount, InstructedAmount,
+      fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey,
     );
 
     const uri = await generateRedirectUri(authorisationServerId, paymentId, 'openid payments', sessionId, interactionId);

@@ -65,7 +65,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
         {}, // opts
         {}, // risk
         creditorAccount, instructedAmount,
-        fapiFinancialId, idempotencyKey, interactionId,
+        fapiFinancialId, idempotencyKey, null, interactionId,
       ));
     });
   });

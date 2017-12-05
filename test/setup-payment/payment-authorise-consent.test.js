@@ -15,11 +15,13 @@ const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
 const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
+const idempotencyKey = 'testIdemKey';
 
 const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
+  const idemKeyStub = sinon.stub().returns(idempotencyKey);
   const { generateRedirectUri } = proxyquire(
     '../../app/authorise/authorise-uri.js',
     {
@@ -45,6 +47,7 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
+      'uuid/v4': idemKeyStub,
     },
   );
   const app = express();
@@ -70,7 +73,7 @@ describe('/payment-authorise-consent with successful setupPayment', () => {
   const app = setupApp(setupPaymentStub, authorisationEndpointStub);
 
   const scope = 'openid payments';
-  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope);
+  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope, idempotencyKey);
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
     client_id: clientId,
@@ -82,6 +85,7 @@ describe('/payment-authorise-consent with successful setupPayment', () => {
   };
   const expectedState = {
     authorisationServerId,
+    idempotencyKey,
     scope,
     sessionId,
   };

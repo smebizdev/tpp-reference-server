@@ -7,17 +7,21 @@ const bodyParser = require('body-parser');
 const env = require('env-var');
 const qs = require('qs');
 
+const { statePayload } = require('../../app/authorise/authorise-uri.js');
+
 const authorisationServerId = '123';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
 const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
+const idempotencyKey = 'testIdemKey';
 
 const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
+  const idemKeyStub = sinon.stub().returns(idempotencyKey);
   const { generateRedirectUri } = proxyquire(
     '../../app/authorise/authorise-uri.js',
     {
@@ -43,6 +47,7 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
+      'uuid/v4': idemKeyStub,
     },
   );
   const app = express();
@@ -52,25 +57,37 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
 };
 
 const fapiFinancialId = 'testFapiFinancialId';
+const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/account-request-authorise-consent')
   .set('x-fapi-financial-id', fapiFinancialId)
+  .set('authorization', sessionId)
   .send({ authorisationServerId });
+
+const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 
 describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
   const setupAccountRequestStub = sinon.stub();
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
+  const scope = 'openid accounts';
+  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope, idempotencyKey);
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
     client_id: clientId,
     redirect_uri: redirectUrl,
     request: jsonWebSignature,
     response_type: 'code',
-    scope: 'openid accounts',
-    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBhY2NvdW50cyJ9',
+    scope,
+    state: expectedStateBase64,
+  };
+  const expectedState = {
+    authorisationServerId,
+    idempotencyKey,
+    scope,
+    sessionId,
   };
 
   it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {
@@ -82,6 +99,10 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         const host = parts[0];
         const params = qs.parse(parts[1]);
         assert.equal(host, expectedRedirectHost);
+
+        const state = parseState(params.state);
+        assert.deepEqual(state, expectedState);
+
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');

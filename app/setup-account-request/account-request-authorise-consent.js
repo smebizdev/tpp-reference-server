@@ -13,7 +13,9 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     debug(`authorisationServerId: ${authorisationServerId}`);
     const accountRequestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);
     const idempotencyKey = uuidv4();
-    const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', sessionId, idempotencyKey);
+    const interactionId = uuidv4();
+
+    const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', sessionId, idempotencyKey, interactionId);
 
     debug(`authorize URL is: ${uri}`);
     return res.status(200).send({ uri }); // We can't intercept a 302 !

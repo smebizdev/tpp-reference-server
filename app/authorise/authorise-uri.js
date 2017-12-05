@@ -6,10 +6,10 @@ const qs = require('qs');
 
 const registeredRedirectUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
-const statePayload = (authorisationServerId, sessionId, scope, idempotencyKey) => {
+const statePayload = (authorisationServerId, sessionId, scope, interactionId) => {
   const state = {
     authorisationServerId,
-    idempotencyKey,
+    interactionId,
     sessionId,
     scope,
   };
@@ -17,9 +17,9 @@ const statePayload = (authorisationServerId, sessionId, scope, idempotencyKey) =
 };
 
 const generateRedirectUri = async (authorisationServerId, requestId, scope,
-  sessionId, idempotencyKey) => {
+  sessionId, idempotencyKey, interactionId) => {
   const { clientId } = await getClientCredentials(authorisationServerId);
-  const state = statePayload(authorisationServerId, sessionId, scope, idempotencyKey);
+  const state = statePayload(authorisationServerId, sessionId, scope, interactionId);
   const authEndpoint = await authorisationEndpoint(authorisationServerId);
   const authServerIssuer = await issuer(authorisationServerId);
   const payload = createClaims(

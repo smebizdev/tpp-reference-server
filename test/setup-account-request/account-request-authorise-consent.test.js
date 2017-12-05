@@ -15,13 +15,14 @@ const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
 const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
-const idempotencyKey = 'testIdemKey';
+const key = 'testKey';
+const interactionId = key;
 
 const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
-  const idemKeyStub = sinon.stub().returns(idempotencyKey);
+  const keyStub = sinon.stub().returns(key);
   const { generateRedirectUri } = proxyquire(
     '../../app/authorise/authorise-uri.js',
     {
@@ -47,7 +48,7 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
-      'uuid/v4': idemKeyStub,
+      'uuid/v4': keyStub,
     },
   );
   const app = express();
@@ -73,7 +74,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
   const scope = 'openid accounts';
-  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope, idempotencyKey);
+  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope, interactionId);
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
     client_id: clientId,
@@ -85,7 +86,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   };
   const expectedState = {
     authorisationServerId,
-    idempotencyKey,
+    interactionId,
     scope,
     sessionId,
   };

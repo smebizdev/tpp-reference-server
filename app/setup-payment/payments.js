@@ -29,8 +29,10 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
   const payload = {
     Data: {
       Initiation: {
-        InstructionIdentification: instructionIdentification || uuidv4().slice(0, 34),
-        EndToEndIdentification: endToEndIdentification || uuidv4().slice(0, 34),
+        // InstructionIdentification: instructionIdentification || uuidv4().slice(0, 34),
+        InstructionIdentification: instructionIdentification || 'XX-InstructionIdentification-ZZ',
+        // EndToEndIdentification: endToEndIdentification || uuidv4().slice(0, 34),
+        EndToEndIdentification: endToEndIdentification || 'AA-EndToEndIdentification-BB',
         InstructedAmount: instructedAmount,
         CreditorAccount: creditorAccount,
       },

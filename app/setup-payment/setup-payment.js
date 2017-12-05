@@ -48,7 +48,7 @@ const setupPayment = async (authorisationServerId,
     CreditorAccount, InstructedAmount, idempotencyKey,
   );
 
-  persistPaymentDetails(fapiFinancialId, paymentId, CreditorAccount, InstructedAmount);
+  persistPaymentDetails(idempotencyKey, paymentId, CreditorAccount, InstructedAmount);
 
   return paymentId;
 };

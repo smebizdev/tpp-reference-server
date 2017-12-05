@@ -2,12 +2,11 @@
 const assert = require('assert');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const { checkErrorThrown } = require('../utils');
 const { setupPayment } = require('../../app/setup-account-request'); // eslint-disable-line
-const debug = require('debug')('debug');
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
+const fapiInteractionId = 'interaction-1234';
 
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
@@ -43,7 +42,11 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     paymentsStub = sinon.stub().returns(PaymentsSubmissionResponse());
 
     accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
-    retrievePaymentDetailsStub = sinon.stub().returns({ CreditorAccount: creditorAccount, InstructedAmount: instructedAmount });
+    retrievePaymentDetailsStub = sinon.stub().returns({
+      PaymentId: paymentId,
+      CreditorAccount: creditorAccount,
+      InstructedAmount: instructedAmount,
+    });
 
     submitPaymentProxy = proxyquire('../../app/setup-payment/submit-payment', {
       '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
@@ -58,21 +61,21 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     it('returns PaymentSubmissionId from postPayments call', async () => {
       const id = await submitPaymentProxy(
         authorisationServerId, fapiFinancialId,
-        paymentId, idempotencyKey,
+        idempotencyKey, fapiInteractionId,
       );
       assert.equal(id, PAYMENT_SUBMISSION_ID);
-      debug(resourcePath);
-      debug(accessToken);
-      debug(paymentId);
-      assert(paymentsStub.calledWithExactly(
+      assert.ok(paymentsStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
         accessToken,
         {}, // headers
         {}, // opts
         {}, // risk
-        creditorAccount, instructedAmount,
-        fapiFinancialId, idempotencyKey, paymentId,
+        creditorAccount,
+        instructedAmount,
+        fapiFinancialId,
+        idempotencyKey,
+        paymentId,
       ));
     });
   });

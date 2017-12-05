@@ -68,7 +68,6 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
 const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken,
   headers, opts, risk, CreditorAccount, InstructedAmount, fapiFinancialId,
   idempotencyKey, paymentId, interactionId) => {
-  console.log('intId', interactionId);
   try {
     const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount, paymentId);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line

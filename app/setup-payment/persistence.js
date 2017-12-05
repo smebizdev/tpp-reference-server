@@ -6,7 +6,7 @@ const persistPaymentDetails = async (interactionId, paymentId,
   CreditorAccount, InstructedAmount) => {
   assert(interactionId);
   assert(paymentId);
-  const paymentDetails = Object.assign({}, { PaymentId: paymentId }, { CreditorAccount }, { InstructedAmount });
+  const paymentDetails = { PaymentId: paymentId, CreditorAccount, InstructedAmount };
 
   await set('payments', paymentDetails, interactionId);
 };

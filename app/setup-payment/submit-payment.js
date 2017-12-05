@@ -1,7 +1,6 @@
 const { accessTokenAndResourcePath } = require('../setup-request');
 const { postPayments } = require('./payments');
 const { retrievePaymentDetails } = require('./persistence');
-const debug = require('debug')('debug');
 
 const PAYMENT_SUBMISSION_ENDPOINT_URL = '/open-banking/v1.1/payment-submissions';
 
@@ -27,7 +26,7 @@ const makePayment = async (resourcePath, accessToken, fapiFinancialId,
 };
 
 const submitPayment = async (authorisationServerId,
-  fapiFinancialId, fapiInteractionId, idempotencyKey) => {
+  fapiFinancialId, idempotencyKey, fapiInteractionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
@@ -38,7 +37,7 @@ const submitPayment = async (authorisationServerId,
 
   const response = await makePayment(
     resourcePath, accessToken, fapiFinancialId,
-    CreditorAccount, InstructedAmount, idempotencyKey, PaymentId, fapiInteractionId,
+    CreditorAccount, InstructedAmount, idempotencyKey, PaymentId,
   );
 
   return response;

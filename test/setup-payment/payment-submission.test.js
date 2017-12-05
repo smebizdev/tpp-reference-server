@@ -4,15 +4,6 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 const express = require('express');
 const bodyParser = require('body-parser');
-const env = require('env-var');
-const qs = require('qs');
-
-const authorisationServerId = '123';
-const clientId = 'testClientId';
-const clientSecret = 'testClientSecret';
-const redirectUrl = 'http://example.com/redirect';
-const issuer = 'http://example.com';
-const jsonWebSignature = 'testSignedPayload';
 
 const setupApp = (submitPaymentStub) => {
   const { paymentSubmission } = proxyquire(
@@ -31,7 +22,6 @@ const setupApp = (submitPaymentStub) => {
 
 const fapiFinancialId = 'testFapiFinancialId';
 const fapiInteractionId = 'testInteractionId';
-const PAYMENT_ID = 'P123';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 const doPost = app => request(app)
@@ -43,16 +33,6 @@ const doPost = app => request(app)
 describe('/payment-submission with successful submitPayment', () => {
   const submitPaymentStub = sinon.stub().returns(PAYMENT_SUBMISSION_ID);
   const app = setupApp(submitPaymentStub);
-
-  // const expectedRedirectHost = 'http://example.com/authorize';
-  // const expectedParams = {
-  //   client_id: clientId,
-  //   redirect_uri: redirectUrl,
-  //   request: jsonWebSignature,
-  //   response_type: 'code',
-  //   scope: 'openid payments',
-  //   state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBwYXltZW50cyJ9',
-  // };
 
   it('make payment submission and returns paymentSubmissionId', (done) => {
     doPost(app)

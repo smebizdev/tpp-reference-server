@@ -65,17 +65,13 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
  * @param paymentId < optional - only used for Payment Submission
  * @returns {Promise.<void>}
  */
-const postPayments = async (resourceServerPath, accessToken,
+const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken,
   headers, opts, risk, CreditorAccount, InstructedAmount, fapiFinancialId,
   idempotencyKey, paymentId) => {
   try {
     const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount, paymentId);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
-    // if there is NO paymentId then it's a payments request
-    // if there IS a paymentId it's a payment-submission request
-    const paymentsUri = paymentId
-      ? new URL('/open-banking/v1.1/payment-submissions', host)
-      : new URL('/open-banking/v1.1/payments', host);
+    const paymentsUri = new URL(paymentPathEndpoint, host);
     log(`POST to ${paymentsUri}`);
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${accessToken}`)

@@ -58,6 +58,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
 
       assert(paymentsStub.calledWithExactly(
         resourcePath,
+        '/open-banking/v1.1/payments',
         accessToken,
         {}, // headers
         {}, // opts

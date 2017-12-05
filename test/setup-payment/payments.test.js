@@ -143,6 +143,7 @@ describe('buildPaymentstData and then postPayments', () => {
       const resourceServerPath = 'http://example.com/open-banking/v1.1';
       const result = await postPayments(
         resourceServerPath,
+        '/open-banking/v1.1/payments',
         accessToken,
         headers,
         opts,
@@ -170,6 +171,7 @@ describe('buildPaymentstData and then postPayments', () => {
       const resourceServerPath = 'http://example.com/open-banking/v1.1';
       const result = await postPayments(
         resourceServerPath,
+        '/open-banking/v1.1/payment-submissions',
         accessToken,
         headers,
         opts,

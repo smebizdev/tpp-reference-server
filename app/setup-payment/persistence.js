@@ -7,17 +7,15 @@ const prepId = (authorisationServerId, paymentId) => {
   return `${authorisationServerId}-${paymentId}`;
 };
 
-const persistPaymentDetails = async (authorisationServerId, paymentId,
+const persistPaymentDetails = async (fapiFinancialId, paymentId,
   CreditorAccount, InstructedAmount) => {
-  const id = prepId(authorisationServerId, paymentId);
+  const id = prepId(fapiFinancialId, paymentId);
   const paymentDetails = Object.assign({}, { CreditorAccount }, { InstructedAmount });
 
   await set('payments', paymentDetails, id);
 };
 
-const retrievePaymentDetails = async (authorisationServerId, paymentId) => {
-  await get('payments', prepId(authorisationServerId, paymentId));
-};
+const retrievePaymentDetails = async (fapiFinancialId, paymentId) => get('payments', prepId(fapiFinancialId, paymentId));
 
 
 exports.persistPaymentDetails = persistPaymentDetails;

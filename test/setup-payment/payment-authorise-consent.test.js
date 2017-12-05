@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const env = require('env-var');
 const qs = require('qs');
 
+const { statePayload } = require('../../app/authorise/authorise-uri.js');
+
 const authorisationServerId = '123';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
@@ -52,25 +54,36 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
 };
 
 const fapiFinancialId = 'testFapiFinancialId';
+const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/payment-authorise-consent')
   .set('x-fapi-financial-id', fapiFinancialId)
+  .set('authorization', sessionId)
   .send({ authorisationServerId });
+
+const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 
 describe('/payment-authorise-consent with successful setupPayment', () => {
   const setupPaymentStub = sinon.stub();
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupPaymentStub, authorisationEndpointStub);
 
+  const scope = 'openid payments';
+  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope);
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
     client_id: clientId,
     redirect_uri: redirectUrl,
     request: jsonWebSignature,
     response_type: 'code',
-    scope: 'openid payments',
-    state: 'eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiIxMjMiLCJzY29wZSI6Im9wZW5pZCBwYXltZW50cyJ9',
+    scope,
+    state: expectedStateBase64,
+  };
+  const expectedState = {
+    authorisationServerId,
+    scope,
+    sessionId,
   };
 
   it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {
@@ -82,6 +95,10 @@ describe('/payment-authorise-consent with successful setupPayment', () => {
         const host = parts[0];
         const params = qs.parse(parts[1]);
         assert.equal(host, expectedRedirectHost);
+
+        const state = parseState(params.state);
+        assert.deepEqual(state, expectedState);
+
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');

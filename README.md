@@ -15,10 +15,10 @@ Use the latest release [v0.5.0](https://github.com/OpenBankingUK/tpp-reference-s
 
 To obtain the latest release:
 
-``sh
+```sh
 git clone https://github.com/OpenBankingUK/tpp-reference-server
 git checkout v0.5.0
-``
+```
 
 Note: latest `master` branch code is actively under development and may not be stable.
 

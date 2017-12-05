@@ -2,12 +2,12 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 const assert = require('assert');
 
-const instructedAmount = {
+const InstructedAmount = {
   Amount: '100.45',
   Currency: 'GBP',
 };
 
-const creditorAccount = {
+const CreditorAccount = {
   SchemeName: 'SortCodeAccountNumber',
   Identification: '01122313235478',
   Name: 'Mr Kevin',
@@ -15,7 +15,7 @@ const creditorAccount = {
 };
 
 const paymentId = '44673';
-const authorisationServerId = 'ABCD';
+const paymentIdemId = 'ABCD';
 
 describe('persist payment details and retrieve it', () => {
   let setSpy;
@@ -32,38 +32,30 @@ describe('persist payment details and retrieve it', () => {
   it('verify valid payment details persistence', async () => {
     const { persistPaymentDetails } = persistence;
     await persistPaymentDetails(
-      authorisationServerId, paymentId,
-      creditorAccount, instructedAmount,
+      paymentIdemId, paymentId,
+      CreditorAccount, InstructedAmount,
     );
     assert.ok(setSpy.called);
     assert.ok(setSpy.calledOnce);
-    assert.equal(`${authorisationServerId}-${paymentId}`, setSpy.lastCall.args[2]);
-    assert.deepEqual(
-      Object.assign(
-        {}, { CreditorAccount: creditorAccount },
-        { InstructedAmount: instructedAmount },
-      ),
-      setSpy.lastCall.args[1],
-    );
+    assert.ok(setSpy.calledWithExactly('payments', { PaymentId: paymentId, CreditorAccount, InstructedAmount }, paymentIdemId));
   });
 
   it('verify valid payment details retrieval', async () => {
     const { retrievePaymentDetails } = persistence;
 
-    await retrievePaymentDetails(authorisationServerId, paymentId);
+    await retrievePaymentDetails(paymentIdemId, paymentId);
     assert.ok(getSpy.called);
     assert.ok(getSpy.calledOnce);
-    assert.equal(`${authorisationServerId}-${paymentId}`, getSpy.lastCall.args[1]);
+    assert.ok(getSpy.calledWithExactly('payments', paymentIdemId));
   });
 
   it('verify error when paymentId not provided for payment details retrieval', async () => {
     const { retrievePaymentDetails } = persistence;
 
     try {
-      await retrievePaymentDetails(authorisationServerId, null);
+      await retrievePaymentDetails(null);
     } catch (e) {
       assert.ok(e instanceof assert.AssertionError);
-      assert.equal(e.message, 'Payment id not provided');
     }
     assert.ok(getSpy.notCalled);
   });

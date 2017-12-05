@@ -18,7 +18,7 @@ const paymentAuthoriseConsent = async (req, res) => {
 
     const paymentId = await setupPayment(
       authorisationServerId,
-      fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey,
+      fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey, interactionId,
     );
 
     const uri = await generateRedirectUri(authorisationServerId, paymentId, 'openid payments', sessionId, interactionId);

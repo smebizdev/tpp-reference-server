@@ -3,7 +3,6 @@ const { setupMutualTLS } = require('../certs-util');
 const { URL } = require('url');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
-const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
 
 const allowedCurrencies = ['GBP', 'EUR']; // TODO - refactor out of here
@@ -29,8 +28,8 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
   const payload = {
     Data: {
       Initiation: {
-        InstructionIdentification: instructionIdentification || uuidv4().slice(0, 34),
-        EndToEndIdentification: endToEndIdentification || uuidv4().slice(0, 34),
+        InstructionIdentification: instructionIdentification || 'XX-InstructionIdentification-ZZ',
+        EndToEndIdentification: endToEndIdentification || 'AA-EndToEndIdentification-BB',
         InstructedAmount: instructedAmount,
         CreditorAccount: creditorAccount,
       },
@@ -65,17 +64,13 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
  * @param paymentId < optional - only used for Payment Submission
  * @returns {Promise.<void>}
  */
-const postPayments = async (resourceServerPath, accessToken,
+const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken,
   headers, opts, risk, CreditorAccount, InstructedAmount, fapiFinancialId,
-  idempotencyKey, paymentId) => {
+  idempotencyKey, paymentId, interactionId) => {
   try {
     const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount, paymentId);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
-    // if there is NO paymentId then it's a payments request
-    // if there IS a paymentId it's a payment-submission request
-    const paymentsUri = paymentId
-      ? new URL('/open-banking/v1.1/payment-submissions', host)
-      : new URL('/open-banking/v1.1/payments', host);
+    const paymentsUri = new URL(paymentPathEndpoint, host);
     log(`POST to ${paymentsUri}`);
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${accessToken}`)
@@ -86,7 +81,8 @@ const postPayments = async (resourceServerPath, accessToken,
       .set('accept', 'application/json; charset=utf-8');
     if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
-    if (headers.interactionId) payment.set('x-fapi-interaction-id', headers.interactionId);
+    if (interactionId) payment.set('x-fapi-interaction-id', interactionId);
+
     payment.send(body);
     const response = await payment;
     debug(`${response.status} response for ${paymentsUri}`);

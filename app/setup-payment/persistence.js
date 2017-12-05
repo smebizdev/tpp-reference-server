@@ -1,22 +1,19 @@
 const { set, get } = require('../storage');
 const assert = require('assert');
 
-const prepId = (authorisationServerId, paymentId) => {
-  assert(authorisationServerId, 'Authorisation Server id not provided');
-  assert(paymentId, 'Payment id not provided');
-  return `${authorisationServerId}-${paymentId}`;
-};
 
-const persistPaymentDetails = async (authorisationServerId, paymentId,
+const persistPaymentDetails = async (interactionId, paymentId,
   CreditorAccount, InstructedAmount) => {
-  const id = prepId(authorisationServerId, paymentId);
-  const paymentDetails = Object.assign({}, { CreditorAccount }, { InstructedAmount });
+  assert(interactionId);
+  assert(paymentId);
+  const paymentDetails = { PaymentId: paymentId, CreditorAccount, InstructedAmount };
 
-  await set('payments', paymentDetails, id);
+  await set('payments', paymentDetails, interactionId);
 };
 
-const retrievePaymentDetails = async (authorisationServerId, paymentId) => {
-  await get('payments', prepId(authorisationServerId, paymentId));
+const retrievePaymentDetails = async (interactionId) => {
+  assert(interactionId);
+  return get('payments', interactionId);
 };
 
 

@@ -143,11 +143,12 @@ describe('buildPaymentstData and then postPayments', () => {
       const resourceServerPath = 'http://example.com/open-banking/v1.1';
       const result = await postPayments(
         resourceServerPath,
+        '/open-banking/v1.1/payments',
         accessToken,
         headers,
         opts,
         risk,
-        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey,
+        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey, null, interactionId,
       );
       assert.deepEqual(result, expectedPaymentResponse);
     });
@@ -170,6 +171,7 @@ describe('buildPaymentstData and then postPayments', () => {
       const resourceServerPath = 'http://example.com/open-banking/v1.1';
       const result = await postPayments(
         resourceServerPath,
+        '/open-banking/v1.1/payment-submissions',
         accessToken,
         headers,
         opts,
@@ -179,6 +181,7 @@ describe('buildPaymentstData and then postPayments', () => {
         fapiFinancialId,
         idempotencyKey,
         paymentId,
+        interactionId,
       );
       assert.deepEqual(result, expectedPaymentSubmissionResponse);
     });

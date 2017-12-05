@@ -17,7 +17,7 @@ const statePayload = (authorisationServerId, sessionId, scope, interactionId) =>
 };
 
 const generateRedirectUri = async (authorisationServerId, requestId, scope,
-  sessionId, idempotencyKey, interactionId) => {
+  sessionId, interactionId) => {
   const { clientId } = await getClientCredentials(authorisationServerId);
   const state = statePayload(authorisationServerId, sessionId, scope, interactionId);
   const authEndpoint = await authorisationEndpoint(authorisationServerId);

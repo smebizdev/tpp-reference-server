@@ -15,7 +15,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
     {}, // opts
     {}, // risk
     CreditorAccount, InstructedAmount,
-    fapiFinancialId, idempotencyKey, interactionId,
+    fapiFinancialId, idempotencyKey, null, interactionId,
   );
   let error;
   if (response.Data) {

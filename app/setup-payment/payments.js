@@ -78,11 +78,11 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken
       .set('x-idempotency-key', idempotencyKey)
       .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .set('x-fapi-financial-id', fapiFinancialId)
-      .set('x-fapi-interaction-id', interactionId)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8');
     if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
+    if (interactionId) payment.set('x-fapi-interaction-id', interactionId);
 
     payment.send(body);
     const response = await payment;

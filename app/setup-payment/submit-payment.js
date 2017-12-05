@@ -31,13 +31,12 @@ const submitPayment = async (authorisationServerId,
     authorisationServerId,
     fapiFinancialId,
   );
-
-  const { PaymentId, CreditorAccount, InstructedAmount } =
+  const r =
     await retrievePaymentDetails(fapiInteractionId);
 
   const response = await makePayment(
     resourcePath, accessToken, fapiFinancialId,
-    CreditorAccount, InstructedAmount, idempotencyKey, PaymentId,
+    r.CreditorAccount, r.InstructedAmount, idempotencyKey, r.PaymentId,
   );
 
   return response;

@@ -14,8 +14,8 @@ const paymentSubmission = async (req, res) => {
     const paymentSubmissionId = await submitPayment(
       authServerId,
       fapiFinancialId,
-      fapiInteractionId,
       idempotencyKey,
+      fapiInteractionId,
     );
 
     debug(`Payment Submission succesfully completed. Id: ${paymentSubmissionId}`);

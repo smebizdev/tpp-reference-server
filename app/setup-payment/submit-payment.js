@@ -27,18 +27,18 @@ const makePayment = async (resourcePath, accessToken, fapiFinancialId,
 };
 
 const submitPayment = async (authorisationServerId,
-  fapiFinancialId, paymentId, idempotencyKey) => {
+  fapiFinancialId, fapiInteractionId, idempotencyKey) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
   );
 
-  const { CreditorAccount, InstructedAmount } =
-    await retrievePaymentDetails(fapiFinancialId, paymentId);
+  const { PaymentId, CreditorAccount, InstructedAmount } =
+    await retrievePaymentDetails(fapiInteractionId);
 
   const response = await makePayment(
     resourcePath, accessToken, fapiFinancialId,
-    CreditorAccount, InstructedAmount, idempotencyKey, paymentId,
+    CreditorAccount, InstructedAmount, idempotencyKey, PaymentId, fapiInteractionId,
   );
 
   return response;

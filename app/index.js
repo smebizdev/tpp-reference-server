@@ -38,8 +38,8 @@ app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
 app.all('/payment-authorise-consent', requireAuthorization);
 app.post('/payment-authorise-consent', paymentAuthoriseConsent);
 
-app.all('/payments/:paymentId/submissions', requireAuthorization);
-app.post('/payments/:paymentId/submissions', paymentSubmission);
+app.all('/payments/submissions', requireAuthorization);
+app.post('/payments/submissions', paymentSubmission);
 
 app.all('/tpp/authorized', requireAuthorization);
 app.get('/tpp/authorized', authorisationCodeGrantedHandler);

@@ -13,6 +13,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
   const paymentId = '88379';
   const idempotencyKey = '2023klf';
+  const interactionId = 'abcd';
   let setupPaymentProxy;
   let accessTokenAndResourcePathProxy;
   let paymentsStub;
@@ -52,7 +53,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
     it('returns PaymentId from postPayments call', async () => {
       const id = await setupPaymentProxy(
         authorisationServerId, fapiFinancialId,
-        creditorAccount, instructedAmount, idempotencyKey,
+        creditorAccount, instructedAmount, idempotencyKey, interactionId,
       );
       assert.equal(id, paymentId);
 
@@ -64,7 +65,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
         {}, // opts
         {}, // risk
         creditorAccount, instructedAmount,
-        fapiFinancialId, idempotencyKey,
+        fapiFinancialId, idempotencyKey, interactionId,
       ));
     });
   });

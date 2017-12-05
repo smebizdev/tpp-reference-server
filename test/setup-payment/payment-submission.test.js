@@ -25,17 +25,19 @@ const setupApp = (submitPaymentStub) => {
   );
   const app = express();
   app.use(bodyParser.json());
-  app.post('/payments/:paymentId/submissions', paymentSubmission);
+  app.post('/payments/submissions', paymentSubmission);
   return app;
 };
 
 const fapiFinancialId = 'testFapiFinancialId';
+const fapiInteractionId = 'testInteractionId';
 const PAYMENT_ID = 'P123';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 const doPost = app => request(app)
-  .post(`/payments/${PAYMENT_ID}/submissions`)
+  .post('/payments/submissions')
   .set('x-fapi-financial-id', fapiFinancialId)
+  .set('x-fapi-interaction-id', fapiInteractionId)
   .send();
 
 describe('/payment-submission with successful submitPayment', () => {
@@ -56,9 +58,7 @@ describe('/payment-submission with successful submitPayment', () => {
     doPost(app)
       .end((e, r) => {
         assert.equal(r.status, 201);
-        const location = r.get('Location');
 
-        assert.equal(location, `/payments/${PAYMENT_ID}/submissions/${PAYMENT_SUBMISSION_ID}`);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
         done();

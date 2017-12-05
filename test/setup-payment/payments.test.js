@@ -148,7 +148,7 @@ describe('buildPaymentstData and then postPayments', () => {
         headers,
         opts,
         risk,
-        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey,
+        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey, null, interactionId,
       );
       assert.deepEqual(result, expectedPaymentResponse);
     });
@@ -181,6 +181,7 @@ describe('buildPaymentstData and then postPayments', () => {
         fapiFinancialId,
         idempotencyKey,
         paymentId,
+        interactionId,
       );
       assert.deepEqual(result, expectedPaymentSubmissionResponse);
     });

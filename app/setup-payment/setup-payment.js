@@ -6,7 +6,7 @@ const debug = require('debug')('debug');
 const PAYMENT_REQUEST_ENDPOINT_URL = '/open-banking/v1.1/payments';
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId,
-  CreditorAccount, InstructedAmount, idempotencyKey) => {
+  CreditorAccount, InstructedAmount, idempotencyKey, interactionId) => {
   const response = await postPayments(
     resourcePath,
     PAYMENT_REQUEST_ENDPOINT_URL,
@@ -15,7 +15,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
     {}, // opts
     {}, // risk
     CreditorAccount, InstructedAmount,
-    fapiFinancialId, idempotencyKey,
+    fapiFinancialId, idempotencyKey, interactionId,
   );
   let error;
   if (response.Data) {
@@ -37,7 +37,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
 };
 
 const setupPayment = async (authorisationServerId,
-  fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey) => {
+  fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey, interactionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(
     authorisationServerId,
     fapiFinancialId,
@@ -45,10 +45,10 @@ const setupPayment = async (authorisationServerId,
 
   const paymentId = await createRequest(
     resourcePath, accessToken, fapiFinancialId,
-    CreditorAccount, InstructedAmount, idempotencyKey,
+    CreditorAccount, InstructedAmount, idempotencyKey, interactionId,
   );
 
-  persistPaymentDetails(idempotencyKey, paymentId, CreditorAccount, InstructedAmount);
+  persistPaymentDetails(interactionId, paymentId, CreditorAccount, InstructedAmount);
 
   return paymentId;
 };

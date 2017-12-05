@@ -67,7 +67,8 @@ const buildPaymentsData = (opts, risk, creditorAccount, instructedAmount, paymen
  */
 const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken,
   headers, opts, risk, CreditorAccount, InstructedAmount, fapiFinancialId,
-  idempotencyKey, paymentId) => {
+  idempotencyKey, paymentId, interactionId) => {
+  console.log('intId', interactionId);
   try {
     const body = buildPaymentsData(opts, risk, CreditorAccount, InstructedAmount, paymentId);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
@@ -78,11 +79,12 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, accessToken
       .set('x-idempotency-key', idempotencyKey)
       .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .set('x-fapi-financial-id', fapiFinancialId)
+      .set('x-fapi-interaction-id', interactionId)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8');
     if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
-    if (headers.interactionId) payment.set('x-fapi-interaction-id', headers.interactionId);
+
     payment.send(body);
     const response = await payment;
     debug(`${response.status} response for ${paymentsUri}`);

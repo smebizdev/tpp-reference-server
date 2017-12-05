@@ -9,6 +9,19 @@ The implementation uses
 and
 [express-http-proxy](https://github.com/villadora/express-http-proxy).
 
+## Use latest release
+
+Use the latest release [v0.5.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.5.0).
+
+To obtain the latest release:
+
+``sh
+git clone https://github.com/OpenBankingUK/tpp-reference-server
+git checkout v0.5.0
+``
+
+Note: latest `master` branch code is actively under development and may not be stable.
+
 ## Use cases
 
 __Work in progress__ - so far we provide,

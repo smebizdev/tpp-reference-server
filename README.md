@@ -262,7 +262,6 @@ DEBUG=error,log \
 * Set OB Provisioned status using `OB_PROVISIONED` env var.
 * Set OB Directory host using `OB_DIRECTORY_HOST` env var.
 * Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
-* Set hardcoded x-fapi-financial-id using `X_FAPI_FINANCIAL_ID` env var.
 * Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
 Set the environment variables `MONGODB_URI` as per your mongodb instance.
 

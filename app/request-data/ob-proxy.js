@@ -3,13 +3,15 @@ const { setupMutualTLS } = require('../certs-util');
 const { resourceServerHost } = require('../authorisation-servers');
 const { URL } = require('url');
 const { accessToken } = require('../authorise');
+const { fapiFinancialIdFor } = require('../authorisation-servers');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const authServerId = req.headers['x-authorization-server-id'];
-  const xFapiFinancialId = req.headers['x-fapi-financial-id'];
+  const xFapiFinancialId = fapiFinancialIdFor(authServerId);
+
   const sessionId = req.headers.authorization;
   let host;
   try {

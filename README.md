@@ -108,19 +108,16 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
     "id": "aaaj4NmBD8lQxmLh2O",
     "logoUri": "",
     "name": "AAA Example Bank",
-    "orgId": "aaax5nTR33811Qy",
   },
   {
     "id": "bbbX7tUB4fPIYB0k1m",
     "logoUri": "",
     "name": "BBB Example Bank",
-    "orgId": "bbbUB4fPIYB0k1m",
   },
   {
     "id": "cccbN8iAsMh74sOXhk",
     "logoUri": "",
     "name": "CCC Example Bank",
-    "orgId": "cccMh74sOXhkQfi",
   }
 ]
 ```

@@ -6,13 +6,12 @@ const assert = require('assert');
 
 describe('storage set data with id', () => {
   const collection = 'testAuthServers';
-  const orgId = 'bbbccc-example-org';
   const data = {
     BaseApiDNSUri: 'http://bbb.example.com',
     CustomerFriendlyLogoUri: 'string',
     CustomerFriendlyName: 'BBB Example Bank',
   };
-  const id = `${orgId}-${data.BaseApiDNSUri}`;
+  const id = 'testId';
 
   it('then get with invalid id returns null', async () => {
     await set(collection, data, id);

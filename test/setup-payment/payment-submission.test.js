@@ -5,12 +5,17 @@ const sinon = require('sinon');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const fapiFinancialId = 'testFapiFinancialId';
+
 const setupApp = (submitPaymentStub) => {
   const { paymentSubmission } = proxyquire(
     '../../app/setup-payment/payment-submission.js',
     {
       './submit-payment': {
         submitPayment: submitPaymentStub,
+      },
+      '../authorisation-servers': {
+        fapiFinancialIdFor: () => fapiFinancialId,
       },
     },
   );
@@ -20,7 +25,6 @@ const setupApp = (submitPaymentStub) => {
   return app;
 };
 
-const fapiFinancialId = 'testFapiFinancialId';
 const fapiInteractionId = 'testInteractionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 

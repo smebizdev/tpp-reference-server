@@ -6,6 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const fapiFinancialId = 'testFapiFinancialId';
+const authServerId = 'testAuthServerId';
 
 const setupApp = (submitPaymentStub) => {
   const { paymentSubmission } = proxyquire(
@@ -30,7 +31,7 @@ const PAYMENT_SUBMISSION_ID = 'PS456';
 
 const doPost = app => request(app)
   .post('/payment-submissions')
-  .set('x-fapi-financial-id', fapiFinancialId)
+  .set('x-authorization-server-id', authServerId)
   .set('x-fapi-interaction-id', fapiInteractionId)
   .send();
 

@@ -65,7 +65,6 @@ const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/payment-authorise-consent')
-  .set('x-fapi-financial-id', fapiFinancialId)
   .set('authorization', sessionId)
   .send({ authorisationServerId });
 

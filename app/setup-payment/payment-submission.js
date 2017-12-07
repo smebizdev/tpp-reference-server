@@ -8,7 +8,7 @@ const paymentSubmission = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const authServerId = req.headers['x-authorization-server-id'];
-    const fapiFinancialId = fapiFinancialIdFor(authServerId);
+    const fapiFinancialId = await fapiFinancialIdFor(authServerId);
     const fapiInteractionId = req.headers['x-fapi-interaction-id'];
     const idempotencyKey = uuidv4();
 

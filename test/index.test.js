@@ -143,6 +143,7 @@ describe('Proxy', () => {
   beforeEach(async () => {
     await setAuthServerConfig(authServerId, {
       obDirectoryConfig: {
+        OBOrganisationId: fapiFinancialId,
         BaseApiDNSUri: resourceApiHost,
       },
     });
@@ -165,7 +166,6 @@ describe('Proxy', () => {
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
           .set('authorization', sessionId)
-          .set('x-fapi-financial-id', fapiFinancialId)
           .set('x-authorization-server-id', authServerId)
           .end((e, r) => {
             assert.equal(r.status, 200);
@@ -176,7 +176,7 @@ describe('Proxy', () => {
     });
   });
 
-  it('returns 500 response for missing x-fapi-financial-id', (done) => {
+  it('returns 400 response for missing x-authorization-server-id', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
       setTokenPayload(sessionId, tokenPayload).then(() => {
@@ -184,26 +184,8 @@ describe('Proxy', () => {
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
           .set('authorization', sessionId)
-          .set('x-authorization-server-id', authServerId)
           .end((e, r) => {
-            assert.equal(r.status, 500);
-            done();
-          });
-      });
-    });
-  });
-
-  it('returns 500 response for missing x-authorization-server-id', (done) => {
-    login(app).end((err, res) => {
-      const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload).then(() => {
-        request(app)
-          .get('/open-banking/v1.1/accounts')
-          .set('Accept', 'application/json')
-          .set('authorization', sessionId)
-          .set('x-fapi-financial-id', fapiFinancialId)
-          .end((e, r) => {
-            assert.equal(r.status, 500);
+            assert.equal(r.status, 400);
             done();
           });
       });

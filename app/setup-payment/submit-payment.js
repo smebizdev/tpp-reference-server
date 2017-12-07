@@ -26,7 +26,7 @@ const makePayment = async (
     paymentData,
   );
 
-  if (response && response.Data) {
+  if (response && response.Data && response.Data.Status !== 'Rejected') {
     return response.Data.PaymentSubissionId;
   }
   const error = new Error('Payment failed');

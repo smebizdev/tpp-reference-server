@@ -16,14 +16,26 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
   const PaymentId = '88379';
   const idempotencyKey = '2023klf';
+  const idempotencyKey2 = 'ee15fea57';
   let submitPaymentProxy;
+  let submitPaymentProxy2;
   let accessTokenAndResourcePathProxy;
-  let paymentsStub;
+  let paymentsSuccessStub;
+  let paymentsRejectedStub;
   let retrievePaymentDetailsStub;
+  let retrievePaymentRejectStub;
 
-  const PaymentsSubmissionResponse = () => ({
+  const PaymentsSubmissionSuccessResponse = () => ({
     Data: {
       PaymentSubissionId: PAYMENT_SUBMISSION_ID,
+      Status: 'AcceptedSettlementInProcess',
+    },
+  });
+
+  const PaymentsSubmissionRejectedResponse = () => ({
+    Data: {
+      PaymentSubissionId: PAYMENT_SUBMISSION_ID,
+      Status: 'Rejected',
     },
   });
 
@@ -38,9 +50,8 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     Currency: 'GBP',
   };
 
-  const setup = () => () => {
-    paymentsStub = sinon.stub().returns(PaymentsSubmissionResponse());
-
+  const setupForSuccess = () => () => {
+    paymentsSuccessStub = sinon.stub().returns(PaymentsSubmissionSuccessResponse());
     accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
     retrievePaymentDetailsStub = sinon.stub().returns({
       PaymentId,
@@ -50,21 +61,21 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
     submitPaymentProxy = proxyquire('../../app/setup-payment/submit-payment', {
       '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
-      './payments': { postPayments: paymentsStub },
+      './payments': { postPayments: paymentsSuccessStub },
       './persistence': { retrievePaymentDetails: retrievePaymentDetailsStub },
     }).submitPayment;
   };
 
-  describe('when AcceptedTechnicalValidation', () => {
-    before(setup());
+  describe('When Submitted Payment is in status AcceptedSettlementInProcess', () => {
+    before(setupForSuccess());
 
-    it('returns PaymentSubmissionId from postPayments call', async () => {
+    it('Returns PaymentSubmissionId from postPayments call', async () => {
       const id = await submitPaymentProxy(
         authorisationServerId, fapiFinancialId,
         idempotencyKey, fapiInteractionId,
       );
       assert.equal(id, PAYMENT_SUBMISSION_ID);
-      assert.ok(paymentsStub.calledWithExactly(
+      assert.ok(paymentsSuccessStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
         {
@@ -76,6 +87,49 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
           InstructedAmount,
         },
       ));
+    });
+  });
+
+
+  const setupForRejected = () => () => {
+    paymentsRejectedStub = sinon.stub().returns(PaymentsSubmissionRejectedResponse());
+    accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
+    retrievePaymentRejectStub = sinon.stub().returns({
+      PaymentId: paymentId,
+      CreditorAccount: creditorAccount,
+      InstructedAmount: instructedAmount,
+    });
+    submitPaymentProxy2 = proxyquire('../../app/setup-payment/submit-payment', {
+      '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      './payments': { postPayments: paymentsRejectedStub },
+      './persistence': { retrievePaymentDetails: retrievePaymentRejectStub },
+    }).submitPayment;
+  };
+
+  describe('When Payment Submission Rejected', () => {
+    before(setupForRejected());
+    it('returns an error from postPayments call', async () => {
+      try {
+        await submitPaymentProxy2(
+          authorisationServerId, fapiFinancialId,
+          idempotencyKey2, fapiInteractionId,
+        );
+      } catch (err) {
+        assert.equal(err.status, 500);
+        assert.ok(paymentsRejectedStub.calledWithExactly(
+          resourcePath,
+          '/open-banking/v1.1/payment-submissions',
+          accessToken,
+          {}, // headers
+          {}, // opts
+          {}, // risk
+          creditorAccount,
+          instructedAmount,
+          fapiFinancialId,
+          idempotencyKey2,
+          paymentId,
+        ));
+      }
     });
   });
 });

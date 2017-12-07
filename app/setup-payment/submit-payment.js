@@ -27,10 +27,7 @@ const makePayment = async (resourcePath, accessToken, fapiFinancialId,
 
 const submitPayment = async (authorisationServerId,
   fapiFinancialId, idempotencyKey, fapiInteractionId) => {
-  const { accessToken, resourcePath } = await accessTokenAndResourcePath(
-    authorisationServerId,
-    fapiFinancialId,
-  );
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   const r =
     await retrievePaymentDetails(fapiInteractionId);
 

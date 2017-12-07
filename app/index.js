@@ -6,6 +6,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { session } = require('./session');
 const { requireAuthorization } = require('./session');
+const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
@@ -32,19 +33,19 @@ app.use(
   OBAccountPaymentServiceProviders,
 );
 
-app.all('/account-request-authorise-consent', requireAuthorization);
+app.all('/account-request-authorise-consent', requireAuthorization, requireAuthorisationServerId);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
 
-app.all('/payment-authorise-consent', requireAuthorization);
+app.all('/payment-authorise-consent', requireAuthorization, requireAuthorisationServerId);
 app.post('/payment-authorise-consent', paymentAuthoriseConsent);
 
-app.all('/payment-submissions', requireAuthorization);
+app.all('/payment-submissions', requireAuthorization, requireAuthorisationServerId);
 app.post('/payment-submissions', paymentSubmission);
 
 app.all('/tpp/authorized', requireAuthorization);
 app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
-app.all('/open-banking/*', requireAuthorization);
+app.all('/open-banking/*', requireAuthorization, requireAuthorisationServerId);
 app.use('/open-banking', resourceRequestHandler);
 app.use('/session/check', session.check);
 

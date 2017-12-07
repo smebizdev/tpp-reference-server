@@ -38,10 +38,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId,
 
 const setupPayment = async (authorisationServerId,
   fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey, interactionId) => {
-  const { accessToken, resourcePath } = await accessTokenAndResourcePath(
-    authorisationServerId,
-    fapiFinancialId,
-  );
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
 
   const paymentId = await createRequest(
     resourcePath, accessToken, fapiFinancialId,

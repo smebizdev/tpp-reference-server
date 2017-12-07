@@ -22,10 +22,7 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
 };
 
 const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
-  const { accessToken, resourcePath } = await accessTokenAndResourcePath(
-    authorisationServerId,
-    fapiFinancialId,
-  );
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   const accountRequestId = await createRequest(
     resourcePath,
     accessToken,

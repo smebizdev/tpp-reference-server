@@ -3,6 +3,7 @@ const {
   authorisationEndpoint,
   issuer,
   fapiFinancialIdFor,
+  requireAuthorisationServerId,
   authorisationServersForClient,
   storeAuthorisationServers,
   tokenEndpoint,
@@ -17,6 +18,7 @@ exports.authorisationServersForClient = authorisationServersForClient;
 exports.authorisationEndpoint = authorisationEndpoint;
 exports.issuer = issuer;
 exports.fapiFinancialIdFor = fapiFinancialIdFor;
+exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.tokenEndpoint = tokenEndpoint;
 exports.resourceServerHost = resourceServerHost;

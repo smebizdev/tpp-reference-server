@@ -62,6 +62,14 @@ const fapiFinancialIdFor = async (authServerId) => {
   throw err;
 };
 
+const requireAuthorisationServerId = async (req, res, next) => {
+  const authServerId = req.headers['x-authorization-server-id'];
+  if (!authServerId) {
+    return res.status(400).send('request missing x-authorization-server-id header');
+  }
+  return next();
+};
+
 const resourceServerHost = async (authServerId) => {
   const config = await obDirectoryConfig(authServerId);
   if (config && config.BaseApiDNSUri) {
@@ -201,4 +209,5 @@ exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;
 exports.fapiFinancialIdFor = fapiFinancialIdFor;
+exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

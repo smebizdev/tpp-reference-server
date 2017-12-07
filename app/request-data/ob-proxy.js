@@ -10,7 +10,7 @@ const error = require('debug')('error');
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const authServerId = req.headers['x-authorization-server-id'];
-  const xFapiFinancialId = fapiFinancialIdFor(authServerId);
+  const xFapiFinancialId = await fapiFinancialIdFor(authServerId);
 
   const sessionId = req.headers.authorization;
   let host;

@@ -11,18 +11,20 @@ const {
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
+  fapiFinancialIdFor,
 } = require('../../app/authorisation-servers');
 
 const nock = require('nock');
 
 const authServerId = 'aaaj4NmBD8lQxmLh2O9FLY';
+const orgId = 'aaa-example-org';
 const flattenedObDirectoryAuthServerList = [
   {
     Id: authServerId,
     BaseApiDNSUri: 'http://aaa.example.com',
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
-    OBOrganisationId: 'aaa-example-org',
+    OBOrganisationId: orgId,
   },
 ];
 
@@ -70,6 +72,22 @@ describe('authorisation servers', () => {
 
   afterEach(async () => {
     await drop(ASPSP_AUTH_SERVERS_COLLECTION);
+  });
+
+  describe('fapiFinancialIdFor', () => {
+    it('returns fapiFinancialId given valid authServerId', async () => {
+      const id = await fapiFinancialIdFor(authServerId);
+      assert.equal(id, orgId);
+    });
+
+    it('throws error given invalid authServerId', async () => {
+      try {
+        await fapiFinancialIdFor('invalid-id');
+        assert.ok(false);
+      } catch (err) {
+        assert.equal(err.status, 500);
+      }
+    });
   });
 
   describe('getClientCredentials', () => {

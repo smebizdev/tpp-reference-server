@@ -20,12 +20,10 @@ const transformServerData = (data) => {
   const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
-  const orgId = data.OBOrganisationId;
   return {
     id,
     logoUri,
     name,
-    orgId,
   };
 };
 
@@ -44,10 +42,30 @@ const getClientCredentials = async (authServerId) => {
   throw err;
 };
 
+const obDirectoryConfig = async (id) => {
+  try {
+    const config = await getAuthServerConfig(id);
+    return (config && config.obDirectoryConfig) ? config.obDirectoryConfig : null;
+  } catch (err) {
+    error(err);
+    return null;
+  }
+};
+
+const fapiFinancialIdFor = async (authServerId) => {
+  const config = await obDirectoryConfig(authServerId);
+  if (config && config.OBOrganisationId) {
+    return config.OBOrganisationId;
+  }
+  const err = new Error(`fapiFinancialId for ${authServerId} not found`);
+  err.status = 500;
+  throw err;
+};
+
 const resourceServerHost = async (authServerId) => {
-  const authServer = await getAuthServerConfig(authServerId);
-  if (authServer && authServer.obDirectoryConfig && authServer.obDirectoryConfig.BaseApiDNSUri) {
-    return authServer.obDirectoryConfig.BaseApiDNSUri;
+  const config = await obDirectoryConfig(authServerId);
+  if (config && config.BaseApiDNSUri) {
+    return config.BaseApiDNSUri;
   }
   const err = new Error(`resource server host for ${authServerId} not found`);
   err.status = 500;
@@ -182,4 +200,5 @@ exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;
+exports.fapiFinancialIdFor = fapiFinancialIdFor;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

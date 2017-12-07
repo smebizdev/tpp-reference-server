@@ -17,6 +17,7 @@ const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
 const key = 'testKey';
 const interactionId = key;
+const fapiFinancialId = 'testFapiFinancialId';
 
 const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
@@ -48,6 +49,9 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
+      '../authorisation-servers': {
+        fapiFinancialIdFor: () => fapiFinancialId,
+      },
       'uuid/v4': keyStub,
     },
   );
@@ -57,12 +61,10 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   return app;
 };
 
-const fapiFinancialId = 'testFapiFinancialId';
 const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/payment-authorise-consent')
-  .set('x-fapi-financial-id', fapiFinancialId)
   .set('authorization', sessionId)
   .send({ authorisationServerId });
 

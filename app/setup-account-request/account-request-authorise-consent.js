@@ -1,5 +1,7 @@
 const { setupAccountRequest } = require('./setup-account-request');
 const { generateRedirectUri } = require('../authorise');
+const { fapiFinancialIdFor } = require('../authorisation-servers');
+
 const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
@@ -9,7 +11,8 @@ const accountRequestAuthoriseConsent = async (req, res) => {
   try {
     const sessionId = req.headers['authorization'];
     const { authorisationServerId } = req.body;
-    const fapiFinancialId = req.headers['x-fapi-financial-id'];
+    const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
+
     debug(`authorisationServerId: ${authorisationServerId}`);
     const accountRequestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);
     const interactionId = uuidv4();

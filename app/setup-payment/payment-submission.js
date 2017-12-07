@@ -1,4 +1,5 @@
 const { submitPayment } = require('./submit-payment');
+const { fapiFinancialIdFor } = require('../authorisation-servers');
 const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
@@ -6,9 +7,9 @@ const debug = require('debug')('debug');
 const paymentSubmission = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const fapiFinancialId = req.headers['x-fapi-financial-id'];
-    const fapiInteractionId = req.headers['x-fapi-interaction-id'];
     const authServerId = req.headers['x-authorization-server-id'];
+    const fapiFinancialId = await fapiFinancialIdFor(authServerId);
+    const fapiInteractionId = req.headers['x-fapi-interaction-id'];
     const idempotencyKey = uuidv4();
 
     const paymentSubmissionId = await submitPayment(

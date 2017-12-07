@@ -9,6 +9,19 @@ The implementation uses
 and
 [express-http-proxy](https://github.com/villadora/express-http-proxy).
 
+## Use latest release
+
+Use the latest release [v0.5.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.5.0).
+
+To obtain the latest release:
+
+```sh
+git clone https://github.com/OpenBankingUK/tpp-reference-server
+git checkout v0.5.0
+```
+
+Note: latest `master` branch code is actively under development and may not be stable.
+
 ## Use cases
 
 __Work in progress__ - so far we provide,
@@ -95,19 +108,16 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
     "id": "aaaj4NmBD8lQxmLh2O",
     "logoUri": "",
     "name": "AAA Example Bank",
-    "orgId": "aaax5nTR33811Qy",
   },
   {
     "id": "bbbX7tUB4fPIYB0k1m",
     "logoUri": "",
     "name": "BBB Example Bank",
-    "orgId": "bbbUB4fPIYB0k1m",
   },
   {
     "id": "cccbN8iAsMh74sOXhk",
     "logoUri": "",
     "name": "CCC Example Bank",
-    "orgId": "cccMh74sOXhkQfi",
   }
 ]
 ```
@@ -249,7 +259,6 @@ DEBUG=error,log \
 * Set OB Provisioned status using `OB_PROVISIONED` env var.
 * Set OB Directory host using `OB_DIRECTORY_HOST` env var.
 * Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
-* Set hardcoded x-fapi-financial-id using `X_FAPI_FINANCIAL_ID` env var.
 * Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
 Set the environment variables `MONGODB_URI` as per your mongodb instance.
 

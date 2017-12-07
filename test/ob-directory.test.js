@@ -38,19 +38,16 @@ const expectedResult = [
     id: 'aaaj4NmBD8lQxmLh2O9FLY',
     logoUri: 'string',
     name: 'AAA Example Bank',
-    orgId: 'aaax5nTR33811QyQfi',
   },
   {
     id: 'bbbX7tUB4fPIYB0k1m',
     logoUri: 'string',
     name: 'BBB Example Bank',
-    orgId: 'bbbcccUB4fPIYB0k1m',
   },
   {
     id: 'cccbN8iAsMh74sOXhk',
     logoUri: 'string',
     name: 'CCC Example Bank',
-    orgId: 'bbbcccUB4fPIYB0k1m',
   },
 ];
 

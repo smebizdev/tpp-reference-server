@@ -11,7 +11,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
   try {
     const sessionId = req.headers['authorization'];
     const { authorisationServerId } = req.body;
-    const fapiFinancialId = fapiFinancialIdFor(authorisationServerId);
+    const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
 
     debug(`authorisationServerId: ${authorisationServerId}`);
     const accountRequestId = await setupAccountRequest(authorisationServerId, fapiFinancialId);

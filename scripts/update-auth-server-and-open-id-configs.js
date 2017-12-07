@@ -1,3 +1,8 @@
+const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.load({ path: path.join(__dirname, '..', '.env') });
+
 const { updateOpenIdConfigs } = require('../app/authorisation-servers');
 const { fetchOBAccountPaymentServiceProviders } = require('../app/ob-directory');
 

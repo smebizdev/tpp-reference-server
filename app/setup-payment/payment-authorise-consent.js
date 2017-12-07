@@ -12,8 +12,9 @@ const paymentAuthoriseConsent = async (req, res) => {
     const { authorisationServerId } = req.body;
     const { CreditorAccount } = req.body;
     const { InstructedAmount } = req.body;
-    const fapiFinancialId = fapiFinancialIdFor(authorisationServerId);
+    const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
     debug(`authorisationServerId: ${authorisationServerId}`);
+    debug(`fapiFinancialId: ${fapiFinancialId}`);
     const idempotencyKey = uuidv4();
     const interactionId = uuidv4();
 

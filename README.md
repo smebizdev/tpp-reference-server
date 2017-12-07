@@ -134,10 +134,10 @@ For example `/open-banking/v1.1` gives access to the 1.1 Read write Apis.
 
 #### GET Accounts for a user (Account and Transaction API)
 
-We have a hardcoded demo user `alice` with bank `abcbank` setup in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
+We have a hardcoded demo user `alice` in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
 
 ```sh
-curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts
+curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts
 ```
 
 [Here's a sample response](https://www.openbanking.org.uk/read-write-apis/account-transaction-api/v1-1-0/#accounts-bulk-response).
@@ -147,7 +147,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept:
 Using the same demo account as above.
 
 ```sh
-curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts/22289/product
+curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts/22289/product
 ```
 
 [Here's a sample response](https://www.openbanking.org.uk/read-write-apis/account-transaction-api/v1-1-0/#product-specific-account-response).
@@ -157,7 +157,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept:
 Using the same demo account as above.
 
 ```sh
-curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts/22289/balances
+curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts/22289/balances
 ```
 
 [Here's a sample response](https://www.openbanking.org.uk/read-write-apis/account-transaction-api/v1-1-0/#balances-specific-account-response).

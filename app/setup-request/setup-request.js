@@ -16,17 +16,10 @@ const resourceServerPath = async (authorisationServerId) => {
   return null;
 };
 
-const validateParameters = (authorisationServerId, fapiFinancialId) => {
-  let error;
-  if (!fapiFinancialId) {
-    error = new Error('fapiFinancialId missing from request payload');
-    error.status = 400;
-  }
+const validateParameter = (authorisationServerId) => {
   if (!authorisationServerId) {
-    error = new Error('authorisationServerId missing from request payload');
+    const error = new Error('authorisationServerId missing from request payload');
     error.status = 400;
-  }
-  if (error) {
     throw error;
   }
 };
@@ -48,8 +41,8 @@ const createAccessToken = async (authorisationServerId) => {
   return response.access_token;
 };
 
-const accessTokenAndResourcePath = async (authorisationServerId, fapiFinancialId) => {
-  validateParameters(authorisationServerId, fapiFinancialId);
+const accessTokenAndResourcePath = async (authorisationServerId) => {
+  validateParameter(authorisationServerId);
   const accessToken = await createAccessToken(authorisationServerId);
   const resourcePath = await resourceServerPath(authorisationServerId);
   return { accessToken, resourcePath };

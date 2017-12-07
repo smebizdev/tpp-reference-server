@@ -66,7 +66,8 @@ const sessionId = 'testSession';
 const doPost = app => request(app)
   .post('/payment-authorise-consent')
   .set('authorization', sessionId)
-  .send({ authorisationServerId });
+  .set('x-authorization-server-id', authorisationServerId)
+  .send();
 
 const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 

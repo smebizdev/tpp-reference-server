@@ -9,7 +9,7 @@ const paymentAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const sessionId = req.headers['authorization'];
-    const { authorisationServerId } = req.body;
+    const authorisationServerId = req.headers['x-authorization-server-id'];
     const { CreditorAccount } = req.body;
     const { InstructedAmount } = req.body;
     const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);

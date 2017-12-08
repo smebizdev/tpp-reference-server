@@ -361,11 +361,15 @@ Now calling the `/account-payment-service-provider-authorisation-servers` endpoi
 
 ### Listing available ASPSP authorisation servers
 
-To list authorisation servers currently in the database, run:
+The commands below will list authorisation servers currently in the database.
+
+When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
+
+Run:
 
 ```sh
 # Locally
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
+DEBUG=debug,log npm run listAuthServers
 
 # Remotely on Heroku
 heroku run npm run listAuthServers --remote heroku

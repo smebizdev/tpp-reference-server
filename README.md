@@ -41,7 +41,7 @@ curl -X POST --data 'u=alice&p=wonderland' http://localhost:8003/login
 This returns a session ID token as a `sid`. Use this for further authorized access.
 
 This is an example.
-
+ 
 ```sh
 {
   "sid": "896beb20-affc-11e7-a5e6-a941c8c37252"

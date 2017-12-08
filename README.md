@@ -383,11 +383,13 @@ cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh7
 
 There is a script to input and store client credentials against ASPSP Auth Server configuration.
 
+When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
+
 Example Usages
 
 ```sh
 # Locally
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
+npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
 
 # Remotely on Heroku
 heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
@@ -398,11 +400,11 @@ heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --re
 ##### Locally
 
 ```sh
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+DEBUG=debug,log npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
 
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+DEBUG=debug,log npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
 
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```
 
 ##### Remotely on Heroku

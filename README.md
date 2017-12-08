@@ -41,7 +41,7 @@ curl -X POST --data 'u=alice&p=wonderland' http://localhost:8003/login
 This returns a session ID token as a `sid`. Use this for further authorized access.
 
 This is an example.
-
+ 
 ```sh
 {
   "sid": "896beb20-affc-11e7-a5e6-a941c8c37252"
@@ -361,11 +361,15 @@ Now calling the `/account-payment-service-provider-authorisation-servers` endpoi
 
 ### Listing available ASPSP authorisation servers
 
-To list authorisation servers currently in the database, run:
+The commands below will list authorisation servers currently in the database.
+
+When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
+
+Run:
 
 ```sh
 # Locally
-MONGODB_URI='localhost:27017/sample-tpp-server' npm run listAuthServers --silent
+DEBUG=debug,log npm run listAuthServers
 
 # Remotely on Heroku
 heroku run npm run listAuthServers --remote heroku

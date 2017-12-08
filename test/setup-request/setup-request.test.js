@@ -1,19 +1,9 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
-const { checkErrorThrown } = require('../utils');
 const { accessTokenAndResourcePath } = require('../../app/setup-request'); // eslint-disable-line
 
 const authorisationServerId = 'testAuthorisationServerId';
-
-describe('accessTokenAndResourcePath called with blank authorisationServerId', () => {
-  it('throws error with 400 status set', async () => {
-    await checkErrorThrown(
-      async () => accessTokenAndResourcePath(null),
-      400, 'authorisationServerId missing from request payload',
-    );
-  });
-});
 
 describe('accessTokenAndResourcePath called with valid parameters', () => {
   const token = 'access-token';

@@ -17,21 +17,33 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
   let setupPaymentProxy;
   let accessTokenAndResourcePathProxy;
   let paymentsStub;
+  let buildPaymentsDataStub;
   const PaymentsResponse = status => ({
     Data: {
       PaymentId: paymentId,
       Status: status,
     },
   });
-  const creditorAccount = {
+  const CreditorAccount = {
     SchemeName: 'SortCodeAccountNumber',
     Identification: '01122313235478',
     Name: 'Mr Kevin',
     SecondaryIdentification: '002',
   };
-  const instructedAmount = {
+  const InstructedAmount = {
     Amount: '100.45',
     Currency: 'GBP',
+  };
+
+  const buildPaymentStubResponse = {
+    Data: {
+      Initiation: {
+        CreditorAccount,
+        InstructedAmount,
+        InstructionIdentification: 'testInstructionIdentification',
+        EndToEndIdentification: 'testEndToEndIdentification',
+      },
+    },
   };
 
   const setup = status => () => {
@@ -41,8 +53,11 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
       paymentsStub = sinon.stub().returns({});
     }
     accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
+    buildPaymentsDataStub = sinon.stub().returns(buildPaymentStubResponse);
+
     setupPaymentProxy = proxyquire('../../app/setup-payment/setup-payment', {
       '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      './payment-data-builder': { buildPaymentsData: buildPaymentsDataStub },
       './payments': { postPayments: paymentsStub },
     }).setupPayment;
   };
@@ -53,19 +68,17 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
     it('returns PaymentId from postPayments call', async () => {
       const id = await setupPaymentProxy(
         authorisationServerId, fapiFinancialId,
-        creditorAccount, instructedAmount, idempotencyKey, interactionId,
+        CreditorAccount, InstructedAmount, idempotencyKey, interactionId,
       );
       assert.equal(id, paymentId);
 
       assert(paymentsStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payments',
-        accessToken,
-        {}, // headers
-        {}, // opts
-        {}, // risk
-        creditorAccount, instructedAmount,
-        fapiFinancialId, idempotencyKey, null, interactionId,
+        {
+          accessToken, fapiFinancialId, idempotencyKey, interactionId,
+        }, // headers
+        buildPaymentStubResponse,
       ));
     });
   });
@@ -74,10 +87,15 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
     before(setup('AcceptedCustomerProfile'));
 
     it('returns PaymentId from postPayments call', async () => {
-      const id = await setupPaymentProxy(
-        authorisationServerId, fapiFinancialId,
-        creditorAccount, instructedAmount,
-      );
+      let id;
+      try {
+        id = await setupPaymentProxy(
+          authorisationServerId, fapiFinancialId,
+          CreditorAccount, InstructedAmount,
+        );
+      } catch (e) {
+        assert.fail('Should not throw error');
+      }
       assert.equal(id, paymentId);
     });
   });
@@ -87,7 +105,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, creditorAccount, instructedAmount), // eslint-disable-line
+        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, CreditorAccount, InstructedAmount), // eslint-disable-line
         500, 'Payment response status: "Rejected"',
       );
     });
@@ -98,7 +116,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, creditorAccount, instructedAmount), // eslint-disable-line
+        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, CreditorAccount, InstructedAmount), // eslint-disable-line
         500, 'Payment response status: "Pending"',
       );
     });
@@ -109,7 +127,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
 
     it('throws error', async () => {
       await checkErrorThrown(
-        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, creditorAccount, instructedAmount), // eslint-disable-line
+        async () => setupPaymentProxy(authorisationServerId, fapiFinancialId, CreditorAccount, InstructedAmount), // eslint-disable-line
         500, 'Payment response missing payload',
       );
     });

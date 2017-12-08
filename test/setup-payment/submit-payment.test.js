@@ -14,7 +14,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
   const accessToken = 'access-token';
   const resourceServer = 'http://resource-server.com';
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
-  const paymentId = '88379';
+  const PaymentId = '88379';
   const idempotencyKey = '2023klf';
   let submitPaymentProxy;
   let accessTokenAndResourcePathProxy;
@@ -27,13 +27,13 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     },
   });
 
-  const creditorAccount = {
+  const CreditorAccount = {
     SchemeName: 'SortCodeAccountNumber',
     Identification: '01122313235478',
     Name: 'Mr Kevin',
     SecondaryIdentification: '002',
   };
-  const instructedAmount = {
+  const InstructedAmount = {
     Amount: '100.45',
     Currency: 'GBP',
   };
@@ -43,9 +43,9 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
     accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
     retrievePaymentDetailsStub = sinon.stub().returns({
-      PaymentId: paymentId,
-      CreditorAccount: creditorAccount,
-      InstructedAmount: instructedAmount,
+      PaymentId,
+      CreditorAccount,
+      InstructedAmount,
     });
 
     submitPaymentProxy = proxyquire('../../app/setup-payment/submit-payment', {
@@ -67,15 +67,14 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
       assert.ok(paymentsStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
-        accessToken,
-        {}, // headers
-        {}, // opts
-        {}, // risk
-        creditorAccount,
-        instructedAmount,
-        fapiFinancialId,
-        idempotencyKey,
-        paymentId,
+        {
+          accessToken, fapiFinancialId, idempotencyKey, fapiInteractionId,
+        },
+        {
+          PaymentId,
+          CreditorAccount,
+          InstructedAmount,
+        },
       ));
     });
   });

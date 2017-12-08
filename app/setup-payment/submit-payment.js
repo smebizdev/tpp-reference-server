@@ -4,17 +4,26 @@ const { retrievePaymentDetails } = require('./persistence');
 
 const PAYMENT_SUBMISSION_ENDPOINT_URL = '/open-banking/v1.1/payment-submissions';
 
-const makePayment = async (resourcePath, accessToken, fapiFinancialId,
-  CreditorAccount, InstructedAmount, idempotencyKey, paymentId) => {
+const makePayment = async (
+  resourcePath,
+  accessToken,
+  fapiFinancialId,
+  fapiInteractionId,
+  idempotencyKey,
+  paymentData,
+) => {
+  const headers = {
+    accessToken,
+    fapiFinancialId,
+    fapiInteractionId,
+    idempotencyKey,
+  };
+
   const response = await postPayments(
     resourcePath,
     PAYMENT_SUBMISSION_ENDPOINT_URL,
-    accessToken,
-    {}, // headers
-    {}, // opts
-    {}, // risk
-    CreditorAccount, InstructedAmount,
-    fapiFinancialId, idempotencyKey, paymentId,
+    headers,
+    paymentData,
   );
 
   if (response && response.Data) {
@@ -28,12 +37,15 @@ const makePayment = async (resourcePath, accessToken, fapiFinancialId,
 const submitPayment = async (authorisationServerId,
   fapiFinancialId, idempotencyKey, fapiInteractionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const r =
-    await retrievePaymentDetails(fapiInteractionId);
+  const paymentData = await retrievePaymentDetails(fapiInteractionId);
 
   const response = await makePayment(
-    resourcePath, accessToken, fapiFinancialId,
-    r.CreditorAccount, r.InstructedAmount, idempotencyKey, r.PaymentId,
+    resourcePath,
+    accessToken,
+    fapiFinancialId,
+    fapiInteractionId,
+    idempotencyKey,
+    paymentData,
   );
 
   return response;

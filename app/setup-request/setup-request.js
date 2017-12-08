@@ -16,14 +16,6 @@ const resourceServerPath = async (authorisationServerId) => {
   return null;
 };
 
-const validateParameter = (authorisationServerId) => {
-  if (!authorisationServerId) {
-    const error = new Error('authorisationServerId missing from request payload');
-    error.status = 400;
-    throw error;
-  }
-};
-
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {
   const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
@@ -42,7 +34,6 @@ const createAccessToken = async (authorisationServerId) => {
 };
 
 const accessTokenAndResourcePath = async (authorisationServerId) => {
-  validateParameter(authorisationServerId);
   const accessToken = await createAccessToken(authorisationServerId);
   const resourcePath = await resourceServerPath(authorisationServerId);
   return { accessToken, resourcePath };

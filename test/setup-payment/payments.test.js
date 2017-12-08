@@ -1,4 +1,4 @@
-const { buildPaymentsData, postPayments } = require('../../app/setup-payment/payments');
+const { postPayments } = require('../../app/setup-payment/payments');
 const assert = require('assert');
 const nock = require('nock');
 
@@ -23,18 +23,11 @@ const secondaryIdentification = creditorAccount.SecondaryIdentification;
 const paymentId = '44673';
 const paymentSubmissionId = '44673-001';
 
-describe('buildPaymentstData and then postPayments', () => {
+describe('postPayments request to remote payment endpoints', () => {
   const instructionIdentification = 'ghghg';
   const endToEndIdentification = 'XXXgHTg';
   const reference = 'Things';
   const unstructured = 'XXX';
-
-  const opts = {
-    instructionIdentification,
-    endToEndIdentification,
-    reference,
-    unstructured,
-  };
 
   const risk = {
     foo: 'bar',
@@ -52,6 +45,9 @@ describe('buildPaymentstData and then postPayments', () => {
     interactionId,
     customerIp,
     customerLastLogged,
+    accessToken,
+    fapiFinancialId,
+    idempotencyKey,
   };
 
   const paymentData = {
@@ -128,135 +124,87 @@ describe('buildPaymentstData and then postPayments', () => {
     .matchHeader('x-jws-signature', jwsSignature) // required in v1.1.0 ( not v1.1.1 )
     .reply(201, expectedPaymentSubmissionResponse);
 
+  nock(/example\.com/)
+    .post('/open-banking/v1.1/non-exisits')
+    .matchHeader('authorization', `Bearer ${accessToken}`) // required
+    .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
+    .matchHeader('x-idempotency-key', idempotencyKey) // required
+    .matchHeader('x-fapi-interaction-id', interactionId)
+    .matchHeader('x-fapi-customer-ip-address', customerIp)
+    .matchHeader('x-fapi-customer-last-logged-time', customerLastLogged)
+    .matchHeader('x-jws-signature', jwsSignature) // required in v1.1.0 ( not v1.1.1 )
+    .reply(404, {});
 
-  describe(' For the /payments endpoint', () => {
-    it('returns a body payload of the correct shape', async () => {
-      const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
-      const expectedPayload = {
-        Data: paymentData,
-        Risk: risk,
-      };
-      assert.deepEqual(paymentsPayload, expectedPayload);
-    });
+  nock(/example\.com/)
+    .post('/open-banking/v1.1/bad-request')
+    .matchHeader('authorization', `Bearer ${accessToken}`) // required
+    .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
+    .matchHeader('x-idempotency-key', idempotencyKey) // required
+    .matchHeader('x-fapi-interaction-id', interactionId)
+    .matchHeader('x-fapi-customer-ip-address', customerIp)
+    .matchHeader('x-fapi-customer-last-logged-time', customerLastLogged)
+    .matchHeader('x-jws-signature', jwsSignature) // required in v1.1.0 ( not v1.1.1 )
+    .reply(400, {});
 
-    it('returns data when 201 OK', async () => {
+
+  describe(' For requests to payments endpoints', () => {
+    it('returns data when remote endpoint returns 201 OK', async () => {
       const resourceServerPath = 'http://example.com/open-banking/v1.1';
       const result = await postPayments(
         resourceServerPath,
         '/open-banking/v1.1/payments',
-        accessToken,
         headers,
-        opts,
-        risk,
-        creditorAccount, instructedAmount, fapiFinancialId, idempotencyKey, null, interactionId,
+        paymentData,
       );
       assert.deepEqual(result, expectedPaymentResponse);
     });
   });
 
-  describe(' For the /payment-submissions endpoint', () => {
-    it('returns a body payload of the correct shape', async () => {
-      const paymentSubmissionsPayload = buildPaymentsData(
-        opts, risk,
-        creditorAccount, instructedAmount, paymentId,
-      );
-      const expectedPayload = {
-        Data: paymentSubmissionData,
-        Risk: risk,
-      };
-      assert.deepEqual(paymentSubmissionsPayload, expectedPayload);
-    });
-
-    it('returns data when 201 OK', async () => {
-      const resourceServerPath = 'http://example.com/open-banking/v1.1';
-      const result = await postPayments(
+  it('throws error when remote endpoints returns 404', async () => {
+    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    let error;
+    try {
+      await postPayments(
         resourceServerPath,
-        '/open-banking/v1.1/payment-submissions',
-        accessToken,
+        '/open-banking/v1.1/non-exisits',
         headers,
-        opts,
-        risk,
-        creditorAccount,
-        instructedAmount,
-        fapiFinancialId,
-        idempotencyKey,
-        paymentId,
-        interactionId,
+        paymentData,
       );
-      assert.deepEqual(result, expectedPaymentSubmissionResponse);
-    });
-  });
-});
-
-describe('buildPaymentstData with optionality', () => {
-  const instructionIdentification = 'ttttt';
-  const endToEndIdentification = 'RRR';
-  const reference = 'Ref2';
-
-  const opts = {
-    instructionIdentification,
-    endToEndIdentification,
-    reference,
-  };
-
-  const risk = {
-    foo: 'bar',
-  };
-
-  const data = {
-    Initiation: {
-      InstructionIdentification: instructionIdentification,
-      EndToEndIdentification: endToEndIdentification,
-      InstructedAmount: {
-        Amount: amount,
-        Currency: currency,
-      },
-      CreditorAccount: {
-        SchemeName: 'SortCodeAccountNumber',
-        Identification: identification,
-        Name: name,
-        SecondaryIdentification: secondaryIdentification,
-      },
-      RemittanceInformation: {
-        Reference: reference,
-      },
-    },
-  };
-
-  it('returns a body payload of the correct shape: with missing unstructured field', () => {
-    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
-    const expectedPayload = {
-      Data: {
-        Initiation: data.Initiation,
-      },
-      Risk: risk,
-    };
-    assert.deepEqual(paymentsPayload, expectedPayload);
+    } catch (e) {
+      error = e;
+    }
+    assert.equal('Not Found', error.message);
   });
 
-  it('returns a body payload of the correct shape: with missing reference field', () => {
-    opts.unstructured = 'blah';
-    delete opts.reference;
-    data.Initiation.RemittanceInformation = {
-      Unstructured: opts.unstructured,
-    };
-    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
-    const expectedPayload = {
-      Data: data,
-      Risk: risk,
-    };
-    assert.deepEqual(paymentsPayload, expectedPayload);
+  it('throws error when missing required request headers', async () => {
+    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    let error;
+    try {
+      await postPayments(
+        resourceServerPath,
+        '/open-banking/v1.1/bad-request',
+        {},
+        paymentData,
+      );
+    } catch (e) {
+      error = e;
+    }
+    assert.equal('"value" required in setHeader("x-fapi-financial-id", value)', error.message);
   });
 
-  it('returns a body payload of the correct shape: with missing reference AND unstructured fields', () => {
-    delete opts.reference;
-    delete opts.unstructured;
-    delete data.Initiation.RemittanceInformation;
-    const paymentsPayload = buildPaymentsData(opts, risk, creditorAccount, instructedAmount);
-    const expectedPayload = {
-      Data: data,
-      Risk: risk,
-    };
-    assert.deepEqual(paymentsPayload, expectedPayload);
+  it('throws error when remote endpoing return 400 due to incorrect request format', async () => {
+    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    let error;
+    try {
+      await postPayments(
+        resourceServerPath,
+        '/open-banking/v1.1/bad-request',
+        headers,
+        paymentData,
+      );
+    } catch (e) {
+      error = e;
+    }
+    assert.equal('Bad Request', error.message);
   });
 });

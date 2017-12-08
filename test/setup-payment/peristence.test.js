@@ -14,8 +14,15 @@ const CreditorAccount = {
   SecondaryIdentification: '002',
 };
 
-const paymentId = '44673';
-const paymentIdemId = 'ABCD';
+const paymentData = {
+  CreditorAccount,
+  InstructedAmount,
+  InstructionIdentification: 'testInstructionId',
+  EndToEndIdentification: 'testEndToEndIdentification',
+};
+
+const PaymentId = '44673';
+const interactionId = 'ABCD';
 
 describe('persist payment details and retrieve it', () => {
   let setSpy;
@@ -31,25 +38,49 @@ describe('persist payment details and retrieve it', () => {
   });
   it('verify valid payment details persistence', async () => {
     const { persistPaymentDetails } = persistence;
-    await persistPaymentDetails(
-      paymentIdemId, paymentId,
-      CreditorAccount, InstructedAmount,
-    );
+    const fullPaymentData = {
+      Data: Object.assign({}, paymentData, { PaymentId }),
+    };
+    await persistPaymentDetails(interactionId, fullPaymentData);
     assert.ok(setSpy.called);
     assert.ok(setSpy.calledOnce);
-    assert.ok(setSpy.calledWithExactly('payments', { PaymentId: paymentId, CreditorAccount, InstructedAmount }, paymentIdemId));
+    assert.ok(setSpy.calledWithExactly('payments', fullPaymentData, interactionId));
   });
 
   it('verify valid payment details retrieval', async () => {
     const { retrievePaymentDetails } = persistence;
 
-    await retrievePaymentDetails(paymentIdemId, paymentId);
+    await retrievePaymentDetails(interactionId);
     assert.ok(getSpy.called);
     assert.ok(getSpy.calledOnce);
-    assert.ok(getSpy.calledWithExactly('payments', paymentIdemId));
+    assert.ok(getSpy.calledWithExactly('payments', interactionId, ['-id']));
   });
 
-  it('verify error when paymentId not provided for payment details retrieval', async () => {
+  it('verify error when PaymentId is not provided for payment details persistence', async () => {
+    const { persistPaymentDetails } = persistence;
+    const fullPaymentData = {
+      Data: paymentData,
+    };
+    try {
+      await persistPaymentDetails(interactionId, fullPaymentData);
+    } catch (e) {
+      assert.ok(e instanceof assert.AssertionError);
+    }
+    assert.ok(getSpy.notCalled);
+  });
+
+  it('verify error when interactionId is not provided for payment details persistence', async () => {
+    const { persistPaymentDetails } = persistence;
+
+    try {
+      await persistPaymentDetails(null, paymentData);
+    } catch (e) {
+      assert.ok(e instanceof assert.AssertionError);
+    }
+    assert.ok(getSpy.notCalled);
+  });
+
+  it('verify error when interactionId not provided for payment details retrieval', async () => {
     const { retrievePaymentDetails } = persistence;
 
     try {

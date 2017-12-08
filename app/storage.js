@@ -15,10 +15,10 @@ const db = monk(mongodbUri);
  * @param {string} id - `id` field to query.
  * @return {object} document with given `id` field, or null if none found.
  */
-const get = async (collection, id) => {
+const get = async (collection, id, fields = []) => {
   try {
     const store = await db.get(collection);
-    return await store.findOne({ id }, ['-_id']);
+    return await store.findOne({ id }, ['-_id'].concat(fields));
   } catch (e) {
     error(`error in storage get: ${e.stack}`);
     throw e;

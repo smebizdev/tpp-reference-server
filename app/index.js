@@ -11,7 +11,8 @@ const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { OBAccountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./setup-account-request');
-const { paymentAuthoriseConsent, paymentSubmission } = require('./setup-payment');
+const { paymentAuthoriseConsent } = require('./setup-payment');
+const { paymentSubmission } = require('./submit-payment');
 const { authorisationCodeGrantedHandler } = require('./authorise');
 
 const app = express();

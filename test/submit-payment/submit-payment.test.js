@@ -13,7 +13,6 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
   const PaymentId = '88379';
   const idempotencyKey = '2023klf';
-  const idempotencyKeyUnhappy = 'ee15fea57bacc37';
   let submitPaymentProxy;
 
   const PaymentsSubmissionSuccessResponse = () => ({
@@ -63,10 +62,8 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     before(setup(paymentsSuccessStub));
 
     it('Returns PaymentSubmissionId from postPayments call', async () => {
-      const id = await submitPaymentProxy(
-        authorisationServerId, fapiFinancialId,
-        idempotencyKey, interactionId,
-      );
+      const headers = { fapiFinancialId, idempotencyKey, interactionId };
+      const id = await submitPaymentProxy(authorisationServerId, headers);
       assert.equal(id, PAYMENT_SUBMISSION_ID);
       assert.ok(paymentsSuccessStub.calledWithExactly(
         resourcePath,
@@ -87,10 +84,8 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     before(setup(paymentsRejectedStub));
     it('returns an error from postPayments call', async () => {
       try {
-        await submitPaymentProxy(
-          authorisationServerId, fapiFinancialId,
-          idempotencyKeyUnhappy, interactionId,
-        );
+        const headers = { fapiFinancialId, idempotencyKey, interactionId };
+        await submitPaymentProxy(authorisationServerId, headers);
       } catch (err) {
         assert.equal(err.status, 500);
       }

@@ -11,13 +11,8 @@ const paymentSubmission = async (req, res) => {
     const fapiFinancialId = await fapiFinancialIdFor(authServerId);
     const interactionId = req.headers['x-fapi-interaction-id'];
     const idempotencyKey = uuidv4();
-
-    const paymentSubmissionId = await submitPayment(
-      authServerId,
-      fapiFinancialId,
-      idempotencyKey,
-      interactionId,
-    );
+    const headers = { fapiFinancialId, idempotencyKey, interactionId };
+    const paymentSubmissionId = await submitPayment(authServerId, headers);
 
     debug(`Payment Submission succesfully completed. Id: ${paymentSubmissionId}`);
     return res.status(201).send(); // We can't intercept a 302 !

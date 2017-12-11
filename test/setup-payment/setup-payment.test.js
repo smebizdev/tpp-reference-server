@@ -62,10 +62,10 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
     }).setupPayment;
   };
 
-  const doSetupPayment = async () => setupPaymentProxy(
-    authorisationServerId, fapiFinancialId,
-    CreditorAccount, InstructedAmount, idempotencyKey, interactionId,
-  );
+  const doSetupPayment = async () => {
+    const headers = { fapiFinancialId, idempotencyKey, interactionId };
+    return setupPaymentProxy(authorisationServerId, headers, CreditorAccount, InstructedAmount);
+  };
 
   describe('when AcceptedTechnicalValidation', () => {
     before(setup('AcceptedTechnicalValidation'));

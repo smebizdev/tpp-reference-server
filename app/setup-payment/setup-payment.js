@@ -34,7 +34,7 @@ const createRequest = async (resourcePath, headers, paymentData) => {
 };
 
 const setupPayment = async (authorisationServerId,
-  fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey, interactionId) => {
+  headers, CreditorAccount, InstructedAmount) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
 
   const paymentData = buildPaymentsData(
@@ -43,16 +43,10 @@ const setupPayment = async (authorisationServerId,
     CreditorAccount, InstructedAmount,
   );
 
-  const headers = {
-    accessToken,
-    fapiFinancialId,
-    idempotencyKey,
-    interactionId,
-  };
-
+  const headersWithToken = Object.assign(headers, { accessToken });
   const paymentId = await createRequest(
     resourcePath,
-    headers,
+    headersWithToken,
     paymentData,
   );
 
@@ -64,7 +58,7 @@ const setupPayment = async (authorisationServerId,
     Risk: paymentData.Risk,
   };
 
-  persistPaymentDetails(interactionId, fullPaymentData);
+  persistPaymentDetails(headers.interactionId, fullPaymentData);
 
   return paymentId;
 };

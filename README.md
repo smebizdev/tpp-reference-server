@@ -66,7 +66,7 @@ The server has to be configured with
 * `OB_PROVISIONED=true`.
 * `OB_DIRECTORY_HOST=https://<real directory>`.
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-* `SOFTWARE_STATEMENT_ASSERTION_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
+* `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
 * `CLIENT_SCOPES='openid TPPReadAccess ASPSPReadAccess'`.
 * `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
 

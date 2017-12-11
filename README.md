@@ -66,9 +66,9 @@ The server has to be configured with
 * `OB_PROVISIONED=true`.
 * `OB_DIRECTORY_HOST=https://<real directory>`.
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-* `SOFTWARE_STATEMENT_ASSERTION_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
 * `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'`.
 * `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
+* `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
 
 This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.
 

@@ -6,25 +6,11 @@ const debug = require('debug')('debug');
 
 const PAYMENT_REQUEST_ENDPOINT_URL = '/open-banking/v1.1/payments';
 
-const createRequest = async (
-  resourcePath,
-  accessToken,
-  fapiFinancialId,
-  idempotencyKey,
-  interactionId,
-  paymentData,
-) => {
-  const headers = {
-    accessToken,
-    fapiFinancialId,
-    idempotencyKey,
-    interactionId,
-  };
-
+const createRequest = async (resourcePath, headers, paymentData) => {
   const response = await postPayments(
     resourcePath,
     PAYMENT_REQUEST_ENDPOINT_URL,
-    headers, // headers
+    headers,
     paymentData,
   );
   let error;
@@ -56,12 +42,16 @@ const setupPayment = async (authorisationServerId,
     CreditorAccount, InstructedAmount,
   );
 
-  const paymentId = await createRequest(
-    resourcePath,
+  const headers = {
     accessToken,
     fapiFinancialId,
     idempotencyKey,
     interactionId,
+  };
+
+  const paymentId = await createRequest(
+    resourcePath,
+    headers,
     paymentData,
   );
 

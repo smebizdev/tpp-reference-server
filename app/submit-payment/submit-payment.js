@@ -13,9 +13,9 @@ const makePayment = async (resourcePath, headers, paymentData) => {
   );
 
   if (response && response.Data && response.Data.Status !== 'Rejected') {
-    return response.Data.PaymentSubissionId;
+    return response.Data.PaymentSubmissionId;
   }
-  const error = new Error('Payment failed');
+  const error = new Error('Payment submission failed');
   error.status = 500;
   throw error;
 };

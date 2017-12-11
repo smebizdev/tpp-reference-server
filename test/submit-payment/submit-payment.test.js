@@ -18,14 +18,14 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
   const PaymentsSubmissionSuccessResponse = () => ({
     Data: {
-      PaymentSubissionId: PAYMENT_SUBMISSION_ID,
+      PaymentSubmissionId: PAYMENT_SUBMISSION_ID,
       Status: 'AcceptedSettlementInProcess',
     },
   });
 
   const PaymentsSubmissionRejectedResponse = () => ({
     Data: {
-      PaymentSubissionId: PAYMENT_SUBMISSION_ID,
+      PaymentSubmissionId: PAYMENT_SUBMISSION_ID,
       Status: 'Rejected',
     },
   });

@@ -6,15 +6,19 @@ const debug = require('debug')('debug');
 const error = require('debug')('error');
 const assert = require('assert');
 
+const verifyHeaders = (headers) => {
+  assert.ok(headers.accessToken, 'accessToken missing from headers');
+  assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
+  assert.ok(headers.interactionId, 'interactionId missing from headers');
+  assert.ok(headers.idempotencyKey, 'idempotencyKey missing from headers');
+};
+
 /**
  * @description Dual purpose: payments and payment-submissions
  */
 const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, paymentData) => {
   try {
-    assert.ok(headers.accessToken, 'accessToken missing from headers');
-    assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
-    assert.ok(headers.interactionId, 'interactionId missing from headers');
-    assert.ok(headers.idempotencyKey, 'idempotencyKey missing from headers');
+    verifyHeaders(headers);
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
     const paymentsUri = new URL(paymentPathEndpoint, host);
     log(`POST to ${paymentsUri}`);
@@ -45,3 +49,4 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
 };
 
 exports.postPayments = postPayments;
+exports.verifyHeaders = verifyHeaders;

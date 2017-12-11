@@ -1,6 +1,6 @@
 const { accessTokenAndResourcePath } = require('../setup-request');
-const { postPayments } = require('./payments');
-const { retrievePaymentDetails } = require('./persistence');
+const { postPayments } = require('../setup-payment/payments');
+const { retrievePaymentDetails } = require('../setup-payment/persistence');
 
 const PAYMENT_SUBMISSION_ENDPOINT_URL = '/open-banking/v1.1/payment-submissions';
 

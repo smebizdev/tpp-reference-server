@@ -10,7 +10,7 @@ const authServerId = 'testAuthServerId';
 
 const setupApp = (submitPaymentStub) => {
   const { paymentSubmission } = proxyquire(
-    '../../app/setup-payment/payment-submission.js',
+    '../../app/submit-payment/payment-submission.js',
     {
       './submit-payment': {
         submitPayment: submitPaymentStub,

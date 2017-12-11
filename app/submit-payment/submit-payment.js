@@ -22,13 +22,13 @@ const makePayment = async (resourcePath, headers, paymentData) => {
 };
 
 const submitPayment = async (authorisationServerId,
-  fapiFinancialId, idempotencyKey, fapiInteractionId) => {
+  fapiFinancialId, idempotencyKey, interactionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const paymentData = await retrievePaymentDetails(fapiInteractionId);
+  const paymentData = await retrievePaymentDetails(interactionId);
   const headers = {
     accessToken,
     fapiFinancialId,
-    fapiInteractionId,
+    interactionId,
     idempotencyKey,
   };
   const response = await makePayment(resourcePath, headers, paymentData);

@@ -4,7 +4,7 @@ const sinon = require('sinon');
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
-const fapiInteractionId = 'interaction-1234';
+const interactionId = 'interaction-1234';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 describe('submitPayment called with authorisationServerId and fapiFinancialId', () => {
@@ -65,14 +65,14 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     it('Returns PaymentSubmissionId from postPayments call', async () => {
       const id = await submitPaymentProxy(
         authorisationServerId, fapiFinancialId,
-        idempotencyKey, fapiInteractionId,
+        idempotencyKey, interactionId,
       );
       assert.equal(id, PAYMENT_SUBMISSION_ID);
       assert.ok(paymentsSuccessStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
         {
-          accessToken, fapiFinancialId, idempotencyKey, fapiInteractionId,
+          accessToken, fapiFinancialId, idempotencyKey, interactionId,
         },
         {
           PaymentId,
@@ -89,7 +89,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
       try {
         await submitPaymentProxy(
           authorisationServerId, fapiFinancialId,
-          idempotencyKeyUnhappy, fapiInteractionId,
+          idempotencyKeyUnhappy, interactionId,
         );
       } catch (err) {
         assert.equal(err.status, 500);

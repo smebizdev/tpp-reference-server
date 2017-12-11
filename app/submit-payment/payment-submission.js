@@ -9,14 +9,14 @@ const paymentSubmission = async (req, res) => {
   try {
     const authServerId = req.headers['x-authorization-server-id'];
     const fapiFinancialId = await fapiFinancialIdFor(authServerId);
-    const fapiInteractionId = req.headers['x-fapi-interaction-id'];
+    const interactionId = req.headers['x-fapi-interaction-id'];
     const idempotencyKey = uuidv4();
 
     const paymentSubmissionId = await submitPayment(
       authServerId,
       fapiFinancialId,
       idempotencyKey,
-      fapiInteractionId,
+      interactionId,
     );
 
     debug(`Payment Submission succesfully completed. Id: ${paymentSubmissionId}`);

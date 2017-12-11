@@ -4,12 +4,17 @@ const { URL } = require('url');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
+const assert = require('assert');
 
 /**
  * @description Dual purpose: payments and payment-submissions
  */
 const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, paymentData) => {
   try {
+    assert.ok(headers.accessToken, 'accessToken missing from headers');
+    assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
+    assert.ok(headers.interactionId, 'interactionId missing from headers');
+    assert.ok(headers.idempotencyKey, 'idempotencyKey missing from headers');
     const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
     const paymentsUri = new URL(paymentPathEndpoint, host);
     log(`POST to ${paymentsUri}`);
@@ -17,12 +22,12 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
       .set('authorization', `Bearer ${headers.accessToken}`)
       .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .set('x-fapi-financial-id', headers.fapiFinancialId)
+      .set('x-fapi-interaction-id', headers.interactionId)
       .set('x-idempotency-key', headers.idempotencyKey)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8');
     if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
-    if (headers.interactionId) payment.set('x-fapi-interaction-id', headers.interactionId);
 
     payment.send(paymentData);
     const response = await payment;

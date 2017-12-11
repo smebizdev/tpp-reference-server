@@ -18,7 +18,7 @@ const provisionedForOpenBanking = process.env.OB_PROVISIONED === 'true';
 const directoryHost = process.env.OB_DIRECTORY_HOST;
 const directoryAuthHost = process.env.OB_DIRECTORY_AUTH_HOST;
 const softwareStatementId = process.env.SOFTWARE_STATEMENT_ID;
-const softwareStatementAssertionKid = process.env.SIGNING_KID;
+const signingKid = process.env.SIGNING_KID;
 const authClientScopes = process.env.CLIENT_SCOPES;
 const signingKey = () => Buffer.from(process.env.SIGNING_KEY || '', 'base64').toString();
 
@@ -62,7 +62,7 @@ const getAccessToken = async () => {
     };
 
     const createdJwt = nJwt.create(claims, signingKey(), 'RS256');
-    createdJwt.setHeader('kid', softwareStatementAssertionKid);
+    createdJwt.setHeader('kid', signingKid);
     const compactedJwt = createdJwt.compact();
 
     const response = await setupMutualTLS(request.post(authUrl))

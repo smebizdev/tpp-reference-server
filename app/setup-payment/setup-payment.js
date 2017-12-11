@@ -1,5 +1,5 @@
 const { accessTokenAndResourcePath } = require('../setup-request');
-const { postPayments } = require('./payments');
+const { verifyHeaders, postPayments } = require('./payments');
 const { buildPaymentsData } = require('./payment-data-builder');
 const { persistPaymentDetails } = require('./persistence');
 const debug = require('debug')('debug');
@@ -7,6 +7,7 @@ const debug = require('debug')('debug');
 const PAYMENT_REQUEST_ENDPOINT_URL = '/open-banking/v1.1/payments';
 
 const createRequest = async (resourcePath, headers, paymentData) => {
+  verifyHeaders(headers);
   const response = await postPayments(
     resourcePath,
     PAYMENT_REQUEST_ENDPOINT_URL,
@@ -33,7 +34,7 @@ const createRequest = async (resourcePath, headers, paymentData) => {
 };
 
 const setupPayment = async (authorisationServerId,
-  fapiFinancialId, CreditorAccount, InstructedAmount, idempotencyKey, interactionId) => {
+  headers, CreditorAccount, InstructedAmount) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
 
   const paymentData = buildPaymentsData(
@@ -42,16 +43,10 @@ const setupPayment = async (authorisationServerId,
     CreditorAccount, InstructedAmount,
   );
 
-  const headers = {
-    accessToken,
-    fapiFinancialId,
-    idempotencyKey,
-    interactionId,
-  };
-
+  const headersWithToken = Object.assign(headers, { accessToken });
   const paymentId = await createRequest(
     resourcePath,
-    headers,
+    headersWithToken,
     paymentData,
   );
 
@@ -63,7 +58,7 @@ const setupPayment = async (authorisationServerId,
     Risk: paymentData.Risk,
   };
 
-  persistPaymentDetails(interactionId, fullPaymentData);
+  persistPaymentDetails(headers.interactionId, fullPaymentData);
 
   return paymentId;
 };

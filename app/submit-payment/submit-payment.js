@@ -1,5 +1,5 @@
 const { accessTokenAndResourcePath } = require('../setup-request');
-const { postPayments } = require('../setup-payment/payments');
+const { verifyHeaders, postPayments } = require('../setup-payment/payments');
 const { retrievePaymentDetails } = require('../setup-payment/persistence');
 
 const PAYMENT_SUBMISSION_ENDPOINT_URL = '/open-banking/v1.1/payment-submissions';
@@ -20,18 +20,12 @@ const makePayment = async (resourcePath, headers, paymentData) => {
   throw error;
 };
 
-const submitPayment = async (authorisationServerId,
-  fapiFinancialId, idempotencyKey, fapiInteractionId) => {
+const submitPayment = async (authorisationServerId, headers) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const paymentData = await retrievePaymentDetails(fapiInteractionId);
-  const headers = {
-    accessToken,
-    fapiFinancialId,
-    fapiInteractionId,
-    idempotencyKey,
-  };
-
-  const response = await makePayment(resourcePath, headers, paymentData);
+  const headersWithToken = Object.assign(headers, { accessToken });
+  verifyHeaders(headers);
+  const paymentData = await retrievePaymentDetails(headers.interactionId);
+  const response = await makePayment(resourcePath, headersWithToken, paymentData);
   return response;
 };
 

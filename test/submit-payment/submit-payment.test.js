@@ -4,7 +4,7 @@ const sinon = require('sinon');
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
-const fapiInteractionId = 'interaction-1234';
+const interactionId = 'interaction-1234';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 describe('submitPayment called with authorisationServerId and fapiFinancialId', () => {
@@ -13,7 +13,6 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
   const PaymentId = '88379';
   const idempotencyKey = '2023klf';
-  const idempotencyKeyUnhappy = 'ee15fea57bacc37';
   let submitPaymentProxy;
 
   const PaymentsSubmissionSuccessResponse = () => ({
@@ -63,16 +62,14 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     before(setup(paymentsSuccessStub));
 
     it('Returns PaymentSubmissionId from postPayments call', async () => {
-      const id = await submitPaymentProxy(
-        authorisationServerId, fapiFinancialId,
-        idempotencyKey, fapiInteractionId,
-      );
+      const headers = { fapiFinancialId, idempotencyKey, interactionId };
+      const id = await submitPaymentProxy(authorisationServerId, headers);
       assert.equal(id, PAYMENT_SUBMISSION_ID);
       assert.ok(paymentsSuccessStub.calledWithExactly(
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
         {
-          accessToken, fapiFinancialId, idempotencyKey, fapiInteractionId,
+          accessToken, fapiFinancialId, idempotencyKey, interactionId,
         },
         {
           PaymentId,
@@ -87,10 +84,8 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     before(setup(paymentsRejectedStub));
     it('returns an error from postPayments call', async () => {
       try {
-        await submitPaymentProxy(
-          authorisationServerId, fapiFinancialId,
-          idempotencyKeyUnhappy, fapiInteractionId,
-        );
+        const headers = { fapiFinancialId, idempotencyKey, interactionId };
+        await submitPaymentProxy(authorisationServerId, headers);
       } catch (err) {
         assert.equal(err.status, 500);
       }

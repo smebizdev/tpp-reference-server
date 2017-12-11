@@ -26,13 +26,13 @@ const setupApp = (submitPaymentStub) => {
   return app;
 };
 
-const fapiInteractionId = 'testInteractionId';
+const interactionId = 'testInteractionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 const doPost = app => request(app)
   .post('/payment-submissions')
   .set('x-authorization-server-id', authServerId)
-  .set('x-fapi-interaction-id', fapiInteractionId)
+  .set('x-fapi-interaction-id', interactionId)
   .send();
 
 describe('/payment-submission with successful submitPayment', () => {

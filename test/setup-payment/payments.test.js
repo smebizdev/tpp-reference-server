@@ -189,7 +189,7 @@ describe('postPayments request to remote payment endpoints', () => {
     } catch (e) {
       error = e;
     }
-    assert.equal('"value" required in setHeader("x-fapi-financial-id", value)', error.message);
+    assert.equal('accessToken missing from headers', error.message);
   });
 
   it('throws error when remote endpoing return 400 due to incorrect request format', async () => {

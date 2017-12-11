@@ -41,7 +41,7 @@ curl -X POST --data 'u=alice&p=wonderland' http://localhost:8003/login
 This returns a session ID token as a `sid`. Use this for further authorized access.
 
 This is an example.
- 
+
 ```sh
 {
   "sid": "896beb20-affc-11e7-a5e6-a941c8c37252"
@@ -67,7 +67,7 @@ The server has to be configured with
 * `OB_DIRECTORY_HOST=https://<real directory>`.
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
 * `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
-* `CLIENT_SCOPES='openid TPPReadAccess ASPSPReadAccess'`.
+* `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'`.
 * `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
 
 This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.

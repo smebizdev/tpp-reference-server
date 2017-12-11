@@ -7,17 +7,6 @@ const error = require('debug')('error');
 
 /**
  * @description Dual purpose: payments and payment-submissions
- * @param resourceServerPath
- * @param accessToken
- * @param headers
- * @param opts
- * @param risk
- * @param CreditorAccount
- * @param InstructedAmount
- * @param fapiFinancialId
- * @param idempotencyKey
- * @param paymentId < optional - only used for Payment Submission
- * @returns {Promise.<void>}
  */
 const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, paymentData) => {
   try {

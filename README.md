@@ -169,16 +169,28 @@ Found. Redirecting to http://localhost:8080/tpp/authorized?code=spoofAuthorisati
 ```
 
 To conclude the flow and ensure the `access-token` is generated,
-* First, parse the `state` query param.
+* First, parse the `state` query param using the [Node.js `REPL`](https://nodejs.org/api/repl.html).
+
 ```sh
 node
+# Node.js REPL
 new Buffer("eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ==", 'base64').toString('ascii')
 ```
+
 This produces
 ```
 '{"authorisationServerId":"aaaj4NmBD8lQxmLh2O","interactionId":"8a2c9572-1f1f-407a-9526-5f834e7fc1ac","sessionId":"c758b000-df52-11e7-83ea-d1671a959de0","scope":"openid accounts"}'
 ```
+
+* Close the `REPL`:
+
+```sh
+# Node.js REPL
+.exit
+```
+
 * Then, perform a GET request against the TPP Server using `code` and parsed `authorisationServerId` from the `state`.
+
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json' --url "http://localhost:8003/tpp/authorized?code=spoofAuthorisationCode&authorisationServerId=aaaj4NmBD8lQxmLh2O"
 ```

@@ -28,7 +28,9 @@ __Work in progress__ - so far we provide,
 
 * Authenticating with the server.
 * List ASPSP Authorisation Servers - actual & simulated based on ENVs.
-* Proxy requests for upstream backend [ASPSP Read/Write APIs](https://www.openbanking.org.uk/read-write-apis/).
+* OLD: Proxy requests for upstream backend [ASPSP Read/Write APIs](https://www.openbanking.org.uk/read-write-apis/).
+* Basic AISP functionality and consent flow.
+* Basic PISP functionality and consent flow.
 
 ### Authenticating with the server.
 
@@ -66,6 +68,7 @@ The server has to be configured with
 * `OB_PROVISIONED=true`.
 * `OB_DIRECTORY_HOST=https://<real directory>`.
 * `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
+* `SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized`.
 * `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'`.
 * `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
 * `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
@@ -122,9 +125,77 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ]
 ```
 
-### Proxy requests for upstream backend ASPSP APIs (v1.1)
+<!-- ### Proxy requests for upstream backend ASPSP APIs (v1.1) -->
+### Basic AISP functionality and consent flow (API v1.1)
 
 __NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.
+
+We support a simple AISP workflow where a PSU authorises a TPP to view account information on their behalf. This showcases the required oAuth consent flow and hits the relevant [proxied APIs](#proxied-api-path).
+
+#### OIDC Authorization Flow
+
+We implement the OIDC Authorization Flow which generates an `access-token` on the PSUs behalf to allow the TPP to access their accounts.
+
+This `access-token`
+* Is stored on the ASPSP Authorization Server.
+* Post generation marks the PSU's account as `Authorised` on the ASPSP Resource Server.
+
+Here's how to start the flow,
+
+```sh
+curl -X POST -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json' -d '{"authorisationServerId": "aaaj4NmBD8lQxmLh2O"}' http://localhost:8003/account-request-authorise-consent
+```
+
+This will yield a URI required to perform the oAuth flow. Sample below:
+
+```json
+{
+  "uri": "http://localhost:8001/aaaj4NmBD8lQxmLh2O/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Ftpp%2Fauthorized&state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiYzEzOWI5M2UtYWU1NC00YzI0LWIzNjEtZWUyODZlOWRjYTBlIiwic2Vzc2lvbklkIjoiNWFjMTEzMzAtZGY1MC0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ%3D%3D&client_id=spoofClientId&response_type=code&request=eyJhbGciOiJub25lIn0.eyJpc3MiOiJzcG9vZkNsaWVudElkIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjbGllbnRfaWQiOiJzcG9vZkNsaWVudElkIiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3RwcC9hdXRob3JpemVkIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMiLCJzdGF0ZSI6ImV5SmhkWFJvYjNKcGMyRjBhVzl1VTJWeWRtVnlTV1FpT2lKaFlXRnFORTV0UWtRNGJGRjRiVXhvTWs4aUxDSnBiblJsY21GamRHbHZia2xrSWpvaVl6RXpPV0k1TTJVdFlXVTFOQzAwWXpJMExXSXpOakV0WldVeU9EWmxPV1JqWVRCbElpd2ljMlZ6YzJsdmJrbGtJam9pTldGak1URXpNekF0WkdZMU1DMHhNV1UzTFRnelpXRXRaREUyTnpGaE9UVTVaR1V3SWl3aWMyTnZjR1VpT2lKdmNHVnVhV1FnWVdOamIzVnVkSE1pZlE9PSIsIm5vbmNlIjoiZHVtbXktbm9uY2UiLCJtYXhfYWdlIjo4NjQwMCwiY2xhaW1zIjp7InVzZXJpbmZvIjp7Im9wZW5iYW5raW5nX2ludGVudF9pZCI6eyJ2YWx1ZSI6IjAxMmZhZGY1LWI4NWYtNDZjNS04MTc1LTk4NTRkMzZkZjVmYSIsImVzc2VudGlhbCI6dHJ1ZX19LCJpZF90b2tlbiI6eyJvcGVuYmFua2luZ19pbnRlbnRfaWQiOnsidmFsdWUiOiIwMTJmYWRmNS1iODVmLTQ2YzUtODE3NS05ODU0ZDM2ZGY1ZmEiLCJlc3NlbnRpYWwiOnRydWV9LCJhY3IiOnsiZXNzZW50aWFsIjp0cnVlfX19fQ.&scope=openid%20accounts"
+}
+```
+
+A `redirect_uri` is included in the querystring. This will be used by the ASPSP server to redirect back to the intended endpoint. It's normally configured using the `SOFTWARE_STATEMENT_REDIRECT_URL` ENV.
+
+Perform a GET request against the `uri` in the payload to continue the flow,
+
+```sh
+curl -X GET --url "http://localhost:8001/aaaj4NmBD8lQxmLh2O/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Ftpp%2Fauthorized&state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ%3D%3D&client_id=spoofClientId&response_type=code&request=eyJhbGciOiJub25lIn0.eyJpc3MiOiJzcG9vZkNsaWVudElkIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjbGllbnRfaWQiOiJzcG9vZkNsaWVudElkIiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3RwcC9hdXRob3JpemVkIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMiLCJzdGF0ZSI6ImV5SmhkWFJvYjNKcGMyRjBhVzl1VTJWeWRtVnlTV1FpT2lKaFlXRnFORTV0UWtRNGJGRjRiVXhvTWs4aUxDSnBiblJsY21GamRHbHZia2xrSWpvaU9HRXlZemsxTnpJdE1XWXhaaTAwTURkaExUazFNall0TldZNE16UmxOMlpqTVdGaklpd2ljMlZ6YzJsdmJrbGtJam9pWXpjMU9HSXdNREF0WkdZMU1pMHhNV1UzTFRnelpXRXRaREUyTnpGaE9UVTVaR1V3SWl3aWMyTnZjR1VpT2lKdmNHVnVhV1FnWVdOamIzVnVkSE1pZlE9PSIsIm5vbmNlIjoiZHVtbXktbm9uY2UiLCJtYXhfYWdlIjo4NjQwMCwiY2xhaW1zIjp7InVzZXJpbmZvIjp7Im9wZW5iYW5raW5nX2ludGVudF9pZCI6eyJ2YWx1ZSI6ImY2MjRkYWVkLThkYWMtNGExOS1hYmU1LWNlMjgwNWYzNDliOSIsImVzc2VudGlhbCI6dHJ1ZX19LCJpZF90b2tlbiI6eyJvcGVuYmFua2luZ19pbnRlbnRfaWQiOnsidmFsdWUiOiJmNjI0ZGFlZC04ZGFjLTRhMTktYWJlNS1jZTI4MDVmMzQ5YjkiLCJlc3NlbnRpYWwiOnRydWV9LCJhY3IiOnsiZXNzZW50aWFsIjp0cnVlfX19fQ.&scope=openid%20accounts"
+```
+
+This results in a redirection url with the correct `code` as per the OIDC Authorization Flow. Also, it includes a `state` query param that includes a base64 encoded string to identify the ASPSP Authorization Server for further queries.
+
+```sh
+Found. Redirecting to http://localhost:8080/tpp/authorized?code=spoofAuthorisationCode&state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ==
+```
+
+To conclude the flow and ensure the `access-token` is generated,
+* First, parse the `state` query param using the [Node.js `REPL`](https://nodejs.org/api/repl.html).
+
+```sh
+node
+# Node.js REPL
+new Buffer("eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ==", 'base64').toString('ascii');
+```
+
+This produces
+```
+'{"authorisationServerId":"aaaj4NmBD8lQxmLh2O","interactionId":"8a2c9572-1f1f-407a-9526-5f834e7fc1ac","sessionId":"c758b000-df52-11e7-83ea-d1671a959de0","scope":"openid accounts"}'
+```
+
+* Close the `REPL`:
+
+```sh
+# Node.js REPL
+.exit
+```
+
+* Then, perform a GET request against the TPP Server using `code` and parsed `authorisationServerId` from the `state`.
+
+```sh
+curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json' --url "http://localhost:8003/tpp/authorized?code=spoofAuthorisationCode&authorisationServerId=aaaj4NmBD8lQxmLh2O"
+```
+
+This creates an `access-token` and allows authorized access to the APIs.
 
 #### Proxied API path
 

@@ -174,7 +174,7 @@ To conclude the flow and ensure the `access-token` is generated,
 ```sh
 node
 # Node.js REPL
-new Buffer("eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ==", 'base64').toString('ascii')
+new Buffer("eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiOGEyYzk1NzItMWYxZi00MDdhLTk1MjYtNWY4MzRlN2ZjMWFjIiwic2Vzc2lvbklkIjoiYzc1OGIwMDAtZGY1Mi0xMWU3LTgzZWEtZDE2NzFhOTU5ZGUwIiwic2NvcGUiOiJvcGVuaWQgYWNjb3VudHMifQ==", 'base64').toString('ascii');
 ```
 
 This produces

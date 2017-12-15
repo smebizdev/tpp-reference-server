@@ -15,7 +15,7 @@ services:
     environment: 
      - "DEBUG=error,log"
      - "PORT=8001"
-     - "HOST=http://localhost:8001"
+     - "HOST=http://refmockserver:8001"
      - "ACCOUNT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json"
      - "PAYMENT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json"
      - "CLIENT_ID=spoofClientId"
@@ -26,12 +26,13 @@ services:
      - "BANK_DATA_DIRECTORY=abcbank"
      - "VERSION=v1.1"
      - "OPENID_CONFIG_ENDPOINT_URL=http://refmockserver:8001/openid/config"
-     - "OPENID_ASPSP_AUTH_HOST=http://refmockserver:8001"
+     - "OPENID_ASPSP_AUTH_HOST=http://${HOST_IP}:8001"
     command: >
       /bin/bash -c "
         rm -fr .env
         echo Start the Reference Mock Service
-        DEBUG=debug,log,error npm run foreman"
+        DEBUG=debug,log,error npm run foreman
+        "
   tpp-server:
     build: .
     image: ob/tpp-server

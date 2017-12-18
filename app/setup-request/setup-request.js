@@ -1,20 +1,8 @@
 const { postToken } = require('../obtain-access-token');
 const {
   getClientCredentials,
-  resourceServerHost,
+  resourceServerPath,
 } = require('../authorisation-servers');
-
-const resourceServerPath = async (authorisationServerId) => {
-  if (authorisationServerId) {
-    const host = await resourceServerHost(authorisationServerId);
-    if (host.indexOf('/open-banking/') > 0) {
-      return host;
-    }
-    const apiVersion = 'v1.1';
-    return `${host}/open-banking/${apiVersion}`;
-  }
-  return null;
-};
 
 // Returns access-token when request successful
 const createAccessToken = async (authorisationServerId) => {

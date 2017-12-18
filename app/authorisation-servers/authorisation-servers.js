@@ -73,11 +73,24 @@ const requireAuthorisationServerId = async (req, res, next) => {
 const resourceServerHost = async (authServerId) => {
   const config = await obDirectoryConfig(authServerId);
   if (config && config.BaseApiDNSUri) {
-    return config.BaseApiDNSUri;
+    const host = config.BaseApiDNSUri;
+    if (host.indexOf('/open-banking/') > 0) {
+      return host;
+    }
+    return host;
   }
   const err = new Error(`resource server host for ${authServerId} not found`);
   err.status = 500;
   throw err;
+};
+
+const resourceServerPath = async (authorisationServerId) => {
+  if (authorisationServerId) {
+    const host = await resourceServerHost(authorisationServerId);
+    const apiVersion = 'v1.1';
+    return `${host}/open-banking/${apiVersion}`;
+  }
+  return null;
 };
 
 const storeAuthorisationServers = async (list) => {
@@ -204,6 +217,7 @@ exports.allAuthorisationServers = allAuthorisationServers;
 exports.authorisationServersForClient = authorisationServersForClient;
 exports.tokenEndpoint = tokenEndpoint;
 exports.resourceServerHost = resourceServerHost;
+exports.resourceServerPath = resourceServerPath;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;

@@ -7,7 +7,7 @@ const authorisationServerId = 'testAuthorisationServerId';
 
 describe('accessTokenAndResourcePath called with valid parameters', () => {
   const token = 'access-token';
-  const resourceServer = 'http://resource-server.com';
+  const resourceServerPath = 'http://resource-server.com/open-banking/v1.1';
   const clientId = 'testClientId';
   const clientSecret = 'testClientSecret';
   const tokenPayload = {
@@ -17,12 +17,12 @@ describe('accessTokenAndResourcePath called with valid parameters', () => {
   const tokenResponse = { access_token: token };
   const tokenStub = sinon.stub().returns(tokenResponse);
   const getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-  const resourceServerHostStub = sinon.stub().returns(resourceServer);
+  const resourceServerPathStub = sinon.stub().returns(resourceServerPath);
   const accessTokenAndResourcePathProxy = proxyquire('../../app/setup-request/setup-request', {
     '../obtain-access-token': { postToken: tokenStub },
     '../authorisation-servers': {
       getClientCredentials: getClientCredentialsStub,
-      resourceServerHost: resourceServerHostStub,
+      resourceServerPath: resourceServerPathStub,
     },
   }).accessTokenAndResourcePath;
 
@@ -34,7 +34,7 @@ describe('accessTokenAndResourcePath called with valid parameters', () => {
       clientId, clientSecret, tokenPayload,
     ), 'postToken called correctly');
 
-    assert.equal(resourcePath, `${resourceServer}/open-banking/v1.1`);
+    assert.equal(resourcePath, resourceServerPath);
     assert.equal(accessToken, token);
   });
 });

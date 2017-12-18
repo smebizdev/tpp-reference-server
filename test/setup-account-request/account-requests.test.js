@@ -24,13 +24,12 @@ describe('postAccountRequests', () => {
 
   const accessToken = '2YotnFZFEjr1zCsicMWpAA';
   const fapiFinancialId = 'abc';
-  const jwsSignature = 'not-required-swagger-to-be-changed';
 
   nock(/example\.com/)
     .post('/open-banking/v1.1/account-requests')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
-    .matchHeader('x-jws-signature', jwsSignature) // required
+    // optional x-jws-signature
     // optional x-fapi-customer-last-logged-time
     // optional x-fapi-customer-ip-address
     // optional x-fapi-interaction-id

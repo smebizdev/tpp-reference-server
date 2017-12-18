@@ -40,7 +40,6 @@ const postAccountRequests = async (resourceServerPath, accessToken,
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8')
       .set('x-fapi-financial-id', fapiFinancialId)
-      .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;

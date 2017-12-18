@@ -24,7 +24,6 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     log(`POST to ${paymentsUri}`);
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${headers.accessToken}`)
-      .set('x-jws-signature', 'not-required-swagger-to-be-changed')
       .set('x-fapi-financial-id', headers.fapiFinancialId)
       .set('x-fapi-interaction-id', headers.interactionId)
       .set('x-idempotency-key', headers.idempotencyKey)
@@ -32,6 +31,7 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
       .set('accept', 'application/json; charset=utf-8');
     if (headers.customerLastLogged) payment.set('x-fapi-customer-last-logged-time', headers.customerLastLogged);
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
+    if (headers.jwsSignature) payment.set('x-jws-signature', headers.jwsSignature);
 
     payment.send(paymentData);
     const response = await payment;

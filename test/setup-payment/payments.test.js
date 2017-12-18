@@ -39,7 +39,7 @@ describe('postPayments request to remote payment endpoints', () => {
   const interactionId = 'xyz';
   const customerIp = '10.10.0.1';
   const customerLastLogged = 'Sun, 10 Sep 2017 19:43:31 UTC';
-  const jwsSignature = 'not-required-swagger-to-be-changed';
+  const jwsSignature = 'testJwsSignature';
 
   const headers = {
     interactionId,
@@ -48,6 +48,7 @@ describe('postPayments request to remote payment endpoints', () => {
     accessToken,
     fapiFinancialId,
     idempotencyKey,
+    jwsSignature,
   };
 
   const paymentData = {

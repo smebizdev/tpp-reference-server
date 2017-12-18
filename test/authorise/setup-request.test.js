@@ -1,7 +1,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
-const { accessTokenAndResourcePath } = require('../../app/setup-request'); // eslint-disable-line
+const { accessTokenAndResourcePath } = require('../../app/authorise'); // eslint-disable-line
 
 const authorisationServerId = 'testAuthorisationServerId';
 
@@ -10,8 +10,8 @@ describe('accessTokenAndResourcePath called with valid parameters', () => {
   const resourceServerPath = 'http://resource-server.com/open-banking/v1.1';
   const tokenStub = sinon.stub().returns(token);
   const resourceServerPathStub = sinon.stub().returns(resourceServerPath);
-  const accessTokenAndResourcePathProxy = proxyquire('../../app/setup-request/setup-request', {
-    '../authorise': { createAccessToken: tokenStub },
+  const accessTokenAndResourcePathProxy = proxyquire('../../app/authorise/setup-request', {
+    './obtain-access-token': { createAccessToken: tokenStub },
     '../authorisation-servers': {
       resourceServerPath: resourceServerPathStub,
     },

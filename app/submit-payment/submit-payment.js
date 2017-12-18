@@ -1,4 +1,4 @@
-const { accessTokenAndResourcePath } = require('../setup-request');
+const { accessTokenAndResourcePath } = require('../authorise');
 const { verifyHeaders, postPayments } = require('../setup-payment/payments');
 const { retrievePaymentDetails } = require('../setup-payment/persistence');
 

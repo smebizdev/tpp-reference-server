@@ -1,4 +1,4 @@
-const { createAccessToken } = require('../authorise');
+const { createAccessToken } = require('./obtain-access-token');
 const { resourceServerPath } = require('../authorisation-servers');
 
 const accessTokenAndResourcePath = async (authorisationServerId) => {

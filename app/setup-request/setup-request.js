@@ -1,25 +1,5 @@
-const { postToken } = require('../authorise');
-const {
-  getClientCredentials,
-  resourceServerPath,
-} = require('../authorisation-servers');
-
-// Returns access-token when request successful
-const createAccessToken = async (authorisationServerId) => {
-  const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
-  const accessTokenPayload = {
-    scope: 'accounts payments', // include both scopes for client credentials grant
-    grant_type: 'client_credentials',
-  };
-
-  const response = await postToken(
-    authorisationServerId,
-    clientId,
-    clientSecret,
-    accessTokenPayload,
-  );
-  return response.access_token;
-};
+const { createAccessToken } = require('../authorise');
+const { resourceServerPath } = require('../authorisation-servers');
 
 const accessTokenAndResourcePath = async (authorisationServerId) => {
   const accessToken = await createAccessToken(authorisationServerId);

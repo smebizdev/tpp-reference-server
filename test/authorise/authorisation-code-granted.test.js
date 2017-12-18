@@ -39,7 +39,7 @@ describe('Authorized Code Granted', () => {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
       }),
-      '../obtain-access-token': { postToken: postTokenStub },
+      './obtain-access-token': { postToken: postTokenStub },
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
       },
@@ -92,7 +92,7 @@ describe('Authorized Code Granted', () => {
           'env-var': env.mock({
             SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
           }),
-          '../obtain-access-token': { postToken: postTokenStub },
+          './obtain-access-token': { postToken: postTokenStub },
           '../authorisation-servers': {
             getClientCredentials: getClientCredentialsStub,
           },

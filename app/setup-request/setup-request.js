@@ -1,4 +1,4 @@
-const { postToken } = require('../obtain-access-token');
+const { postToken } = require('../authorise');
 const {
   getClientCredentials,
   resourceServerPath,

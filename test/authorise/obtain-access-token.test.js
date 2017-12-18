@@ -13,8 +13,8 @@ const samplePayload = {
   grant_type: 'client_credentials',
 };
 
-const postTokenFn = tokenEndpointStub => proxyquire('../app/obtain-access-token', {
-  './authorisation-servers': {
+const postTokenFn = tokenEndpointStub => proxyquire('../../app/authorise/obtain-access-token', {
+  '../authorisation-servers': {
     tokenEndpoint: tokenEndpointStub,
   },
 }).postToken;

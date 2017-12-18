@@ -19,7 +19,7 @@ describe('accessTokenAndResourcePath called with valid parameters', () => {
   const getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const resourceServerPathStub = sinon.stub().returns(resourceServerPath);
   const accessTokenAndResourcePathProxy = proxyquire('../../app/setup-request/setup-request', {
-    '../obtain-access-token': { postToken: tokenStub },
+    '../authorise': { postToken: tokenStub },
     '../authorisation-servers': {
       getClientCredentials: getClientCredentialsStub,
       resourceServerPath: resourceServerPathStub,

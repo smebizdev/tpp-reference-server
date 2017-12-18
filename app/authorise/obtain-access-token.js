@@ -1,6 +1,6 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('./certs-util');
-const { tokenEndpoint } = require('./authorisation-servers');
+const { setupMutualTLS } = require('../certs-util');
+const { tokenEndpoint } = require('../authorisation-servers');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');

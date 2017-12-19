@@ -30,7 +30,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     }
     accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
     setupAccountRequestProxy = proxyquire('../../app/setup-account-request/setup-account-request', {
-      '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      '../authorise': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
       './account-requests': { postAccountRequests: accountRequestsStub },
     }).setupAccountRequest;
   };

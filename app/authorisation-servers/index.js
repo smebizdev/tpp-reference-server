@@ -8,6 +8,7 @@ const {
   storeAuthorisationServers,
   tokenEndpoint,
   resourceServerHost,
+  resourceServerPath,
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
@@ -22,6 +23,7 @@ exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.storeAuthorisationServers = storeAuthorisationServers;
 exports.tokenEndpoint = tokenEndpoint;
 exports.resourceServerHost = resourceServerHost;
+exports.resourceServerPath = resourceServerPath;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;

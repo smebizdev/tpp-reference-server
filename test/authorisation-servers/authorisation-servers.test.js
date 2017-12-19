@@ -8,6 +8,7 @@ const {
   storeAuthorisationServers,
   tokenEndpoint,
   resourceServerHost,
+  resourceServerPath,
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
@@ -17,11 +18,12 @@ const {
 const nock = require('nock');
 
 const authServerId = 'aaaj4NmBD8lQxmLh2O9FLY';
+const baseApiDNSUri = 'http://aaa.example.com/open-banking/v1.1';
 const orgId = 'aaa-example-org';
 const flattenedObDirectoryAuthServerList = [
   {
     Id: authServerId,
-    BaseApiDNSUri: 'http://aaa.example.com',
+    BaseApiDNSUri: baseApiDNSUri,
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
     OBOrganisationId: orgId,
@@ -43,7 +45,7 @@ const clientCredentials = {
 const withOpenIdConfig = {
   id: authServerId,
   obDirectoryConfig: {
-    BaseApiDNSUri: 'http://aaa.example.com',
+    BaseApiDNSUri: baseApiDNSUri,
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
     Id: authServerId,
@@ -55,7 +57,7 @@ const withOpenIdConfig = {
 const withClientCredsConfig = {
   id: authServerId,
   obDirectoryConfig: {
-    BaseApiDNSUri: 'http://aaa.example.com',
+    BaseApiDNSUri: baseApiDNSUri,
     CustomerFriendlyName: 'AAA Example Bank',
     OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
     Id: authServerId,
@@ -158,6 +160,20 @@ describe('authorisation servers', () => {
       } catch (err) {
         assert.equal(err.status, 500);
       }
+    });
+  });
+
+  describe('resourceServerHost', () => {
+    it('returns BaseApiDNSUri host', async () => {
+      const host = await resourceServerHost(authServerId);
+      assert.equal(host, baseApiDNSUri);
+    });
+  });
+
+  describe('resourceServerPath', () => {
+    it('returns BaseApiDNSUri host plus path', async () => {
+      const path = await resourceServerPath(authServerId);
+      assert.equal(path, `${baseApiDNSUri}/open-banking/v1.1`);
     });
   });
 

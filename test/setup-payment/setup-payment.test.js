@@ -56,7 +56,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
     buildPaymentsDataStub = sinon.stub().returns(buildPaymentStubResponse);
 
     setupPaymentProxy = proxyquire('../../app/setup-payment/setup-payment', {
-      '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      '../authorise': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
       './payment-data-builder': { buildPaymentsData: buildPaymentsDataStub },
       './payments': { postPayments: paymentsStub },
     }).setupPayment;

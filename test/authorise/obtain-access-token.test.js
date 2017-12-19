@@ -13,15 +13,24 @@ const samplePayload = {
   grant_type: 'client_credentials',
 };
 
-const postTokenFn = tokenEndpointStub => proxyquire('../app/obtain-access-token', {
-  './authorisation-servers': {
+const getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
+
+const postTokenFn = tokenEndpointStub => proxyquire('../../app/authorise/obtain-access-token', {
+  '../authorisation-servers': {
     tokenEndpoint: tokenEndpointStub,
   },
 }).postToken;
 
+const createTokenFn = tokenEndpointStub => proxyquire('../../app/authorise/obtain-access-token', {
+  '../authorisation-servers': {
+    tokenEndpoint: tokenEndpointStub,
+    getClientCredentials: getClientCredentialsStub,
+  },
+}).createAccessToken;
+
 describe('POST /token 200 response', () => {
   const tokenEndpointStub = sinon.stub().returns('http://example.com/token');
-  const postToken = postTokenFn(tokenEndpointStub);
+  const createToken = createTokenFn(tokenEndpointStub);
   const response = {
     access_token: 'accessToken',
     expires_in: 3600,
@@ -34,9 +43,9 @@ describe('POST /token 200 response', () => {
     .matchHeader('authorization', credentials)
     .reply(200, response);
 
-  it('returns data when 200 OK', async () => {
-    const result = await postToken(authServerId, clientId, clientSecret, samplePayload);
-    assert.deepEqual(result, response);
+  it('returns token from createToken when 200 OK', async () => {
+    const token = await createToken(authServerId);
+    assert.equal(token, 'accessToken');
   });
 });
 

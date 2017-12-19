@@ -1,6 +1,6 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('./certs-util');
-const { tokenEndpoint } = require('./authorisation-servers');
+const { setupMutualTLS } = require('../certs-util');
+const { getClientCredentials, tokenEndpoint } = require('../authorisation-servers');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
@@ -38,4 +38,22 @@ const postToken = async (authorisationServerId, clientId, clientSecret, payload)
   }
 };
 
+// Returns access-token when request successful
+const createAccessToken = async (authorisationServerId) => {
+  const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
+  const accessTokenPayload = {
+    scope: 'accounts payments', // include both scopes for client credentials grant
+    grant_type: 'client_credentials',
+  };
+
+  const response = await postToken(
+    authorisationServerId,
+    clientId,
+    clientSecret,
+    accessTokenPayload,
+  );
+  return response.access_token;
+};
+
 exports.postToken = postToken;
+exports.createAccessToken = createAccessToken;

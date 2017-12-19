@@ -1,4 +1,4 @@
-const { accessTokenAndResourcePath } = require('../setup-request');
+const { accessTokenAndResourcePath } = require('../authorise');
 const { postAccountRequests } = require('./account-requests');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {

@@ -52,7 +52,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
   const setup = paymentStub => () => {
     submitPaymentProxy = proxyquire('../../app/submit-payment/submit-payment', {
-      '../setup-request': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      '../authorise': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
       '../setup-payment/payments': { postPayments: paymentStub },
       '../setup-payment/persistence': { retrievePaymentDetails: retrievePaymentDetailsStub },
     }).submitPayment;

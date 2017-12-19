@@ -1,6 +1,6 @@
 {
   "name": "tpp-reference-server",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Reference TPP application API server",
   "author": "Open Banking Limited",
   "main": "index.js",

@@ -4,20 +4,41 @@ This application simulates a typical Third Party Provider (TPP) backend server.
 Its primary function is to provide Open Banking processes to a client.
 
 The implementation uses
-[Node.js](https://nodejs.org/),
-[express](https://github.com/expressjs/express),
-and
-[express-http-proxy](https://github.com/villadora/express-http-proxy).
+[Node.js](https://nodejs.org/), and [express](https://github.com/expressjs/express).
+
+## Table of contents
+
+* [Use latest release](#use-latest-release)
+* [Use cases](#use-cases)
+   * [Authenticating with the server](#authenticating-with-the-server)
+   * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
+   * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
+* [Installation](#installation)
+   * [Dependencies](#dependencies)
+   * [Server setup](#server-setup)
+* [Running server](#running-server)
+   * [Run locally](#run-locally)
+   * [Deploy to heroku](#deploy-to-heroku)
+   * [Already provisioned with OB Directory](#already-provisioned-with-ob-directory-1)
+* [Using mTLS](#using-mtls)
+   * [Running against The Reference Mock Server](#running-against-the-reference-mock-server)
+   * [Running against OpenBanking Directory with an ASPSP reference sandbox](#running-against-openbanking-directory-with-an-aspsp-reference-sandbox)
+* [Configuration of ASPSP Authorisation Servers](#configuration-of-aspsp-authorisation-servers)
+   * [Adding and Updating ASPSP authorisation servers](#adding-and-updating-aspsp-authorisation-servers)
+   * [Listing available ASPSP authorisation servers](#listing-available-aspsp-authorisation-servers)
+   * [Adding Client Credentials for ASPSP Authorisation Servers](#adding-client-credentials-for-aspsp-authorisation-servers)
+* [Testing](#testing)
+* [eslint](#eslint)
 
 ## Use latest release
 
-Use the latest release [v0.5.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.5.0).
+Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).
 
 To obtain the latest release:
 
 ```sh
 git clone https://github.com/OpenBankingUK/tpp-reference-server
-git checkout v0.5.0
+git checkout v0.6.0
 ```
 
 Note: latest `master` branch code is actively under development and may not be stable.
@@ -32,7 +53,7 @@ __Work in progress__ - so far we provide,
 * Basic AISP functionality and consent flow.
 * Basic PISP functionality and consent flow.
 
-### Authenticating with the server.
+### Authenticating with the server
 
 #### Login
 

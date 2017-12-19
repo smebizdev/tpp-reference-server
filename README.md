@@ -27,21 +27,18 @@ The implementation uses
    * [Adding and Updating ASPSP authorisation servers](#adding-and-updating-aspsp-authorisation-servers)
    * [Listing available ASPSP authorisation servers](#listing-available-aspsp-authorisation-servers)
    * [Adding Client Credentials for ASPSP Authorisation Servers](#adding-client-credentials-for-aspsp-authorisation-servers)
-      * [Setting client credentials for running against Reference Mock Server](#setting-client-credentials-for-running-against-reference-mock-server)
-         * [Locally](#locally)
-         * [Remotely on Heroku](#remotely-on-heroku)
 * [Testing](#testing)
 * [eslint](#eslint)
 
 ## Use latest release
 
-Use the latest release [v0.5.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.5.0).
+Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).
 
 To obtain the latest release:
 
 ```sh
 git clone https://github.com/OpenBankingUK/tpp-reference-server
-git checkout v0.5.0
+git checkout v0.6.0
 ```
 
 Note: latest `master` branch code is actively under development and may not be stable.

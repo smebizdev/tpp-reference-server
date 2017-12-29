@@ -8,7 +8,7 @@ const authorization = process.env.AUTHORIZATION;
  * @returns {*}
  */
 const getAuthFromSession = (candidate, callback) => {
-  session.getId((err, sid) => {
+  session.getId(candidate, (err, sid) => {
     if (sid === candidate) {
       return callback(authorization);
     }

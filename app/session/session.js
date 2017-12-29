@@ -3,8 +3,8 @@ const { store } = require('./persistence.js');
 const log = require('debug')('log');
 
 const session = (() => {
-  const setId = sid => store.set('session_id', sid);
-  const getId = cb => store.get('session_id', cb);
+  const setId = sid => store.set(sid, sid);
+  const getId = (sid, cb) => store.get(sid, cb);
   const setAccessToken = accessToken => store.set('ob_directory_access_token', JSON.stringify(accessToken));
   const getAccessToken = cb => store.get('ob_directory_access_token', cb);
 
@@ -14,10 +14,10 @@ const session = (() => {
       if (sid !== candidate) {
         return cb(null);
       }
-      store.remove('session_id'); // Async but we kinda don't care :-/
+      store.remove(candidate); // Async but we kinda don't care :-/
       return cb(sid);
     };
-    store.get('session_id', sessHandler);
+    store.get(candidate, sessHandler);
   };
 
   const newId = () => {
@@ -27,7 +27,8 @@ const session = (() => {
   };
 
   const check = (req, res) => {
-    getId((err, sid) => {
+    const candidate = req.headers.authorization;
+    getId(candidate, (err, sid) => {
       if (err) {
         res.sendStatus(500);
       } else {

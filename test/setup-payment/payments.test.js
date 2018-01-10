@@ -104,7 +104,7 @@ describe('postPayments request to remote payment endpoints', () => {
   // Request / response Mocks
   // Payment
   nock(/example\.com/)
-    .post('/open-banking/v1.1/payments')
+    .post('/prefix/open-banking/v1.1/payments')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
     .matchHeader('x-idempotency-key', idempotencyKey) // required
@@ -115,7 +115,7 @@ describe('postPayments request to remote payment endpoints', () => {
     .reply(201, expectedPaymentResponse);
 
   nock(/example\.com/)
-    .post('/open-banking/v1.1/payment-submissions')
+    .post('/prefix/open-banking/v1.1/payment-submissions')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
     .matchHeader('x-idempotency-key', idempotencyKey) // required
@@ -126,7 +126,7 @@ describe('postPayments request to remote payment endpoints', () => {
     .reply(201, expectedPaymentSubmissionResponse);
 
   nock(/example\.com/)
-    .post('/open-banking/v1.1/non-exisits')
+    .post('/prefix/open-banking/v1.1/non-exisits')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
     .matchHeader('x-idempotency-key', idempotencyKey) // required
@@ -137,7 +137,7 @@ describe('postPayments request to remote payment endpoints', () => {
     .reply(404, {});
 
   nock(/example\.com/)
-    .post('/open-banking/v1.1/bad-request')
+    .post('/prefix/open-banking/v1.1/bad-request')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
     .matchHeader('x-idempotency-key', idempotencyKey) // required
@@ -150,7 +150,7 @@ describe('postPayments request to remote payment endpoints', () => {
 
   describe(' For requests to payments endpoints', () => {
     it('returns data when remote endpoint returns 201 OK', async () => {
-      const resourceServerPath = 'http://example.com/open-banking/v1.1';
+      const resourceServerPath = 'http://example.com/prefix';
       const result = await postPayments(
         resourceServerPath,
         '/open-banking/v1.1/payments',
@@ -162,7 +162,7 @@ describe('postPayments request to remote payment endpoints', () => {
   });
 
   it('throws error when remote endpoints returns 404', async () => {
-    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    const resourceServerPath = 'http://example.com/prefix';
     let error;
     try {
       await postPayments(
@@ -178,7 +178,7 @@ describe('postPayments request to remote payment endpoints', () => {
   });
 
   it('throws error when missing required request headers', async () => {
-    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    const resourceServerPath = 'http://example.com/prefix';
     let error;
     try {
       await postPayments(
@@ -194,7 +194,7 @@ describe('postPayments request to remote payment endpoints', () => {
   });
 
   it('throws error when remote endpoing return 400 due to incorrect request format', async () => {
-    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    const resourceServerPath = 'http://example.com/prefix';
     let error;
     try {
       await postPayments(

@@ -1,7 +1,6 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
-const { resourceServerHost } = require('../authorisation-servers');
-const { URL } = require('url');
+const { resourceServerPath } = require('../authorisation-servers');
 const { accessToken } = require('../authorise');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const debug = require('debug')('debug');
@@ -15,14 +14,13 @@ const resourceRequestHandler = async (req, res) => {
   const sessionId = req.headers.authorization;
   let host;
   try {
-    host = await resourceServerHost(authServerId);
-    host = host.split('/open-banking')[0]; // eslint-disable-line
+    host = await resourceServerPath(authServerId);
   } catch (err) {
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);
   }
   const path = `/open-banking${req.path}`;
-  const proxiedUrl = new URL(path, host);
+  const proxiedUrl = `${host}${path}`;
   const token = await accessToken(sessionId);
   const bearerToken = `Bearer ${token}`;
 

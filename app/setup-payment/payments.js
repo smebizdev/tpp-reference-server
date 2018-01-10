@@ -1,6 +1,5 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
-const { URL } = require('url');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
@@ -19,8 +18,7 @@ const verifyHeaders = (headers) => {
 const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, paymentData) => {
   try {
     verifyHeaders(headers);
-    const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
-    const paymentsUri = new URL(paymentPathEndpoint, host);
+    const paymentsUri = `${resourceServerPath}${paymentPathEndpoint}`;
     log(`POST to ${paymentsUri}`);
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${headers.accessToken}`)

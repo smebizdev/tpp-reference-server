@@ -18,7 +18,8 @@ const {
 const nock = require('nock');
 
 const authServerId = 'aaaj4NmBD8lQxmLh2O9FLY';
-const baseApiDNSUri = 'http://aaa.example.com/open-banking/v1.1';
+const baseApiDNSUri = 'http://aaa.example.com/some/path/open-banking/v1.1';
+const resourcePath = 'http://aaa.example.com/some/path';
 const orgId = 'aaa-example-org';
 const flattenedObDirectoryAuthServerList = [
   {
@@ -173,7 +174,7 @@ describe('authorisation servers', () => {
   describe('resourceServerPath', () => {
     it('returns BaseApiDNSUri host plus path', async () => {
       const path = await resourceServerPath(authServerId);
-      assert.equal(path, `${baseApiDNSUri}/open-banking/v1.1`);
+      assert.equal(path, resourcePath);
     });
   });
 

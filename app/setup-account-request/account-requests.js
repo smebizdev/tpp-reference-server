@@ -1,6 +1,5 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
-const { URL } = require('url');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 
@@ -32,8 +31,7 @@ const postAccountRequests = async (resourceServerPath, accessToken,
   fapiFinancialId) => {
   try {
     const body = buildAccountRequestData();
-    const host = resourceServerPath.split('/open-banking')[0]; // eslint-disable-line
-    const accountRequestsUri = new URL('/open-banking/v1.1/account-requests', host);
+    const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
     const response = await setupMutualTLS(request.post(accountRequestsUri))
       .set('authorization', `Bearer ${accessToken}`)

@@ -26,7 +26,7 @@ describe('postAccountRequests', () => {
   const fapiFinancialId = 'abc';
 
   nock(/example\.com/)
-    .post('/open-banking/v1.1/account-requests')
+    .post('/prefix/open-banking/v1.1/account-requests')
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
     // optional x-jws-signature
@@ -36,7 +36,7 @@ describe('postAccountRequests', () => {
     .reply(201, response);
 
   it('returns data when 201 OK', async () => {
-    const resourceServerPath = 'http://example.com/open-banking/v1.1';
+    const resourceServerPath = 'http://example.com/prefix';
     const result = await postAccountRequests(
       resourceServerPath,
       accessToken,

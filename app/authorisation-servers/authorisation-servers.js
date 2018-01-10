@@ -84,11 +84,12 @@ const resourceServerHost = async (authServerId) => {
   throw err;
 };
 
+// Strips '/open-banking/*' and trailing '/' from resourceServerHost
 const resourceServerPath = async (authorisationServerId) => {
   if (authorisationServerId) {
     const host = await resourceServerHost(authorisationServerId);
-    const apiVersion = 'v1.1';
-    return `${host}/open-banking/${apiVersion}`;
+    const path = host.split('/open-banking')[0].replace(/\/$/, '');
+    return path;
   }
   return null;
 };

@@ -12,7 +12,7 @@ services:
     image: ob/reference-mock-server
     ports:
      - "8001:8001"
-    environment: 
+    environment:
      - "DEBUG=error,log"
      - "PORT=8001"
      - "HOST=http://refmockserver:8001"
@@ -26,7 +26,8 @@ services:
      - "BANK_DATA_DIRECTORY=abcbank"
      - "VERSION=v1.1"
      - "OPENID_CONFIG_ENDPOINT_URL=http://refmockserver:8001/openid/config"
-     - "OPENID_ASPSP_AUTH_HOST=http://${HOST_IP}:8001"
+     - "OPENID_ASPSP_AUTH_HOST=http://${ASPSP_AUTH_HOST_IP}:8001"
+     - "OPENID_ASPSP_TOKEN_HOST=http://refmockserver:8001"
     command: >
       /bin/bash -c "
         rm -fr .env
@@ -38,7 +39,7 @@ services:
     image: ob/tpp-server
     ports:
      - "8003:8003"
-    environment: 
+    environment:
      - "PORT=8003"
      - "DEBUG=error,log,debug"
      - "OB_PROVISIONED=false"
@@ -72,7 +73,7 @@ services:
         while ! nc -z mongo 27017 ; do echo Watining for Mongo; sleep 1; done
         echo Mongo is UP
         while ! nc -z refmockserver 8001 ; do echo watining for Mock Server; sleep 1; done
-        echo Mock Server is UP 
+        echo Mock Server is UP
         echo Initialise list of ASPSPs
         npm run updateAuthServersAndOpenIds
         npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
@@ -81,8 +82,3 @@ services:
         echo Start the TPP Reference Service
         DEBUG=debug,log,error npm run foreman
         "
-
-
-              
-        
-  

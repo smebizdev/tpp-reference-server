@@ -4,7 +4,6 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { session } = require('./session');
 const { requireAuthorization } = require('./session');
 const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
@@ -48,6 +47,5 @@ app.get('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization, requireAuthorisationServerId);
 app.use('/open-banking', resourceRequestHandler);
-app.use('/session/check', session.check);
 
 exports.app = app;

@@ -475,7 +475,6 @@ DEBUG=error,log \
   SIGNING_KEY='' \
   TRANSPORT_CERT='' \
   TRANSPORT_KEY='' \
-  AUTHORIZATION=alice \
   MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
   PORT=8003 \
   npm start
@@ -483,7 +482,6 @@ DEBUG=error,log \
 ```
 
 * Set debug log levels using `DEBUG` env var.
-* Set hardcoded auth token using `AUTHORIZATION` env var.
 * Set OB Provisioned status using `OB_PROVISIONED` env var.
 * Set OB Directory host using `OB_DIRECTORY_HOST` env var.
 * Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
@@ -518,7 +516,6 @@ heroku create --region eu <newname>
 heroku addons:create redistogo # or any other redis add-on
 heroku addons:create mongolab:sandbox
 
-heroku config:set AUTHORIZATION=<mock-token>
 heroku config:set DEBUG=error,log
 heroku config:set OB_PROVISIONED=false
 heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com

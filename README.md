@@ -21,6 +21,7 @@ The implementation uses
    * [Run locally](#run-locally)
    * [Deploy to heroku](#deploy-to-heroku)
    * [Already provisioned with OB Directory](#already-provisioned-with-ob-directory-1)
+* [Base64 encoding of required Certs and Keys](#base64-encoding-of-required-certs-and-keys)
 * [Using mTLS](#using-mtls)
    * [Running against The Reference Mock Server](#running-against-the-reference-mock-server)
    * [Running against OpenBanking Directory with an ASPSP reference sandbox](#running-against-openbanking-directory-with-an-aspsp-reference-sandbox)
@@ -261,7 +262,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-autho
 __Note__: for this to work you need an ASPSP Server installed and running.
 For instance the mock server.
 
-We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment 
+We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment
 from an ASPSP to a third party.  The current use case with v1.1 is a Single Immediate Payment.
 
 There are 5 steps in the Single Immediate Payment flow
@@ -273,7 +274,7 @@ There are 5 steps in the Single Immediate Payment flow
 5) Check Payment Status (TPP <> ASPSP)
 
 
-### Step 1 Request Payment Initiation 
+### Step 1 Request Payment Initiation
 
 The PSU needs to be logged into the TPP Server (Ref App) and get a session to do anything.
 Without the TPP Ref Client We can simulate this with a CURL request like this:
@@ -282,36 +283,36 @@ Without the TPP Ref Client We can simulate this with a CURL request like this:
 curl -X POST --data 'u=alice&p=wonderland' http://localhost:8003/login
 ```
 
-This should yield a payload with a Session ID like this 
+This should yield a payload with a Session ID like this
 ```sh
 {
 	"sid": "eefbda80-ec93-11e7-a1f6-0f0979b77e2b"
 }
 ```
 
-We kick off the payment initiation with the Client calling to the TPP Server's 
+We kick off the payment initiation with the Client calling to the TPP Server's
 `/payment-authorise-consent` endpoint with a payload like that can be simulated with a CURL command like this
 
 ```sh
-curl -X POST -H 'Authorization: eefbda80-ec93-11e7-a1f6-0f0979b77e2b' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json' -H "Content-Type: application/json" -d '{"authorisationServerId":"aaaj4NmBD8lQxmLh2O","InstructedAmount":{"Amount":"10.00","Currency":"GBP"},"CreditorAccount":{"SchemeName":"SortCodeAccountNumber","Identification":"11111112345678","Name":"Sam Morse"}}' http://localhost:8003/payment-authorise-consent 
+curl -X POST -H 'Authorization: eefbda80-ec93-11e7-a1f6-0f0979b77e2b' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json' -H "Content-Type: application/json" -d '{"authorisationServerId":"aaaj4NmBD8lQxmLh2O","InstructedAmount":{"Amount":"10.00","Currency":"GBP"},"CreditorAccount":{"SchemeName":"SortCodeAccountNumber","Identification":"11111112345678","Name":"Sam Morse"}}' http://localhost:8003/payment-authorise-consent
 ```
 
 __Note:__ The Authorisation header is the `sid` value we obtained earlier.
 
-This kicks off a train of events (Step 2) which - if the PSU authorises the payment - gives back 
+This kicks off a train of events (Step 2) which - if the PSU authorises the payment - gives back
 a Redirect URL, the payload of which also contains an embedded redirect URL (see later).
 
 ### Step 2 - Setup single payment initiation
 
 In overview:
-1) The TPP Server calls out to the `/token/` endpoint at the ASPSP Auth server to 
+1) The TPP Server calls out to the `/token/` endpoint at the ASPSP Auth server to
 get an `access-token`
 2) The TPP server calls out to the `/payments/` endpoint using the `access-token`, and sends payment details
 3) ... The ASPSP creates a *Payment Resource* - with a `PaymentId` - bound to the ClientId (TPP detail stored in Directory)
 4) ... the ASPSP sends back a 201 response to the TPP Server with the `PaymentId`
 5) The TPP Server stores the `PaymentId` for later use (bound to the PSU Session and / or state - see later)
-6) TPP Generates a Signed Request Object with requested claims (including PaymentId) 
-7) TPP Server generates a Redirct URL (embedded in a JSON Object) with various parameters relevant to the Payment Resource 
+6) TPP Generates a Signed Request Object with requested claims (including PaymentId)
+7) TPP Server generates a Redirct URL (embedded in a JSON Object) with various parameters relevant to the Payment Resource
 and sends this to the Client.
 
 
@@ -321,20 +322,20 @@ From 2 above (`payments` endpoint) - [Here's a sample response](https://openbank
 From 7 above - Example Redirect URL JSON object:
 
 ```sh
-{"uri":"http://localhost:8001/aaaj4NmBD8lQxmLh2O/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Ftpp%2Fauthorized&state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiYTM1Y2QzNGQtYzA3Yi00MWZhLWJjZGQtYjc5YTQ5NGE4NTE4Iiwic2Vzc2lvbklkIjoiZDllZTJmNzAtZWM5NC0xMWU3LWExZjYtMGYwOTc5Yjc3ZTJiIiwic2NvcGUiOiJvcGVuaWQgcGF5bWVudHMifQ%3D%3D&client_id=spoofClientId&response_type=code&request=eyJhbGciOiJub25lIn0.eyJpc3MiOiJzcG9vZkNsaWVudElkIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjbGllbnRfaWQiOiJzcG9vZkNsaWVudElkIiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3RwcC9hdXRob3JpemVkIiwic2NvcGUiOiJvcGVuaWQgcGF5bWVudHMiLCJzdGF0ZSI6ImV5SmhkWFJvYjNKcGMyRjBhVzl1VTJWeWRtVnlTV1FpT2lKaFlXRnFORTV0UWtRNGJGRjRiVXhvTWs4aUxDSnBiblJsY21GamRHbHZia2xrSWpvaVlUTTFZMlF6TkdRdFl6QTNZaTAwTVdaaExXSmpaR1F0WWpjNVlUUTVOR0U0TlRFNElpd2ljMlZ6YzJsdmJrbGtJam9pWkRsbFpUSm1OekF0WldNNU5DMHhNV1UzTFdFeFpqWXRNR1l3T1RjNVlqYzNaVEppSWl3aWMyTnZjR1VpT2lKdmNHVnVhV1FnY0dGNWJXVnVkSE1pZlE9PSIsIm5vbmNlIjoiZHVtbXktbm9uY2UiLCJtYXhfYWdlIjo4NjQwMCwiY2xhaW1zIjp7InVzZXJpbmZvIjp7Im9wZW5iYW5raW5nX2ludGVudF9pZCI6eyJ2YWx1ZSI6IjVmMGNiYjAxLTQzOTctNDhmZi04MDE3LTQ3OTA4YmU0NWNlYiIsImVzc2VudGlhbCI6dHJ1ZX19LCJpZF90b2tlbiI6eyJvcGVuYmFua2luZ19pbnRlbnRfaWQiOnsidmFsdWUiOiI1ZjBjYmIwMS00Mzk3LTQ4ZmYtODAxNy00NzkwOGJlNDVjZWIiLCJlc3NlbnRpYWwiOnRydWV9LCJhY3IiOnsiZXNzZW50aWFsIjp0cnVlfX19fQ.&scope=openid%20payments"} 
+{"uri":"http://localhost:8001/aaaj4NmBD8lQxmLh2O/authorize?redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Ftpp%2Fauthorized&state=eyJhdXRob3Jpc2F0aW9uU2VydmVySWQiOiJhYWFqNE5tQkQ4bFF4bUxoMk8iLCJpbnRlcmFjdGlvbklkIjoiYTM1Y2QzNGQtYzA3Yi00MWZhLWJjZGQtYjc5YTQ5NGE4NTE4Iiwic2Vzc2lvbklkIjoiZDllZTJmNzAtZWM5NC0xMWU3LWExZjYtMGYwOTc5Yjc3ZTJiIiwic2NvcGUiOiJvcGVuaWQgcGF5bWVudHMifQ%3D%3D&client_id=spoofClientId&response_type=code&request=eyJhbGciOiJub25lIn0.eyJpc3MiOiJzcG9vZkNsaWVudElkIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjbGllbnRfaWQiOiJzcG9vZkNsaWVudElkIiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3RwcC9hdXRob3JpemVkIiwic2NvcGUiOiJvcGVuaWQgcGF5bWVudHMiLCJzdGF0ZSI6ImV5SmhkWFJvYjNKcGMyRjBhVzl1VTJWeWRtVnlTV1FpT2lKaFlXRnFORTV0UWtRNGJGRjRiVXhvTWs4aUxDSnBiblJsY21GamRHbHZia2xrSWpvaVlUTTFZMlF6TkdRdFl6QTNZaTAwTVdaaExXSmpaR1F0WWpjNVlUUTVOR0U0TlRFNElpd2ljMlZ6YzJsdmJrbGtJam9pWkRsbFpUSm1OekF0WldNNU5DMHhNV1UzTFdFeFpqWXRNR1l3T1RjNVlqYzNaVEppSWl3aWMyTnZjR1VpT2lKdmNHVnVhV1FnY0dGNWJXVnVkSE1pZlE9PSIsIm5vbmNlIjoiZHVtbXktbm9uY2UiLCJtYXhfYWdlIjo4NjQwMCwiY2xhaW1zIjp7InVzZXJpbmZvIjp7Im9wZW5iYW5raW5nX2ludGVudF9pZCI6eyJ2YWx1ZSI6IjVmMGNiYjAxLTQzOTctNDhmZi04MDE3LTQ3OTA4YmU0NWNlYiIsImVzc2VudGlhbCI6dHJ1ZX19LCJpZF90b2tlbiI6eyJvcGVuYmFua2luZ19pbnRlbnRfaWQiOnsidmFsdWUiOiI1ZjBjYmIwMS00Mzk3LTQ4ZmYtODAxNy00NzkwOGJlNDVjZWIiLCJlc3NlbnRpYWwiOnRydWV9LCJhY3IiOnsiZXNzZW50aWFsIjp0cnVlfX19fQ.&scope=openid%20payments"}
 ```
 
-This URL redirects to the ASPSP for the PSU to log in to their ASPSP 
-and give consent for the payment to be made. 
+This URL redirects to the ASPSP for the PSU to log in to their ASPSP
+and give consent for the payment to be made.
 
-The embedded Redirect URL mentioned above is the "Software Statement Redirect URL", 
-and it's the URL that the ASPSP redirects the 
-PSU client back to once the PSU has granted consent. 
+The embedded Redirect URL mentioned above is the "Software Statement Redirect URL",
+and it's the URL that the ASPSP redirects the
+PSU client back to once the PSU has granted consent.
 
 ### Step 3 - Authorise Consent
 
-This is in the realm of the ASPSP.  Assuming the PSU gives consent the ASPSP will redirect back to 
-the embedded redirect URL found in the Software Statement. 
+This is in the realm of the ASPSP.  Assuming the PSU gives consent the ASPSP will redirect back to
+the embedded redirect URL found in the Software Statement.
 In the case of the TPP Reference App this URL is `http://localhost:8080/tpp/authorized`
 
 The TPP Client code picks up the redirected URL which contains two parameters:
@@ -348,9 +349,9 @@ http://localhost:8080/tpp/authorized?code=spoofAuthorisationCode&state=eyJhdXRob
 ```
 
 `code` is the `authorization-code` from the ASPSP Auth Server, which the TPP Server uses
- to call out to the `/token` endpoint again to swap for a new `access-token` which will be used in 
+ to call out to the `/token` endpoint again to swap for a new `access-token` which will be used in
  Step 4 - payment submission.
- 
+
 
 At this point the state payload can be inspected using the Node REPL like this:
 
@@ -368,22 +369,22 @@ This results in (example only, and formatted for ease of reading):
 	"scope": "openid payments"
 }
 ```
- 
+
 
 ### Step 4 - Create Payment Submission
 
 The TPP Server retrieves the `PaymentId` (and various other parameters) it saved earlier.
 
-TPP Calls out to the `/payment-submissions` endpoint using the stored payment initiation details and new access token. 
+TPP Calls out to the `/payment-submissions` endpoint using the stored payment initiation details and new access token.
 
-ASPSP Responds with a HTTP Status 201 and a `PaymentSubmissionId` 
+ASPSP Responds with a HTTP Status 201 and a `PaymentSubmissionId`
 
 [Here's a sample response](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0#PaymentInitiationAPISpecification-v1.1.0-POST/payment-submissionsResponse)
 
 ### Step 5 - Get payment submission status
 
-Depending on how old the access-toke is we can either use the existing one 
-OR kick off a new CLient Credentials Grant at the token endpoint to get a new one 
+Depending on how old the access-toke is we can either use the existing one
+OR kick off a new CLient Credentials Grant at the token endpoint to get a new one
 
 The call out to the `/payment-submissions` endpoint with a `GET` and the `PaymentSubmissionId`
 
@@ -534,6 +535,31 @@ git push heroku master
 ### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
+
+## Base64 encoding of required Certs and Keys
+
+All ENVs to be configured with Certs and Keys have to be base64 encoded strings. This applies to
+* `SIGNING_KEY`
+* `OB_ISSUING_CA`
+* `TRANSPORT_CERT`
+* `TRANSPORT_KEY`
+
+Please use the script below to encode your certs (a cert at a time).
+
+```
+npm run base64-cert-or-key <path/to/cert> or <path/to/key>
+```
+
+This produces
+```
+BASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):
+
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2...
+```
+
+As per instructions in the output copy the base64 encoded string to the relevant ENV.
+
+__Running against The Reference Mock Server__: This __DOES NOT__ require setting any CERTs or Keys.
 
 ## Using mTLS
 

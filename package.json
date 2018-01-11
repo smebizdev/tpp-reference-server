@@ -47,7 +47,8 @@
     "checks": "node ./node_modules/eslint/bin/eslint.js . && mocha",
     "listAuthServers": "node ./scripts/list-auth-servers.js",
     "saveCreds": "node ./scripts/add-client-credentials.js",
-    "updateAuthServersAndOpenIds": "node ./scripts/update-auth-server-and-open-id-configs"
+    "updateAuthServersAndOpenIds": "node ./scripts/update-auth-server-and-open-id-configs",
+    "base64-cert": "node ./scripts/base64-encode-cert"
   },
   "repository": {
     "type": "git",

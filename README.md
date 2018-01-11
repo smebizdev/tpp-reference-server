@@ -19,7 +19,6 @@ The implementation uses
    * [Server setup](#server-setup)
 * [Running server](#running-server)
    * [Run locally](#run-locally)
-   * [Deploy to heroku](#deploy-to-heroku)
    * [Already provisioned with OB Directory](#already-provisioned-with-ob-directory-1)
 * [Base64 encoding of required Certs and Keys](#base64-encoding-of-required-certs-and-keys)
 * [Using mTLS](#using-mtls)
@@ -29,6 +28,7 @@ The implementation uses
    * [Adding and Updating ASPSP authorisation servers](#adding-and-updating-aspsp-authorisation-servers)
    * [Listing available ASPSP authorisation servers](#listing-available-aspsp-authorisation-servers)
    * [Adding Client Credentials for ASPSP Authorisation Servers](#adding-client-credentials-for-aspsp-authorisation-servers)
+* [Deploy to heroku](#deploy-to-heroku)
 * [Testing](#testing)
 * [eslint](#eslint)
 
@@ -492,43 +492,6 @@ Set the environment variables `MONGODB_URI` as per your mongodb instance.
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
-### Deploy to heroku
-
-To deploy to heroku for the first time:
-
-```sh
-npm install -g heroku-cli
-```
-
-To verify your CLI installation use the heroku --version command.
-
-```sh
-heroku --version
-```
-
-Setup application.
-
-```sh
-heroku login
-
-heroku create --region eu <newname>
-
-heroku addons:create redistogo # or any other redis add-on
-heroku addons:create mongolab:sandbox
-
-heroku config:set DEBUG=error,log
-heroku config:set OB_PROVISIONED=false
-heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com
-heroku config:set SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized
-heroku config:set SIGNING_KEY=''
-heroku config:set MTLS_ENABLED=false
-heroku config:set OB_ISSUING_CA=''
-heroku config:set TRANSPORT_CERT=''
-heroku config:set TRANSPORT_KEY=''
-
-git push heroku master
-```
-
 ### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
@@ -600,11 +563,7 @@ Bootstrapping or updating the list of ASPSP authorisation servers in MongoDB is 
 When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
 
 ```sh
-# Locally
 DEBUG=debug,log npm run updateAuthServersAndOpenIds
-
-# Remotely on Heroku
-heroku run npm run updateAuthServersAndOpenIds --remote heroku
 ```
 
 Now calling the `/account-payment-service-provider-authorisation-servers` endpoint returns the correctly formatted list of ASPSP authorisation servers previously fetched from OB Directory.
@@ -618,11 +577,7 @@ When run locally the required ENV vars will be loaded from the `.env` file, othe
 Run:
 
 ```sh
-# Locally
 DEBUG=debug,log npm run listAuthServers
-
-# Remotely on Heroku
-heroku run npm run listAuthServers --remote heroku
 ```
 
 Output on terminal is TSV that looks like this:
@@ -642,11 +597,7 @@ When run locally the required ENV vars will be loaded from the `.env` file, othe
 Example Usages
 
 ```sh
-# Locally
 npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
-
-# Remotely on Heroku
-heroku run npm run saveCreds authServerId=123 clientId=456 clientSecret=789 --remote heroku
 ```
 
 #### Setting client credentials for running against Reference Mock Server
@@ -661,15 +612,9 @@ DEBUG=debug,log npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoof
 DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
 ```
 
-##### Remotely on Heroku
+## Deploy to heroku
 
-```sh
-heroku run npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
-
-heroku run npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
-
-heroku run npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
-```
+You can follow these [instructions to deploy to heroku](./README-HEROKU.md).
 
 ## Testing
 
@@ -685,10 +630,8 @@ Run tests continuously on file changes in watch mode via:
 npm run test:watch
 ```
 
-
 Manual Testing  
 Sending Form Data to login with POstman - use `x-www-form-urlencoded`
-
 
 ## eslint
 

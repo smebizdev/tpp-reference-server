@@ -18,4 +18,15 @@ describe('base64EncodeCert', () => {
   it('base64 encodes file data correctly', async () => {
     assert.equal(await encoder('file/path'), 'ZmlsZS10ZXh0');
   });
+
+  it('throws an error when a file path is not supplied', async () => {
+    try {
+      await encoder();
+    } catch (e) {
+      assert.equal(
+        e.message,
+        'Please include a path to a CERT file,\n<<e.g. npm run base64-cert full/path/to/cert>>',
+      );
+    }
+  });
 });

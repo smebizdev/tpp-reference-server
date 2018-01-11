@@ -1,26 +1,19 @@
 const { session } = require('./session');
 
-const authorization = process.env.AUTHORIZATION;
-
-/**
- * @description Only return the authorization if there is a valid session
- * @param sid
- * @returns {*}
- */
-const getAuthFromSession = (candidate, callback) => {
+const validSession = (candidate, callback) => {
   session.getId(candidate, (err, sid) => {
     if (sid === candidate) {
-      return callback(authorization);
+      return callback(true);
     }
-    return callback('');
+    return callback(false);
   });
 };
 
 const requireAuthorization = (req, res, next) => {
   const sid = req.headers.authorization;
   if (sid) {
-    getAuthFromSession(sid, (token) => {
-      if (token.length === 0) {
+    validSession(sid, (valid) => {
+      if (!valid) {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.status(401).send();
       } else {
@@ -34,4 +27,3 @@ const requireAuthorization = (req, res, next) => {
 };
 
 exports.requireAuthorization = requireAuthorization;
-exports.getAuthFromSession = getAuthFromSession;

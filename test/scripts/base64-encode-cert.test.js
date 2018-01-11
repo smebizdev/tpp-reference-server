@@ -1,7 +1,7 @@
 const assert = require('assert'); // eslint-disable-line
 const proxyquire = require('proxyquire'); // eslint-disable-line
 
-describe('base64EncodeCert', () => {
+describe('base64EncodeCertOrKey', () => {
   let encoder;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('base64EncodeCert', () => {
           '@noCallThru': true,
         },
       },
-    ).base64EncodeCert;
+    ).base64EncodeCertOrKey;
   });
 
   it('base64 encodes file data correctly', async () => {
@@ -25,7 +25,7 @@ describe('base64EncodeCert', () => {
     } catch (e) {
       assert.equal(
         e.message,
-        'Please include a path to a CERT file,\n<<e.g. npm run base64-cert full/path/to/cert>>',
+        'Please include a path to a CERT or KEY file,\n<<e.g. npm run base64-cert full/path/to/file>>',
       );
     }
   });

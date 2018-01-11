@@ -3,19 +3,19 @@ const debug = require('debug')('debug');
 const log = require('debug')('log');
 const error = require('debug')('error');
 
-const encodeCert = async (certFile) => {
+const encoder = async (certFile) => {
   if (!certFile) {
-    throw new Error('Please include a path to a CERT file,\n<<e.g. npm run base64-cert full/path/to/cert>>');
+    throw new Error('Please include a path to a CERT or KEY file,\n<<e.g. npm run base64-cert full/path/to/file>>');
   }
 
-  log('Running encodeCert');
+  log('Running encoder');
   const cert = fs.readFileSync(certFile);
   const result = Buffer.from(cert).toString('base64');
   debug(`Encoded CERT: ${result}`);
   return result;
 };
 
-encodeCert(process.argv.slice(2)[0]).then((encodedCert) => {
+encoder(process.argv.slice(2)[0]).then((encodedCert) => {
   if (process.env.NODE_ENV !== 'test') {
     console.log('\nBASE64 ENCODED CERT (Please copy the text below to the required ENV):\n'); // eslint-disable-line
     console.log(encodedCert); // eslint-disable-line
@@ -29,4 +29,4 @@ encodeCert(process.argv.slice(2)[0]).then((encodedCert) => {
   }
 });
 
-exports.base64EncodeCert = encodeCert;
+exports.base64EncodeCertOrKey = encoder;

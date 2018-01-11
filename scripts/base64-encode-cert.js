@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const debug = require('debug')('debug');
 const log = require('debug')('log');
 const error = require('debug')('error');
@@ -11,7 +10,7 @@ const encodeCert = async (certFile) => {
 
   log('Running encodeCert');
   const cert = fs.readFileSync(certFile);
-  const result = new Buffer(cert).toString('base64');
+  const result = Buffer.from(cert).toString('base64');
   debug(`Encoded CERT: ${result}`);
   return result;
 };
@@ -22,8 +21,7 @@ encodeCert(process.argv.slice(2)[0]).then((encodedCert) => {
     console.log(encodedCert); // eslint-disable-line
     process.exit();
   }
-})
-.catch((err) => {
+}).catch((err) => {
   if (process.env.NODE_ENV !== 'test') {
     console.log(err.message); // eslint-disable-line
     error(err);
@@ -31,4 +29,4 @@ encodeCert(process.argv.slice(2)[0]).then((encodedCert) => {
   }
 });
 
-exports.encodeCert = encodeCert;
+exports.base64EncodeCert = encodeCert;

@@ -17,7 +17,7 @@ const encoder = async (certFile) => {
 
 encoder(process.argv.slice(2)[0]).then((encodedCert) => {
   if (process.env.NODE_ENV !== 'test') {
-    console.log('\nBASE64 ENCODED CERT (Please copy the text below to the required ENV):\n'); // eslint-disable-line
+    console.log('\nBASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):\n'); // eslint-disable-line
     console.log(encodedCert); // eslint-disable-line
     process.exit();
   }

@@ -5,7 +5,7 @@ describe('base64EncodeCertOrKey', () => {
   let encoder;
 
   beforeEach(async () => {
-    encoder = proxyquire('../../scripts/base64-encode-cert.js', // eslint-disable-line
+    encoder = proxyquire('../../scripts/base64-encode-cert-or-key.js', // eslint-disable-line
       {
         fs: {
           'readFileSync': () => 'file-text',

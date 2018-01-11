@@ -48,7 +48,7 @@
     "listAuthServers": "node ./scripts/list-auth-servers.js",
     "saveCreds": "node ./scripts/add-client-credentials.js",
     "updateAuthServersAndOpenIds": "node ./scripts/update-auth-server-and-open-id-configs",
-    "base64-cert-or-key": "node ./scripts/base64-encode-cert"
+    "base64-cert-or-key": "node ./scripts/base64-encode-cert-or-key"
   },
   "repository": {
     "type": "git",

@@ -602,6 +602,149 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 
 [Here's an example response](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0#PaymentInitiationAPISpecification-v1.1.0-GET/payment-submissionsrequest)
 
+## Installation
+
+### Dependencies
+
+#### NodeJS
+
+We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
+
+On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
+
+On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
+
+On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
+
+#### Redis
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
+
+```sh
+brew install redis
+```
+
+On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
+
+On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
+
+Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### MongoDB
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then
+
+```sh
+brew install mongodb
+```
+
+On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
+
+On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
+
+Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### The Reference Mock Server
+
+We have a [reference mock server](https://github.com/OpenBankingUK/reference-mock-server) that provides simulated endpoints to showcase what the Read/Write API can provide. Please install and run the server as per instructions on the [Github page](https://github.com/OpenBankingUK/reference-mock-server).
+
+> Make sure you run the mock API against v1.1, e.g. `VERSION=v1.1 npm run start`.
+
+Find details in the [To run locally](https://github.com/OpenBankingUK/tpp-reference-server#to-run-locally) section.
+
+### Server setup
+
+Install npm packages:
+
+```sh
+npm install
+```
+
+## Running server
+
+The following are instructions to set up server either locally or on Heroku.
+
+[Follow instructions here](#available-aspsp-servers-with-configured-client-credentials) to confirm that you're setup correctly and can retrieve a list of ASPSP Authorisation servers.
+
+### Run locally
+
+To run using .env file, make a local .env, and run using foreman:
+
+```sh
+cp .env.sample .env
+npm run foreman
+# [OKAY] Loaded ENV .env File as KEY=VALUE Format
+# web.1 | log App listening on port 8003 ...
+```
+
+Or run with environment variables set on the command line:
+
+```sh
+DEBUG=error,log \
+  OB_PROVISIONED=false \
+  OB_DIRECTORY_HOST=http://localhost:8001 \
+  MTLS_ENABLED=false \
+  SIGNING_KEY='' \
+  TRANSPORT_CERT='' \
+  TRANSPORT_KEY='' \
+  MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
+  PORT=8003 \
+  npm start
+#   log  App listening on port 8003 ...
+```
+
+* Set debug log levels using `DEBUG` env var.
+* Set OB Provisioned status using `OB_PROVISIONED` env var.
+* Set OB Directory host using `OB_DIRECTORY_HOST` env var.
+* Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
+* Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
+Set the environment variables `MONGODB_URI` as per your mongodb instance.
+
+#### Already provisioned with OB Directory
+
+As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
+
+### Deploy to heroku
+
+To deploy to heroku for the first time:
+
+```sh
+npm install -g heroku-cli
+```
+
+To verify your CLI installation use the heroku --version command.
+
+```sh
+heroku --version
+```
+
+Setup application.
+
+```sh
+heroku login
+
+heroku create --region eu <newname>
+
+heroku addons:create redistogo # or any other redis add-on
+heroku addons:create mongolab:sandbox
+
+heroku config:set DEBUG=error,log
+heroku config:set OB_PROVISIONED=false
+heroku config:set OB_DIRECTORY_HOST=http://ob-directory.example.com
+heroku config:set SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized
+heroku config:set SIGNING_KEY=''
+heroku config:set MTLS_ENABLED=false
+heroku config:set OB_ISSUING_CA=''
+heroku config:set TRANSPORT_CERT=''
+heroku config:set TRANSPORT_KEY=''
+
+git push heroku master
+```
+
+### Already provisioned with OB Directory
+
+As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
+
 ## Base64 encoding of required Certs and Keys
 
 All ENVs to be configured with Certs and Keys have to be base64 encoded strings. This applies to

@@ -26,18 +26,6 @@ const session = (() => {
     return mySid;
   };
 
-  const check = (req, res) => {
-    const candidate = req.headers.authorization;
-    getId(candidate, (err, sid) => {
-      if (err) {
-        res.sendStatus(500);
-      } else {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(sid));
-      }
-    });
-  };
-
   const deleteAll = async () => {
     await store.deleteAll();
   };
@@ -49,7 +37,6 @@ const session = (() => {
     getAccessToken,
     destroy,
     newId,
-    check,
     deleteAll,
   };
 })();

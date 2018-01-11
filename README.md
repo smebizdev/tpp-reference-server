@@ -9,10 +9,11 @@ The implementation uses
 ## Table of contents
 
 * [Use latest release](#use-latest-release)
+* [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
 * [Installation](#installation)
    * [Dependencies](#dependencies)
    * [Server setup](#server-setup)
-* [Running server](#running-server)
+* [Running server with our Reference Mock Server](#running-server)
   * [Run locally](#run-locally)
   * [Deploy to heroku](#deploy-to-heroku)  
 * [Use cases](#use-cases)
@@ -43,6 +44,72 @@ git checkout v0.6.0
 ```
 
 Note: latest `master` branch code is actively under development and may not be stable.
+
+## Quick start with Reference Mock Server
+
+This assumes you do not have OB Directory access but want to kick the tires to see what's possible.
+
+Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide. Install and run the server as per instructions on the [Github page](https://github.com/OpenBankingUK/reference-mock-server).
+
+> Make sure you run the mock API against v1.1, e.g. `VERSION=v1.1 npm run start`.
+
+### Installation
+
+First install the tooling below.
+
+#### NodeJS
+
+We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
+
+On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
+
+On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
+
+On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
+
+#### Redis
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
+
+```sh
+brew install redis
+```
+
+On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
+
+On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
+
+Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### MongoDB
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then
+
+```sh
+brew install mongodb
+```
+
+On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
+
+On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
+
+Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+### Server setup
+
+Go to project root:
+
+```sh
+cd to/cloned/project/root
+```
+
+Install npm packages:
+
+```sh
+npm install
+```
+
+------------BELOW IS LEGACY------------
 
 ## Installation
 

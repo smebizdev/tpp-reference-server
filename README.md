@@ -636,28 +636,24 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 
 ## Explaining environment variables
 
-```sh
-DEBUG=error,log \
-  OB_PROVISIONED=false \
-  OB_DIRECTORY_HOST=http://localhost:8001 \
-  MTLS_ENABLED=false \
-  SIGNING_KEY='' \
-  TRANSPORT_CERT='' \
-  TRANSPORT_KEY='' \
-  MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
-  PORT=8003
-```
-
-* Set debug log levels using `DEBUG` env var.
-* Set OB Provisioned status using `OB_PROVISIONED` env var.
-* Set OB Directory host using `OB_DIRECTORY_HOST` env var.
-* Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
-* Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
-Set the environment variables `MONGODB_URI` as per your mongodb instance.
-
-#### Already provisioned with OB Directory
-
-As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
+* `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'` - access scopes for API features.
+* `DEBUG=error,log,debug` - enables debugging.
+* `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server` - MongoDB configuration.
+* `MTLS_ENABLED=false` - enables / disables mTLS.
+* `OB_DIRECTORY_AUTH_HOST=xxx` - OB Directory Auth host for issuing tokens.
+* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
+* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
+* `OB_ISSUING_CA=''` - base64 encoded `OB Issuing chain` cert from OB Directory.
+* `OB_PROVISIONED=false` - enables / disables enrolled with OB Directory mode.
+* `PORT=8003` - port where the app is running.
+* `REDIS_HOST=localhost` - Redis configuration.
+* `REDIS_PORT=6379` - Redis port.
+* `SIGNING_KEY=''` - base64 encoded private key used to generate `Signing` cert OB Directory CSR.
+* `SIGNING_KID=xxx` - kid retrieved from OB Directory console.
+* `SOFTWARE_STATEMENT_ID=xxx` - softwareStatementId of software statement generated using OB Directory console.
+* `SOFTWARE_STATEMENT_REDIRECT_URL=xxx` - redirection url as entered in OB Directory software statement.
+* `TRANSPORT_CERT=''` - base64 encoded downloaded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY=''` - base64 encoded private key used to generate `Transport` cert OB Directory CSR.
 
 ## Deploy to heroku
 

@@ -28,7 +28,7 @@ Note: latest `master` branch code is actively under development and may not be s
     * [Server setup](#server-setup)
     * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers)
     * [Run server](#run-server)
-  * [Quick start with Open Banking Directory enrolment](#quick-start-with-open-banking-directory-enrolment)
+  * [Quick start after Open Banking Directory enrolment](#quick-start-after-open-banking-directory-enrolment)
     * [Installation](#installation-1)
     * [Server setup](#server-setup-1)
     * [Turn on OB Directory access and mTLS](#turn-on-ob-directory-access-and-mtls)

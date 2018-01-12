@@ -9,25 +9,21 @@ The implementation uses
 ## Table of contents
 
 * [Use latest release](#use-latest-release)
+* [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
+  * [Installation](#installation)
+  * [Server setup](#server-setup)
+  * [Configure ASPSP Authorisation Servers](configure-aspsp-authorisation-servers)
+  * [Run server](#run-server)
 * [Use cases](#use-cases)
    * [Authenticating with the server](#authenticating-with-the-server)
    * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
    * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
    * [Basic PISP functionality and consent flow (API v1.1)](#basic-pisp-functionality-and-consent-flow-api-v11)
-* [Installation](#installation)
-   * [Dependencies](#dependencies)
-   * [Server setup](#server-setup)
-* [Running server](#running-server)
-   * [Run locally](#run-locally)
-   * [Already provisioned with OB Directory](#already-provisioned-with-ob-directory-1)
+* [Explaining environment variables](#explaining-environment-variables)
 * [Base64 encoding of required Certs and Keys](#base64-encoding-of-required-certs-and-keys)
 * [Using mTLS](#using-mtls)
    * [Running against The Reference Mock Server](#running-against-the-reference-mock-server)
    * [Running against OpenBanking Directory with an ASPSP reference sandbox](#running-against-openbanking-directory-with-an-aspsp-reference-sandbox)
-* [Configuration of ASPSP Authorisation Servers](#configuration-of-aspsp-authorisation-servers)
-   * [Adding and Updating ASPSP authorisation servers](#adding-and-updating-aspsp-authorisation-servers)
-   * [Listing available ASPSP authorisation servers](#listing-available-aspsp-authorisation-servers)
-   * [Adding Client Credentials for ASPSP Authorisation Servers](#adding-client-credentials-for-aspsp-authorisation-servers)
 * [Deploy to heroku](#deploy-to-heroku)
 * [Testing](#testing)
 * [eslint](#eslint)
@@ -45,13 +41,146 @@ git checkout v0.6.0
 
 Note: latest `master` branch code is actively under development and may not be stable.
 
+## Quick start with Reference Mock Server
+
+This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
+
+Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide.
+
+__BEFORE PROCEEDING FURTHER__ install and run the reference mock server [as per these instructions](https://github.com/OpenBankingUK/reference-mock-server).
+
+### Installation
+
+#### NodeJS
+
+We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
+
+On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
+
+On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
+
+On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
+
+#### Redis
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
+
+```sh
+brew install redis
+```
+
+On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
+
+On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
+
+Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### MongoDB
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then
+
+```sh
+brew install mongodb
+```
+
+On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
+
+On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
+
+Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+### Server setup
+
+Go to project root after [cloning the repo](#use-latest-release):
+
+```sh
+cd to/cloned/project/root
+```
+
+Install npm packages:
+
+```sh
+npm install
+```
+
+Make a local .env based on our .env.sample:
+
+```sh
+cp .env.sample .env
+```
+
+### Configure ASPSP Authorisation Servers
+
+__Note:__ NOTHING WORKS IF THIS IS NOT SUCCESSFUL.
+
+Complete the sections below to bootstrap the server with essential ASPSP Authorisation Server data.
+
+#### Adding and Updating ASPSP authorisation servers
+
+Use `updateAuthServersAndOpenIds` to bootstrap or update the list of ASPSP authorisation servers used by the server. These are stored in MongoDB. For each authorisation server the OpenId config is also fetched and stored in the database.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run updateAuthServersAndOpenIds
+```
+
+#### List available ASPSP authorisation servers
+
+Use the `listAuthServers` script to check that Authorisation Servers are available in the database.
+
+This provides useful info like:
+* Are `clientCredentialsPresent` already present for an ASPSP Authorisation Server?
+* Is `openIdConfigPresent` already present for an ASPSP Authorisation Server?
+
+Run:
+
+```sh
+DEBUG=debug,log npm run listAuthServers
+```
+
+Output on terminal is TSV that looks like this:
+```
+id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
+bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
+cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
+```
+
+#### Add Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+DEBUG=debug,log npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+### Run server
+
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+
+```sh
+npm run foreman
+# [OKAY] Loaded ENV .env File as KEY=VALUE Format
+# web.1 | log App listening on port 8003 ...
+```
+
+Assuming the TPP server is now running, install and run the [TPP Reference Client](https://github.com/OpenBankingUK/tpp-reference-client) to view accounts data or make a single payment.
+
+Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
+
+
 ## Use cases
 
 __Work in progress__ - so far we provide,
-
 * Authenticating with the server.
 * List ASPSP Authorisation Servers - actual & simulated based on ENVs.
-* OLD: Proxy requests for upstream backend [ASPSP Read/Write APIs](https://www.openbanking.org.uk/read-write-apis/).
 * Basic AISP functionality and consent flow.
 * Basic PISP functionality and consent flow.
 
@@ -148,7 +277,6 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ]
 ```
 
-<!-- ### Proxy requests for upstream backend ASPSP APIs (v1.1) -->
 ### Basic AISP functionality and consent flow (API v1.1)
 
 __NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.
@@ -257,7 +385,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-autho
 [Here's a sample response](https://www.openbanking.org.uk/read-write-apis/account-transaction-api/v1-1-0/#balances-specific-account-response).
 
 
-## Basic PISP functionality and consent flow (API v1.1)
+### Basic PISP functionality and consent flow (API v1.1)
 
 __Note__: for this to work you need an ASPSP Server installed and running.
 For instance the mock server.
@@ -274,7 +402,7 @@ There are 5 steps in the Single Immediate Payment flow
 5) Check Payment Status (TPP <> ASPSP)
 
 
-### Step 1 Request Payment Initiation
+#### Step 1 Request Payment Initiation
 
 The PSU needs to be logged into the TPP Server (Ref App) and get a session to do anything.
 Without the TPP Ref Client We can simulate this with a CURL request like this:
@@ -302,7 +430,7 @@ __Note:__ The Authorisation header is the `sid` value we obtained earlier.
 This kicks off a train of events (Step 2) which - if the PSU authorises the payment - gives back
 a Redirect URL, the payload of which also contains an embedded redirect URL (see later).
 
-### Step 2 - Setup single payment initiation
+#### Step 2 - Setup single payment initiation
 
 In overview:
 1) The TPP Server calls out to the `/token/` endpoint at the ASPSP Auth server to
@@ -332,7 +460,7 @@ The embedded Redirect URL mentioned above is the "Software Statement Redirect UR
 and it's the URL that the ASPSP redirects the
 PSU client back to once the PSU has granted consent.
 
-### Step 3 - Authorise Consent
+#### Step 3 - Authorise Consent
 
 This is in the realm of the ASPSP.  Assuming the PSU gives consent the ASPSP will redirect back to
 the embedded redirect URL found in the Software Statement.
@@ -371,7 +499,7 @@ This results in (example only, and formatted for ease of reading):
 ```
 
 
-### Step 4 - Create Payment Submission
+#### Step 4 - Create Payment Submission
 
 The TPP Server retrieves the `PaymentId` (and various other parameters) it saved earlier.
 
@@ -381,7 +509,7 @@ ASPSP Responds with a HTTP Status 201 and a `PaymentSubmissionId`
 
 [Here's a sample response](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0#PaymentInitiationAPISpecification-v1.1.0-POST/payment-submissionsResponse)
 
-### Step 5 - Get payment submission status
+#### Step 5 - Get payment submission status
 
 Depending on how old the access-toke is we can either use the existing one
 OR kick off a new CLient Credentials Grant at the token endpoint to get a new one
@@ -390,82 +518,7 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 
 [Here's an example response](https://openbanking.atlassian.net/wiki/spaces/DZ/pages/5786479/Payment+Initiation+API+Specification+-+v1.1.0#PaymentInitiationAPISpecification-v1.1.0-GET/payment-submissionsrequest)
 
-## Installation
-
-### Dependencies
-
-#### NodeJS
-
-We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
-
-On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
-
-On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
-
-On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
-
-#### Redis
-
-On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
-
-```sh
-brew install redis
-```
-
-On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
-
-On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
-
-Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
-
-#### MongoDB
-
-On Mac OSX, you can install via [homebrew](https://brew.sh). Then
-
-```sh
-brew install mongodb
-```
-
-On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
-
-On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
-
-Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
-
-#### The Reference Mock Server
-
-We have a [reference mock server](https://github.com/OpenBankingUK/reference-mock-server) that provides simulated endpoints to showcase what the Read/Write API can provide. Please install and run the server as per instructions on the [Github page](https://github.com/OpenBankingUK/reference-mock-server).
-
-> Make sure you run the mock API against v1.1, e.g. `VERSION=v1.1 npm run start`.
-
-Find details in the [To run locally](https://github.com/OpenBankingUK/tpp-reference-server#to-run-locally) section.
-
-### Server setup
-
-Install npm packages:
-
-```sh
-npm install
-```
-
-## Running server
-
-The following are instructions to set up server either locally or on Heroku.
-
-[Follow instructions here](#available-aspsp-servers-with-configured-client-credentials) to confirm that you're setup correctly and can retrieve a list of ASPSP Authorisation servers.
-
-### Run locally
-
-To run using .env file, make a local .env, and run using foreman:
-
-```sh
-cp .env.sample .env
-npm run foreman
-# [OKAY] Loaded ENV .env File as KEY=VALUE Format
-# web.1 | log App listening on port 8003 ...
-```
-
-Or run with environment variables set on the command line:
+## Explaining environment variables
 
 ```sh
 DEBUG=error,log \
@@ -476,9 +529,7 @@ DEBUG=error,log \
   TRANSPORT_CERT='' \
   TRANSPORT_KEY='' \
   MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
-  PORT=8003 \
-  npm start
-#   log  App listening on port 8003 ...
+  PORT=8003
 ```
 
 * Set debug log levels using `DEBUG` env var.
@@ -492,9 +543,6 @@ Set the environment variables `MONGODB_URI` as per your mongodb instance.
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
-### Already provisioned with OB Directory
-
-As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
 
 ## Base64 encoding of required Certs and Keys
 
@@ -529,13 +577,6 @@ The OpenBanking specification requires parties to use [Mutual TLS authentication
 
 - For the TPP client, a certificate paired with a certificate key and CA certificate are used to establish a secured connection with servers, including `ASPSP Authorization`/`Resource Server`, `OpenBanking Directory` and `OpenId` Configuration.
 
-### Running against The Reference Mock Server
-
-This __DOES NOT__ require setting up `MTLS`.
-
-The server has to be configured with (this is default)
-* `MTLS_ENABLED=false`.
-
 ### Running against OpenBanking Directory with an ASPSP reference sandbox
 
 If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp)
@@ -552,65 +593,6 @@ The server has to be configured with
 * `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
 * `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
-
-## Configuration of ASPSP Authorisation Servers
-
-### Adding and Updating ASPSP authorisation servers
-This is the first step - NOTHING WORKS IF THIS IS NOT SUCCESSFUL.
-
-Bootstrapping or updating the list of ASPSP authorisation servers in MongoDB is a manual task. For each authorisation server the OpenId config is also fetched and stored in the database.
-
-When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
-
-```sh
-DEBUG=debug,log npm run updateAuthServersAndOpenIds
-```
-
-Now calling the `/account-payment-service-provider-authorisation-servers` endpoint returns the correctly formatted list of ASPSP authorisation servers previously fetched from OB Directory.
-
-### Listing available ASPSP authorisation servers
-
-The commands below will list authorisation servers currently in the database.
-
-When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
-
-Run:
-
-```sh
-DEBUG=debug,log npm run listAuthServers
-```
-
-Output on terminal is TSV that looks like this:
-```
-id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
-aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
-bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
-cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
-```
-
-### Adding Client Credentials for ASPSP Authorisation Servers
-
-There is a script to input and store client credentials against ASPSP Auth Server configuration.
-
-When run locally the required ENV vars will be loaded from the `.env` file, otherwise they will be loaded from the shell.
-
-Example Usages
-
-```sh
-npm run saveCreds authServerId=123 clientId=456 clientSecret=789  
-```
-
-#### Setting client credentials for running against Reference Mock Server
-
-##### Locally
-
-```sh
-DEBUG=debug,log npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
-
-DEBUG=debug,log npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
-
-DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
-```
 
 ## Deploy to heroku
 

@@ -12,6 +12,7 @@ The implementation uses
 * [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
   * [Installation](#installation)
   * [Server setup](#server-setup)
+  * [Configure ASPSP Authorisation Servers](configure-aspsp-authorisation-servers)
   * [Run server](#run-server)
 * [Use cases](#use-cases)
    * [Authenticating with the server](#authenticating-with-the-server)
@@ -102,12 +103,69 @@ Install npm packages:
 npm install
 ```
 
-### Run server
-
-To run using .env file, make a local .env based on our .env.sample, and run using foreman:
+Make a local .env based on our .env.sample:
 
 ```sh
 cp .env.sample .env
+```
+
+### Configure ASPSP Authorisation Servers
+
+__Note:__ NOTHING WORKS IF THIS IS NOT SUCCESSFUL.
+
+Complete the sections below to bootstrap the server with essential ASPSP Authorisation Server data.
+
+#### Adding and Updating ASPSP authorisation servers
+
+Use `updateAuthServersAndOpenIds` to bootstrap or update the list of ASPSP authorisation servers used by the server. These are stored in MongoDB. For each authorisation server the OpenId config is also fetched and stored in the database.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run updateAuthServersAndOpenIds
+```
+
+#### List available ASPSP authorisation servers
+
+Use the `listAuthServers` script to check that Authorisation Servers are available in the database.
+
+This provides useful info like:
+* Are `clientCredentialsPresent` already present for an ASPSP Authorisation Server?
+* Is `openIdConfigPresent` already present for an ASPSP Authorisation Server?
+
+Run:
+
+```sh
+DEBUG=debug,log npm run listAuthServers
+```
+
+Output on terminal is TSV that looks like this:
+```
+id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
+bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
+cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
+```
+
+#### Add Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run saveCreds authServerId=aaaj4NmBD8lQxmLh2O clientId=spoofClientId clientSecret=spoofClientSecret
+
+DEBUG=debug,log npm run saveCreds authServerId=bbbX7tUB4fPIYB0k1m clientId=spoofClientId clientSecret=spoofClientSecret
+
+DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoofClientId clientSecret=spoofClientSecret
+```
+
+### Run server
+
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+
+```sh
 npm run foreman
 # [OKAY] Loaded ENV .env File as KEY=VALUE Format
 # web.1 | log App listening on port 8003 ...

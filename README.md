@@ -167,7 +167,7 @@ DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoof
 
 ### Run server
 
-Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](#server-setup):
 
 ```sh
 npm run foreman
@@ -347,7 +347,7 @@ DEBUG=debug,log npm run saveCreds authServerId=<server_id> clientId=<client_id> 
 
 ### Run server
 
-Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](#server-setup-1):
 
 ```sh
 npm run foreman

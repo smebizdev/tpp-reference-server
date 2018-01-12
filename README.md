@@ -153,6 +153,71 @@ Assuming the TPP server is now running, install and run the [TPP Reference Clien
 
 Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
+## Quick start with Open Banking Directory enrolment
+
+This assumes you have enrolled successfully with OB Directory and have access to all necessary credentials, CERTS and KEYS.
+
+Check [here for more info on how to complete this](https://www.openbanking.org.uk/directory/).
+
+### Installation
+
+#### NodeJS
+
+We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
+
+On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
+
+On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
+
+On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
+
+#### Redis
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
+
+```sh
+brew install redis
+```
+
+On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
+
+On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
+
+Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### MongoDB
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then
+
+```sh
+brew install mongodb
+```
+
+On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
+
+On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
+
+Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+### Server setup
+
+Go to project root after [cloning the repo](#use-latest-release):
+
+```sh
+cd to/cloned/project/root
+```
+
+Install npm packages:
+
+```sh
+npm install
+```
+
+Make a local .env based on our .env.sample:
+
+```sh
+cp .env.sample .env
+```
 
 ## Use cases
 

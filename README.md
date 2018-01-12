@@ -371,41 +371,6 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://loca
 
 ### List ASPSP Authorisation Servers
 
-#### OB Directory provisioned TPP
-
-The server has to be configured with
-* `OB_PROVISIONED=true`.
-* `OB_DIRECTORY_HOST=https://<real directory>`.
-* `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-* `SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized`.
-* `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'`.
-* `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
-* `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
-
-This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.
-
-Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
-
-#### OB Directory NOT provisioned TPP
-
-The server has to be configured with
-* `OB_PROVISIONED=false`.
-* `OB_DIRECTORY_HOST=http://localhost:8001` - the [mock server](#the-reference-mock-server) host details.
-
-Here we work around encrypted OB Directory communication. The mock server returns the required data.
-
-Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
-
-#### Available ASPSP servers with configured client credentials
-
-Having configured client credentials means that you have previously authorised with an ASPSP. And, that the ASPSP has issued the necessary `clientId` and `clientSecret`.
-
-If you are running against the [mock server](#the-reference-mock-server), then [here's how to add the required credentials](#adding-client-credentials-for-aspsp-authorisation-servers).
-
-> __NOTE__
-
-> If you don't add client credentials you will get an EMPTY ASPSP server list.
-
 Please __change__ the `Authorization` header to use the `sid` obtained after logging inT.
 
 ```sh
@@ -435,8 +400,6 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ```
 
 ### Basic AISP functionality and consent flow (API v1.1)
-
-__NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.
 
 We support a simple AISP workflow where a PSU authorises a TPP to view account information on their behalf. This showcases the required oAuth consent flow and hits the relevant [proxied APIs](#proxied-api-path).
 
@@ -544,11 +507,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-autho
 
 ### Basic PISP functionality and consent flow (API v1.1)
 
-__Note__: for this to work you need an ASPSP Server installed and running.
-For instance the mock server.
-
-We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment
-from an ASPSP to a third party.  The current use case with v1.1 is a Single Immediate Payment.
+We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment from an ASPSP to a third party.  The current use case with v1.1 is a Single Immediate Payment.
 
 There are 5 steps in the Single Immediate Payment flow
 

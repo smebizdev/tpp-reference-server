@@ -19,6 +19,32 @@ git checkout v0.6.0
 
 Note: latest `master` branch code is actively under development and may not be stable.
 
+## Table of contents
+
+* [TPP Reference Server](#tpp-reference-server)
+  * [Use latest release](#use-latest-release)
+  * [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
+    * [Installation](#installation)
+    * [Server setup](#server-setup)
+    * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers)
+    * [Run server](#run-server)
+  * [Quick start with Open Banking Directory enrolment](#quick-start-with-open-banking-directory-enrolment)
+    * [Installation](#installation-1)
+    * [Server setup](#server-setup-1)
+    * [Turn on OB Directory access and mTLS](#turn-on-ob-directory-access-and-mtls)
+    * [Configure Certs and Keys](#configure-certs-and-keys)
+    * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers-1)
+    * [Run server](#run-server-1)
+  * [Use cases](#use-cases)
+    * [Authenticating with the server](#authenticating-with-the-server)
+    * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
+    * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
+    * [Basic PISP functionality and consent flow (API v1.1)](#basic-pisp-functionality-and-consent-flow-api-v11)
+  * [Explaining environment variables](#explaining-environment-variables)
+  * [Deploy to heroku](#deploy-to-heroku)
+  * [Testing](#testing)
+  * [eslint](#eslint)"
+
 ## Quick start with Mock ASPSPs
 
 This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
@@ -153,7 +179,7 @@ Assuming the TPP server is now running, install and run the [TPP Reference Clien
 
 Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
-## Quick start with Open Banking Directory enrolment
+## Quick start after Open Banking Directory enrolment
 
 This assumes you have enrolled successfully with OB Directory and have access to all necessary credentials, CERTS and KEYS.
 

@@ -10,12 +10,9 @@ The implementation uses
 
 * [Use latest release](#use-latest-release)
 * [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
-* [Installation](#installation)
-   * [Dependencies](#dependencies)
-   * [Server setup](#server-setup)
-* [Running server with our Reference Mock Server](#running-server)
-  * [Run locally](#run-locally)
-  * [Deploy to heroku](#deploy-to-heroku)  
+  * [Installation](#installation)
+  * [Server setup](#server-setup)
+  * [Run server](#run-server)
 * [Use cases](#use-cases)
    * [Authenticating with the server](#authenticating-with-the-server)
    * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
@@ -51,11 +48,7 @@ This assumes you do not have OB Directory access but want to kick the tires to s
 
 Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide. Install and run the server as per instructions on the [Github page](https://github.com/OpenBankingUK/reference-mock-server).
 
-> Make sure you run the mock API against v1.1, e.g. `VERSION=v1.1 npm run start`.
-
 ### Installation
-
-First install the tooling below.
 
 #### NodeJS
 
@@ -97,7 +90,7 @@ Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.
 
 ### Server setup
 
-Go to project root:
+Go to project root after [cloning the repo](#use-latest-release):
 
 ```sh
 cd to/cloned/project/root
@@ -107,6 +100,17 @@ Install npm packages:
 
 ```sh
 npm install
+```
+
+### Run server
+
+To run using .env file, make a local .env based on our .env.sample, and run using foreman:
+
+```sh
+cp .env.sample .env
+npm run foreman
+# [OKAY] Loaded ENV .env File as KEY=VALUE Format
+# web.1 | log App listening on port 8003 ...
 ```
 
 ------------BELOW IS LEGACY------------

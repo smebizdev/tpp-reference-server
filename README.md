@@ -21,7 +21,7 @@ Note: latest `master` branch code is actively under development and may not be s
 
 ## Quick start with Reference Mock Server
 
-This assumes you do not have OB Directory access but want to kick the tires to see what's possible.
+This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
 
 Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide.
 
@@ -153,7 +153,6 @@ Assuming the TPP server is now running, install and run the [TPP Reference Clien
 
 Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
-------------BELOW IS LEGACY------------
 
 ## Use cases
 

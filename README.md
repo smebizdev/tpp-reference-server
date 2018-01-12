@@ -573,6 +573,10 @@ The server has to be configured with
 * `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
 
+## Deploy to heroku
+
+You can follow these [instructions to deploy to heroku](./README-HEROKU.md).
+
 ## Testing
 
 Run unit tests with:
@@ -587,10 +591,8 @@ Run tests continuously on file changes in watch mode via:
 npm run test:watch
 ```
 
-
 Manual Testing  
 Sending Form Data to login with POstman - use `x-www-form-urlencoded`
-
 
 ## eslint
 

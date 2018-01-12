@@ -6,28 +6,6 @@ Its primary function is to provide Open Banking processes to a client.
 The implementation uses
 [Node.js](https://nodejs.org/), and [express](https://github.com/expressjs/express).
 
-## Table of contents
-
-* [Use latest release](#use-latest-release)
-* [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
-  * [Installation](#installation)
-  * [Server setup](#server-setup)
-  * [Configure ASPSP Authorisation Servers](configure-aspsp-authorisation-servers)
-  * [Run server](#run-server)
-* [Use cases](#use-cases)
-   * [Authenticating with the server](#authenticating-with-the-server)
-   * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
-   * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
-   * [Basic PISP functionality and consent flow (API v1.1)](#basic-pisp-functionality-and-consent-flow-api-v11)
-* [Explaining environment variables](#explaining-environment-variables)
-* [Base64 encoding of required Certs and Keys](#base64-encoding-of-required-certs-and-keys)
-* [Using mTLS](#using-mtls)
-   * [Running against The Reference Mock Server](#running-against-the-reference-mock-server)
-   * [Running against OpenBanking Directory with an ASPSP reference sandbox](#running-against-openbanking-directory-with-an-aspsp-reference-sandbox)
-* [Deploy to heroku](#deploy-to-heroku)
-* [Testing](#testing)
-* [eslint](#eslint)
-
 ## Use latest release
 
 Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).

@@ -43,7 +43,7 @@ Note: latest `master` branch code is actively under development and may not be s
   * [Explaining environment variables](#explaining-environment-variables)
   * [Deploy to heroku](#deploy-to-heroku)
   * [Testing](#testing)
-  * [eslint](#eslint)"
+  * [eslint](#eslint)
 
 ## Quick start with Mock ASPSPs
 

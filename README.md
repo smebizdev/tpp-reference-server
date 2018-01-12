@@ -9,7 +9,7 @@ The implementation uses
 ## Table of contents
 
 * [Use latest release](#use-latest-release)
-* [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
+* [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
   * [Installation](#installation)
   * [Server setup](#server-setup)
   * [Configure ASPSP Authorisation Servers](configure-aspsp-authorisation-servers)
@@ -41,7 +41,7 @@ git checkout v0.6.0
 
 Note: latest `master` branch code is actively under development and may not be stable.
 
-## Quick start with Reference Mock Server
+## Quick start with Mock ASPSPs
 
 This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
 

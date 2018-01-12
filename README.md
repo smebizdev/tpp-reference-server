@@ -219,6 +219,56 @@ Make a local .env based on our .env.sample:
 cp .env.sample .env
 ```
 
+## Turn on OB Directory access and mTLS
+
+### OB Directory access
+
+Update the following ENVs in your `.env` file:
+* `OB_PROVISIONED=true`
+* `OB_DIRECTORY_AUTH_HOST=<enter as per OB Directory instructions>`
+* `OB_DIRECTORY_HOST=<enter as per OB Directory instructions>`
+* `SIGNING_KID=<enter as per OB Directory instructions>`
+* `SOFTWARE_STATEMENT_ID=<enter as per OB Directory instructions>`
+* `SOFTWARE_STATEMENT_REDIRECT_URL=<redirection url as entered in OB Directory software statement>`
+
+### mTLS access
+
+Update the following ENVs in your `.env` file:
+* `MTLS_ENABLED=true`
+
+## Configure Certs and Keys
+
+First ensure:
+
+* You have downloaded the required `Transport` and `Signing` Certs (follow OB
+   Directory issued instructions).
+* You have access to the `private key` used when generating the `Signing` Cert CSR.
+* You have access to the `private key` used when generating the `Transport` Cert CSR.
+
+ENVs to be configured with Certs and Keys require these values as base64 encoded strings. This applies to
+
+* `SIGNING_KEY` - private key used to generate `Signing` cert OB Directory CSR.
+* `OB_ISSUING_CA` - Downloaded `OB Issuing chain` cert from OB Directory.
+* `TRANSPORT_CERT` - Downloaded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY` - private key used to generate `Transport` cert OB Directory CSR.
+
+### Encode
+
+Encode using our `base64-cert-or-key` script.
+
+```
+npm run base64-cert-or-key <path/to/cert> or <path/to/key>
+```
+
+This produces something similar to ...
+```
+BASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):
+
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2...
+```
+
+As per instructions in the output: __copy the base64 encoded string to the relevant ENV in your `.env` file.__
+
 ## Use cases
 
 __Work in progress__ - so far we provide,
@@ -585,57 +635,6 @@ Set the environment variables `MONGODB_URI` as per your mongodb instance.
 #### Already provisioned with OB Directory
 
 As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
-
-
-## Base64 encoding of required Certs and Keys
-
-All ENVs to be configured with Certs and Keys have to be base64 encoded strings. This applies to
-* `SIGNING_KEY`
-* `OB_ISSUING_CA`
-* `TRANSPORT_CERT`
-* `TRANSPORT_KEY`
-
-Please use the script below to encode your certs (a cert at a time).
-
-```
-npm run base64-cert-or-key <path/to/cert> or <path/to/key>
-```
-
-This produces
-```
-BASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):
-
-LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2...
-```
-
-As per instructions in the output copy the base64 encoded string to the relevant ENV.
-
-__Running against The Reference Mock Server__: This __DOES NOT__ require setting any CERTs or Keys.
-
-## Using mTLS
-
-The OpenBanking specification requires parties to use [Mutual TLS authentication](https://en.wikipedia.org/wiki/Mutual_authentication) for every connection. OpenBanking uses its own Certification Authority (certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
-
-- For the ASPSP server, a certificate paired with a certificate key and CA certificate are used to secure resources provided by servers.
-
-- For the TPP client, a certificate paired with a certificate key and CA certificate are used to establish a secured connection with servers, including `ASPSP Authorization`/`Resource Server`, `OpenBanking Directory` and `OpenId` Configuration.
-
-### Running against OpenBanking Directory with an ASPSP reference sandbox
-
-If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp)
-and want to interact with an ASPSP reference sandbox listed on OB Directory,
-then ensure
-
-* You have downloaded the required `Transport` and `Signing` Certs (follow OB
-   Directory issued instructions).
-
-* You have access to the `private key` used when generating the `Signing` Cert CSR.
-
-The server has to be configured with
-* `MTLS_ENABLED=true`.
-* `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
-* `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
-* `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
 
 ## Deploy to heroku
 

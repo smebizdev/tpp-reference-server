@@ -47,7 +47,9 @@ Note: latest `master` branch code is actively under development and may not be s
 
 This assumes you do not have OB Directory access but want to kick the tires to see what's possible.
 
-Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide. Install and run the server as per instructions on the [Github page](https://github.com/OpenBankingUK/reference-mock-server).
+Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide.
+
+__BEFORE PROCEEDING FURTHER__ install and run the reference mock server [as per these instructions](https://github.com/OpenBankingUK/reference-mock-server).
 
 ### Installation
 
@@ -170,6 +172,10 @@ npm run foreman
 # [OKAY] Loaded ENV .env File as KEY=VALUE Format
 # web.1 | log App listening on port 8003 ...
 ```
+
+Assuming the TPP server is now running, install and run the [TPP Reference Client](https://github.com/OpenBankingUK/tpp-reference-client) to view accounts data or make a single payment.
+
+Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
 ------------BELOW IS LEGACY------------
 

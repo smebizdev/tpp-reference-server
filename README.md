@@ -8,13 +8,13 @@ The implementation uses
 
 ## Use latest release
 
-Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).
+Use the latest release [v0.7.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.7.0).
 
 To obtain the latest release:
 
 ```sh
 git clone https://github.com/OpenBankingUK/tpp-reference-server
-git checkout v0.6.0
+git checkout v0.7.0
 ```
 
 Note: latest `master` branch code is actively under development and may not be stable.

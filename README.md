@@ -219,9 +219,9 @@ Make a local .env based on our .env.sample:
 cp .env.sample .env
 ```
 
-## Turn on OB Directory access and mTLS
+### Turn on OB Directory access and mTLS
 
-### OB Directory access
+#### OB Directory access
 
 Update the following ENVs in your `.env` file:
 * `OB_PROVISIONED=true`
@@ -231,12 +231,12 @@ Update the following ENVs in your `.env` file:
 * `SOFTWARE_STATEMENT_ID=<enter as per OB Directory instructions>`
 * `SOFTWARE_STATEMENT_REDIRECT_URL=<redirection url as entered in OB Directory software statement>`
 
-### mTLS access
+#### mTLS access
 
 Update the following ENVs in your `.env` file:
 * `MTLS_ENABLED=true`
 
-## Configure Certs and Keys
+### Configure Certs and Keys
 
 First ensure:
 
@@ -252,7 +252,7 @@ ENVs to be configured with Certs and Keys require these values as base64 encoded
 * `TRANSPORT_CERT` - Downloaded `Transport` cert from OB Directory console.
 * `TRANSPORT_KEY` - private key used to generate `Transport` cert OB Directory CSR.
 
-### Encode
+#### Encode
 
 Encode using our `base64-cert-or-key` script.
 
@@ -268,6 +268,57 @@ LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2..
 ```
 
 As per instructions in the output: __copy the base64 encoded string to the relevant ENV in your `.env` file.__
+
+### Configure ASPSP Authorisation Servers
+
+__Note:__ NOTHING WORKS IF THIS IS NOT SUCCESSFUL.
+
+Complete the sections below to bootstrap the server with essential ASPSP Authorisation Server data.
+
+#### Adding and Updating ASPSP authorisation servers
+
+Use `updateAuthServersAndOpenIds` to bootstrap or update the list of ASPSP authorisation servers used by the server. These are stored in MongoDB. For each authorisation server the OpenId config is also fetched and stored in the database.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run updateAuthServersAndOpenIds
+```
+
+#### List available ASPSP authorisation servers
+
+Use the `listAuthServers` script to check that Authorisation Servers are available in the database.
+
+This provides useful info like:
+* Are `clientCredentialsPresent` already present for an ASPSP Authorisation Server?
+* Is `openIdConfigPresent` already present for an ASPSP Authorisation Server?
+
+Run:
+
+```sh
+DEBUG=debug,log npm run listAuthServers
+```
+
+Output on terminal is TSV that looks like this:
+```
+id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
+bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
+cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
+```
+
+#### Add Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Please consult Open Banking documentation on how to acquire a `clientId` and `clientSecret` for an ASPSP Authorisation Server.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run saveCreds authServerId=<server_id> clientId=<client_id> clientSecret=<client_secret>
+```
+
 
 ## Use cases
 

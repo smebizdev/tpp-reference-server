@@ -6,28 +6,6 @@ Its primary function is to provide Open Banking processes to a client.
 The implementation uses
 [Node.js](https://nodejs.org/), and [express](https://github.com/expressjs/express).
 
-## Table of contents
-
-* [Use latest release](#use-latest-release)
-* [Quick start with Reference Mock Server](#quick-start-with-reference-mock-server)
-  * [Installation](#installation)
-  * [Server setup](#server-setup)
-  * [Configure ASPSP Authorisation Servers](configure-aspsp-authorisation-servers)
-  * [Run server](#run-server)
-* [Use cases](#use-cases)
-   * [Authenticating with the server](#authenticating-with-the-server)
-   * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
-   * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
-   * [Basic PISP functionality and consent flow (API v1.1)](#basic-pisp-functionality-and-consent-flow-api-v11)
-* [Explaining environment variables](#explaining-environment-variables)
-* [Base64 encoding of required Certs and Keys](#base64-encoding-of-required-certs-and-keys)
-* [Using mTLS](#using-mtls)
-   * [Running against The Reference Mock Server](#running-against-the-reference-mock-server)
-   * [Running against OpenBanking Directory with an ASPSP reference sandbox](#running-against-openbanking-directory-with-an-aspsp-reference-sandbox)
-* [Deploy to heroku](#deploy-to-heroku)
-* [Testing](#testing)
-* [eslint](#eslint)
-
 ## Use latest release
 
 Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).
@@ -41,7 +19,33 @@ git checkout v0.6.0
 
 Note: latest `master` branch code is actively under development and may not be stable.
 
-## Quick start with Reference Mock Server
+## Table of contents
+
+* [TPP Reference Server](#tpp-reference-server)
+  * [Use latest release](#use-latest-release)
+  * [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
+    * [Installation](#installation)
+    * [Server setup](#server-setup)
+    * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers)
+    * [Run server](#run-server)
+  * [Quick start after Open Banking Directory enrolment](#quick-start-after-open-banking-directory-enrolment)
+    * [Installation](#installation-1)
+    * [Server setup](#server-setup-1)
+    * [Turn on OB Directory access and mTLS](#turn-on-ob-directory-access-and-mtls)
+    * [Configure Certs and Keys](#configure-certs-and-keys)
+    * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers-1)
+    * [Run server](#run-server-1)
+  * [Use cases](#use-cases)
+    * [Authenticating with the server](#authenticating-with-the-server)
+    * [List ASPSP Authorisation Servers](#list-aspsp-authorisation-servers)
+    * [Basic AISP functionality and consent flow (API v1.1)](#basic-aisp-functionality-and-consent-flow-api-v11)
+    * [Basic PISP functionality and consent flow (API v1.1)](#basic-pisp-functionality-and-consent-flow-api-v11)
+  * [Explaining environment variables](#explaining-environment-variables)
+  * [Deploy to heroku](#deploy-to-heroku)
+  * [Testing](#testing)
+  * [eslint](#eslint)"
+
+## Quick start with Mock ASPSPs
 
 This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
 
@@ -163,7 +167,7 @@ DEBUG=debug,log npm run saveCreds authServerId=cccbN8iAsMh74sOXhk clientId=spoof
 
 ### Run server
 
-Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](#server-setup):
 
 ```sh
 npm run foreman
@@ -175,6 +179,185 @@ Assuming the TPP server is now running, install and run the [TPP Reference Clien
 
 Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
+## Quick start after Open Banking Directory enrolment
+
+This assumes you have enrolled successfully with OB Directory and have access to all necessary credentials, CERTS and KEYS.
+
+Check [here for more info on how to complete this](https://www.openbanking.org.uk/directory/).
+
+### Installation
+
+#### NodeJS
+
+We assume [NodeJS](https://nodejs.org/en/) ver8.4+ is installed.
+
+On Mac OSX, use instructions here [Installing Node.js Tutorial](https://nodesource.com/blog/installing-nodejs-tutorial-mac-os-x/).
+
+On Linux, use instructions in [How To Install Node.js On Linux](https://www.ostechnix.com/install-node-js-linux/).
+
+On Windows, use instructions provided here [Installing Node.js Tutorial: Windows](https://nodesource.com/blog/installing-nodejs-tutorial-windows/).
+
+#### Redis
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then.
+
+```sh
+brew install redis
+```
+
+On Linux, use instructions in the [Redis Quick Start guide](https://redis.io/topics/quickstart).
+
+On Windows, use instructions provided here [Installing Redis on a Windows Workstation](https://essenceofcode.com/2015/03/18/installing-redis-on-a-windows-workstation/).
+
+Then set the environment variables `REDIS_PORT` and `REDIS_HOST` as per redis instance. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+#### MongoDB
+
+On Mac OSX, you can install via [homebrew](https://brew.sh). Then
+
+```sh
+brew install mongodb
+```
+
+On Linux, use instructions in the [Install MongoDB Community Edition on Linux](https://docs.mongodb.com/manual/administration/install-on-linux/).
+
+On Windows, use instructions provided here [Install MongoDB Community Edition on Windows](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/).
+
+Then set the environment variable `MONGODB_URI` as per your mongodb instance, e.g. `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server`. Example in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample)
+
+### Server setup
+
+Go to project root after [cloning the repo](#use-latest-release):
+
+```sh
+cd to/cloned/project/root
+```
+
+Install npm packages:
+
+```sh
+npm install
+```
+
+Make a local .env based on our .env.sample:
+
+```sh
+cp .env.sample .env
+```
+
+### Turn on OB Directory access and mTLS
+
+#### OB Directory access
+
+Update the following ENVs in your `.env` file:
+* `OB_PROVISIONED=true`
+* `OB_DIRECTORY_AUTH_HOST=<enter as per OB Directory instructions>`
+* `OB_DIRECTORY_HOST=<enter as per OB Directory instructions>`
+* `SIGNING_KID=<enter as per OB Directory instructions>`
+* `SOFTWARE_STATEMENT_ID=<enter as per OB Directory instructions>`
+* `SOFTWARE_STATEMENT_REDIRECT_URL=<redirection url as entered in OB Directory software statement>`
+
+#### mTLS access
+
+Update the following ENVs in your `.env` file:
+* `MTLS_ENABLED=true`
+
+### Configure Certs and Keys
+
+First ensure:
+
+* You have downloaded the required `Transport` and `Signing` Certs (follow OB
+   Directory issued instructions).
+* You have access to the `private key` used when generating the `Signing` Cert CSR.
+* You have access to the `private key` used when generating the `Transport` Cert CSR.
+
+ENVs to be configured with Certs and Keys require these values as base64 encoded strings. This applies to
+
+* `SIGNING_KEY` - private key used to generate `Signing` cert OB Directory CSR.
+* `OB_ISSUING_CA` - Downloaded `OB Issuing chain` cert from OB Directory.
+* `TRANSPORT_CERT` - Downloaded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY` - private key used to generate `Transport` cert OB Directory CSR.
+
+#### Encode
+
+Encode using our `base64-cert-or-key` script.
+
+```
+npm run base64-cert-or-key <path/to/cert> or <path/to/key>
+```
+
+This produces something similar to ...
+```
+BASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):
+
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2...
+```
+
+As per instructions in the output: __copy the base64 encoded string to the relevant ENV in your `.env` file.__
+
+### Configure ASPSP Authorisation Servers
+
+__Note:__ NOTHING WORKS IF THIS IS NOT SUCCESSFUL.
+
+Complete the sections below to bootstrap the server with essential ASPSP Authorisation Server data.
+
+#### Adding and Updating ASPSP authorisation servers
+
+Use `updateAuthServersAndOpenIds` to bootstrap or update the list of ASPSP authorisation servers used by the server. These are stored in MongoDB. For each authorisation server the OpenId config is also fetched and stored in the database.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run updateAuthServersAndOpenIds
+```
+
+#### List available ASPSP authorisation servers
+
+Use the `listAuthServers` script to check that Authorisation Servers are available in the database.
+
+This provides useful info like:
+* Are `clientCredentialsPresent` already present for an ASPSP Authorisation Server?
+* Is `openIdConfigPresent` already present for an ASPSP Authorisation Server?
+
+Run:
+
+```sh
+DEBUG=debug,log npm run listAuthServers
+```
+
+Output on terminal is TSV that looks like this:
+```
+id                 CustomerFriendlyName OrganisationCommonName Authority  OBOrganisationId clientCredentialsPresent openIdConfigPresent
+aaaj4NmBD8lQxmLh2O AAA Example Bank     AAA Example PLC        GB:FCA:123 aaax5nTR33811Qy  false                    true
+bbbX7tUB4fPIYB0k1m BBB Example Bank     BBB Example PLC        GB:FCA:456 bbbUB4fPIYB0k1m  false                    true
+cccbN8iAsMh74sOXhk CCC Example Bank     CCC Example PLC        GB:FCA:789 cccMh74sOXhkQfi  false                    true
+```
+
+#### Add Client Credentials for ASPSP Authorisation Servers
+
+There is a script to input and store client credentials against ASPSP Auth Server configuration.
+
+Please consult Open Banking documentation on how to acquire a `clientId` and `clientSecret` for an ASPSP Authorisation Server.
+
+Run:
+
+```sh
+DEBUG=debug,log npm run saveCreds authServerId=<server_id> clientId=<client_id> clientSecret=<client_secret>
+```
+
+### Run server
+
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](#server-setup-1):
+
+```sh
+npm run foreman
+# [OKAY] Loaded ENV .env File as KEY=VALUE Format
+# web.1 | log App listening on port 8003 ...
+```
+
+Assuming the TPP server is now running, install and run the [TPP Reference Client](https://github.com/OpenBankingUK/tpp-reference-client) to view accounts data or make a single payment.
+
+Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
 ## Use cases
 
@@ -214,41 +397,6 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' http://loca
 
 ### List ASPSP Authorisation Servers
 
-#### OB Directory provisioned TPP
-
-The server has to be configured with
-* `OB_PROVISIONED=true`.
-* `OB_DIRECTORY_HOST=https://<real directory>`.
-* `SOFTWARE_STATEMENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-* `SOFTWARE_STATEMENT_REDIRECT_URL=http://<host>/tpp/authorized`.
-* `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'`.
-* `SIGNING_KEY=<base64 encoded private key>` - private key used to generate `Signing` cert CSR.
-* `SIGNING_KID=XXXXXX-XXXXxxxXxXXXxxx_xxxx`.
-
-This forces the server to use a provisioned `SOFTWARE_STATEMENT_ID` with the correct oAuth payloads that request real data from the OB Directory.
-
-Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
-
-#### OB Directory NOT provisioned TPP
-
-The server has to be configured with
-* `OB_PROVISIONED=false`.
-* `OB_DIRECTORY_HOST=http://localhost:8001` - the [mock server](#the-reference-mock-server) host details.
-
-Here we work around encrypted OB Directory communication. The mock server returns the required data.
-
-Details in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
-
-#### Available ASPSP servers with configured client credentials
-
-Having configured client credentials means that you have previously authorised with an ASPSP. And, that the ASPSP has issued the necessary `clientId` and `clientSecret`.
-
-If you are running against the [mock server](#the-reference-mock-server), then [here's how to add the required credentials](#adding-client-credentials-for-aspsp-authorisation-servers).
-
-> __NOTE__
-
-> If you don't add client credentials you will get an EMPTY ASPSP server list.
-
 Please __change__ the `Authorization` header to use the `sid` obtained after logging inT.
 
 ```sh
@@ -278,8 +426,6 @@ Here's a sample list of test ASPSPs. This is __NOT__ the raw response from the O
 ```
 
 ### Basic AISP functionality and consent flow (API v1.1)
-
-__NOTE:__ For this to work you need an ASPSP server installed and running. Details in The [mock server](#the-reference-mock-server) section.
 
 We support a simple AISP workflow where a PSU authorises a TPP to view account information on their behalf. This showcases the required oAuth consent flow and hits the relevant [proxied APIs](#proxied-api-path).
 
@@ -387,11 +533,7 @@ curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-autho
 
 ### Basic PISP functionality and consent flow (API v1.1)
 
-__Note__: for this to work you need an ASPSP Server installed and running.
-For instance the mock server.
-
-We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment
-from an ASPSP to a third party.  The current use case with v1.1 is a Single Immediate Payment.
+We support a simple PISP workflow where the PSU authorises a TPP to initialise a payment from an ASPSP to a third party.  The current use case with v1.1 is a Single Immediate Payment.
 
 There are 5 steps in the Single Immediate Payment flow
 
@@ -520,79 +662,24 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 
 ## Explaining environment variables
 
-```sh
-DEBUG=error,log \
-  OB_PROVISIONED=false \
-  OB_DIRECTORY_HOST=http://localhost:8001 \
-  MTLS_ENABLED=false \
-  SIGNING_KEY='' \
-  TRANSPORT_CERT='' \
-  TRANSPORT_KEY='' \
-  MONGODB_URI=mongodb://localhost:27017/sample-tpp-server \
-  PORT=8003
-```
-
-* Set debug log levels using `DEBUG` env var.
-* Set OB Provisioned status using `OB_PROVISIONED` env var.
-* Set OB Directory host using `OB_DIRECTORY_HOST` env var.
-* Set OB Directory access_token using `OB_DIRECTORY_ACCESS_TOKEN` env var.
-* Set the environment variables `REDIS_PORT` and `REDIS_HOST` as per your redis instance.
-Set the environment variables `MONGODB_URI` as per your mongodb instance.
-
-#### Already provisioned with OB Directory
-
-As a TPP, if you have been provisioned with the Open Banking Directory and have already setup a Software Statement, then update/add the `OB_*` ENVs as discussed in [OB Directory provisioned section](#ob-directory-provisioned-tpp).
-
-
-## Base64 encoding of required Certs and Keys
-
-All ENVs to be configured with Certs and Keys have to be base64 encoded strings. This applies to
-* `SIGNING_KEY`
-* `OB_ISSUING_CA`
-* `TRANSPORT_CERT`
-* `TRANSPORT_KEY`
-
-Please use the script below to encode your certs (a cert at a time).
-
-```
-npm run base64-cert-or-key <path/to/cert> or <path/to/key>
-```
-
-This produces
-```
-BASE64 ENCODING COMPLETE (Please copy the text below to the required ENV):
-
-LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUZxekNDQkpPZ0F3SUJBZ0lFV1d2OG5UQU5CZ2...
-```
-
-As per instructions in the output copy the base64 encoded string to the relevant ENV.
-
-__Running against The Reference Mock Server__: This __DOES NOT__ require setting any CERTs or Keys.
-
-## Using mTLS
-
-The OpenBanking specification requires parties to use [Mutual TLS authentication](https://en.wikipedia.org/wiki/Mutual_authentication) for every connection. OpenBanking uses its own Certification Authority (certificate created from OpenBanking Root certificate) to sign clients (TPP) and servers (ASPSP) certificates.
-
-- For the ASPSP server, a certificate paired with a certificate key and CA certificate are used to secure resources provided by servers.
-
-- For the TPP client, a certificate paired with a certificate key and CA certificate are used to establish a secured connection with servers, including `ASPSP Authorization`/`Resource Server`, `OpenBanking Directory` and `OpenId` Configuration.
-
-### Running against OpenBanking Directory with an ASPSP reference sandbox
-
-If you are [already provisioned with OpenBanking Directory](#ob-directory-provisioned-tpp)
-and want to interact with an ASPSP reference sandbox listed on OB Directory,
-then ensure
-
-* You have downloaded the required `Transport` and `Signing` Certs (follow OB
-   Directory issued instructions).
-
-* You have access to the `private key` used when generating the `Signing` Cert CSR.
-
-The server has to be configured with
-* `MTLS_ENABLED=true`.
-* `OB_ISSUING_CA=<base64 encoded cert>` (CA) - Downloaded / base64 encoded `OB Issuing CA` cert from OB Directory.
-* `TRANSPORT_CERT=<base64 encoded cert>` (CERT) - Downloaded / base64 encoded `Transport` cert from OB Directory console.
-* `TRANSPORT_KEY=<base64 encoded private key>` (KEY) - private key used to generate `Transport` cert CSR.
+* `CLIENT_SCOPES='ASPSPReadAccess TPPReadAccess AuthoritiesReadAccess'` - access scopes for API features.
+* `DEBUG=error,log,debug` - enables debugging.
+* `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server` - MongoDB configuration.
+* `MTLS_ENABLED=false` - enables / disables mTLS.
+* `OB_DIRECTORY_AUTH_HOST=xxx` - OB Directory Auth host for issuing tokens.
+* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
+* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
+* `OB_ISSUING_CA=''` - base64 encoded `OB Issuing chain` cert from OB Directory.
+* `OB_PROVISIONED=false` - enables / disables enrolled with OB Directory mode.
+* `PORT=8003` - port where the app is running.
+* `REDIS_HOST=localhost` - Redis configuration.
+* `REDIS_PORT=6379` - Redis port.
+* `SIGNING_KEY=''` - base64 encoded private key used to generate `Signing` cert OB Directory CSR.
+* `SIGNING_KID=xxx` - kid retrieved from OB Directory console.
+* `SOFTWARE_STATEMENT_ID=xxx` - softwareStatementId of software statement generated using OB Directory console.
+* `SOFTWARE_STATEMENT_REDIRECT_URL=xxx` - redirection url as entered in OB Directory software statement.
+* `TRANSPORT_CERT=''` - base64 encoded downloaded `Transport` cert from OB Directory console.
+* `TRANSPORT_KEY=''` - base64 encoded private key used to generate `Transport` cert OB Directory CSR.
 
 ## Deploy to heroku
 

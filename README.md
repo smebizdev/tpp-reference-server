@@ -319,6 +319,19 @@ Run:
 DEBUG=debug,log npm run saveCreds authServerId=<server_id> clientId=<client_id> clientSecret=<client_secret>
 ```
 
+### Run server
+
+Run using foreman, this will pick ENVs from the `.env` file [setup earlier](server-setup):
+
+```sh
+npm run foreman
+# [OKAY] Loaded ENV .env File as KEY=VALUE Format
+# web.1 | log App listening on port 8003 ...
+```
+
+Assuming the TPP server is now running, install and run the [TPP Reference Client](https://github.com/OpenBankingUK/tpp-reference-client) to view accounts data or make a single payment.
+
+Alternatively, check the [supported use cases](#use-cases) to issue `CURL` commands and explore features.
 
 ## Use cases
 

@@ -13,6 +13,8 @@ const {
   getClientCredentials,
   updateClientCredentials,
   fapiFinancialIdFor,
+  requestObjectSigningAlgs,
+  idTokenSigningAlgs,
 } = require('../../app/authorisation-servers');
 
 const nock = require('nock');
@@ -33,8 +35,12 @@ const flattenedObDirectoryAuthServerList = [
 
 const expectedAuthEndpoint = 'http://auth.example.com/authorize';
 const expectedTokenEndpoint = 'http://auth.example.com/token';
+const expectedRequestAlgorithms = ['HS256', 'RS256'];
+const expectedIdTokenAlgorithms = ['HS256', 'PS256'];
 const openIdConfig = {
   authorization_endpoint: expectedAuthEndpoint,
+  id_token_signing_alg_values_supported: expectedIdTokenAlgorithms,
+  request_object_signing_alg_values_supported: expectedRequestAlgorithms,
   token_endpoint: expectedTokenEndpoint,
 };
 
@@ -201,6 +207,12 @@ describe('authorisation servers', () => {
 
       const tokenUrl = await tokenEndpoint(authServerId);
       assert.equal(tokenUrl, expectedTokenEndpoint);
+
+      const requestAlgorithms = await requestObjectSigningAlgs(authServerId);
+      assert.deepEqual(requestAlgorithms, expectedRequestAlgorithms);
+
+      const idTokenAlgorithms = await idTokenSigningAlgs(authServerId);
+      assert.deepEqual(idTokenAlgorithms, expectedIdTokenAlgorithms);
     });
   });
 });

@@ -192,6 +192,28 @@ const authorisationEndpoint = async (id) => {
   return endpoint;
 };
 
+const requestObjectSigningAlgs = async (id) => {
+  const config = await openIdConfig(id);
+  const list = config ? config.request_object_signing_alg_values_supported : null;
+  if (list === null) {
+    const err = new Error(`request object signing algs for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return list;
+};
+
+const idTokenSigningAlgs = async (id) => {
+  const config = await openIdConfig(id);
+  const list = config ? config.id_token_signing_alg_values_supported : null;
+  if (list === null) {
+    const err = new Error(`id token signing algs for auth server ${id} not found`);
+    err.status = 500;
+    throw err;
+  }
+  return list;
+};
+
 const issuer = async (id) => {
   const config = await openIdConfig(id);
   const uri = config ? config.issuer : null;
@@ -228,4 +250,6 @@ exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;
 exports.fapiFinancialIdFor = fapiFinancialIdFor;
 exports.requireAuthorisationServerId = requireAuthorisationServerId;
+exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
+exports.idTokenSigningAlgs = idTokenSigningAlgs;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

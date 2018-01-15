@@ -181,60 +181,26 @@ const openIdConfig = async (id) => {
   }
 };
 
-const authorisationEndpoint = async (id) => {
+const openIdConfigValue = async (id, key) => {
   const config = await openIdConfig(id);
-  const endpoint = config ? config.authorization_endpoint : null;
-  if (endpoint === null) {
-    const err = new Error(`authorisation endpoint for auth server ${id} not found`);
+  const value = config ? config[key] : null;
+  if (value === null) {
+    const err = new Error(`${key} for auth server ${id} not found`);
     err.status = 500;
     throw err;
   }
-  return endpoint;
+  return value;
 };
 
-const requestObjectSigningAlgs = async (id) => {
-  const config = await openIdConfig(id);
-  const list = config ? config.request_object_signing_alg_values_supported : null;
-  if (list === null) {
-    const err = new Error(`request object signing algs for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return list;
-};
+const authorisationEndpoint = async id => openIdConfigValue(id, 'authorization_endpoint');
 
-const idTokenSigningAlgs = async (id) => {
-  const config = await openIdConfig(id);
-  const list = config ? config.id_token_signing_alg_values_supported : null;
-  if (list === null) {
-    const err = new Error(`id token signing algs for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return list;
-};
+const requestObjectSigningAlgs = async id => openIdConfigValue(id, 'request_object_signing_alg_values_supported');
 
-const issuer = async (id) => {
-  const config = await openIdConfig(id);
-  const uri = config ? config.issuer : null;
-  if (uri === null) {
-    const err = new Error(`issuer for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return uri;
-};
+const idTokenSigningAlgs = async id => openIdConfigValue(id, 'id_token_signing_alg_values_supported');
 
-const tokenEndpoint = async (id) => {
-  const config = await openIdConfig(id);
-  const endpoint = config ? config.token_endpoint : null;
-  if (endpoint === null) {
-    const err = new Error(`token endpoint for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return endpoint;
-};
+const issuer = async id => openIdConfigValue(id, 'issuer');
+
+const tokenEndpoint = async id => openIdConfigValue(id, 'token_endpoint');
 
 exports.authorisationEndpoint = authorisationEndpoint;
 exports.issuer = issuer;

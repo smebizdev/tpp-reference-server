@@ -138,7 +138,7 @@ describe('authorisation servers', () => {
   });
 
   describe('authorisationEndpoint called with invalid authServerId', () => {
-    it('returns null', async () => {
+    it('throws 500 status error', async () => {
       try {
         await authorisationEndpoint('invalid-id');
         assert.ok(false);
@@ -149,7 +149,7 @@ describe('authorisation servers', () => {
   });
 
   describe('tokenEndpoint called with invalid authServerId', () => {
-    it('returns null', async () => {
+    it('throws 500 status error', async () => {
       try {
         await tokenEndpoint('invalid-id');
         assert.ok(false);

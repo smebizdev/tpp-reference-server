@@ -668,7 +668,6 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 * `MTLS_ENABLED=false` - enables / disables mTLS.
 * `OB_DIRECTORY_AUTH_HOST=xxx` - OB Directory Auth host for issuing tokens.
 * `OB_DIRECTORY_HOST=xxx` - OB Directory host.
-* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
 * `OB_ISSUING_CA=''` - base64 encoded `OB Issuing chain` cert from OB Directory.
 * `OB_PROVISIONED=false` - enables / disables enrolled with OB Directory mode.
 * `PORT=8003` - port where the app is running.

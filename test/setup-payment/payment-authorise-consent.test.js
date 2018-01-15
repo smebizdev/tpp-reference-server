@@ -24,6 +24,7 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
   const keyStub = sinon.stub().returns(key);
+  const requestObjectSigningAlgsStub = sinon.stub().returns(['none']);
   const { generateRedirectUri } = proxyquire(
     '../../app/authorise/authorise-uri.js',
     {
@@ -37,6 +38,7 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
         authorisationEndpoint: authorisationEndpointStub,
         getClientCredentials: clientCredentialsStub,
         issuer: issuerStub,
+        requestObjectSigningAlgs: requestObjectSigningAlgsStub,
       },
     },
   );

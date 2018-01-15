@@ -8,13 +8,13 @@ The implementation uses
 
 ## Use latest release
 
-Use the latest release [v0.6.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.6.0).
+Use the latest release [v0.7.0](https://github.com/OpenBankingUK/tpp-reference-server/releases/tag/v0.7.0).
 
 To obtain the latest release:
 
 ```sh
 git clone https://github.com/OpenBankingUK/tpp-reference-server
-git checkout v0.6.0
+git checkout v0.7.0
 ```
 
 Note: latest `master` branch code is actively under development and may not be stable.
@@ -43,7 +43,7 @@ Note: latest `master` branch code is actively under development and may not be s
   * [Explaining environment variables](#explaining-environment-variables)
   * [Deploy to heroku](#deploy-to-heroku)
   * [Testing](#testing)
-  * [eslint](#eslint)"
+  * [eslint](#eslint)
 
 ## Quick start with Mock ASPSPs
 
@@ -667,7 +667,6 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 * `MONGODB_URI=mongodb://localhost:27017/sample-tpp-server` - MongoDB configuration.
 * `MTLS_ENABLED=false` - enables / disables mTLS.
 * `OB_DIRECTORY_AUTH_HOST=xxx` - OB Directory Auth host for issuing tokens.
-* `OB_DIRECTORY_HOST=xxx` - OB Directory host.
 * `OB_DIRECTORY_HOST=xxx` - OB Directory host.
 * `OB_ISSUING_CA=''` - base64 encoded `OB Issuing chain` cert from OB Directory.
 * `OB_PROVISIONED=false` - enables / disables enrolled with OB Directory mode.

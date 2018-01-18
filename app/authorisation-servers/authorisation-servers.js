@@ -124,8 +124,12 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
     }
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
     const authServer = await getAuthServerConfig(id);
-    authServer.openIdConfig = openidConfig;
-    await setAuthServerConfig(id, authServer);
+    if (openidConfig) {
+      authServer.openIdConfig = openidConfig;
+      await setAuthServerConfig(id, authServer);
+    } else {
+      error(`OpenID config at ${openidConfigUrl} is blank`);
+    }
   } catch (err) {
     error(`Error getting ${openidConfigUrl} : ${err.message}`);
   }
@@ -145,9 +149,8 @@ const updateClientCredentials = async (id, clientCredentials) => {
 const updateOpenIdConfigs = async () => {
   try {
     const list = await allAuthorisationServers();
-    const toUpdate = list.filter(item => !item.openIdConfig);
 
-    await Promise.all(toUpdate.map(async (authServer) => {
+    await Promise.all(list.map(async (authServer) => {
       const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
       await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
     }));

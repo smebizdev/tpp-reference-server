@@ -1,4 +1,7 @@
 const jws = require('jws');
+const jose = require('node-jose');
+
+const signingKey = () => Buffer.from(process.env.SIGNING_KEY || '', 'base64').toString();
 
 /**
  * Issuer of the token.
@@ -8,17 +11,6 @@ const jws = require('jws');
  * For now return raw clientId
  */
 const issuer = clientId => clientId;
-
-/**
- * Audience that the ID token is intended for.
- * Represents the identifier of the authorization server as defined in RFC7519.
- * When a pure OAuth 2.0 is used, the value is the redirection URI.
- * When OpenID Connect is used, the value is the issuer value of the authorization server.
- */
-// const audience = (authServerIssuer, useOpenidConnect) => {
-//   todo: implement this function
-//   return useOpenidConnect ? authServerIssuer : redirectionUri;
-// };
 
 /**
  * Used to help mitigate against replay attacks.
@@ -63,13 +55,51 @@ const createClaims = (
   claims: claims(requestId),
 });
 
-// Use alg: 'none' for now when signing.
-const createJsonWebSignature = (payload) => {
-  const signature = jws.sign({
-    header: { alg: 'none' },
-    payload,
-  });
-  return signature;
+const signWithNone = payload => jws.sign({
+  header: { alg: 'none' },
+  payload,
+});
+
+const signWithFapiAlg = async (alg, payload) => {
+  const key = await jose.JWK.asKey(signingKey(), 'pem');
+  const result = await jose.JWS.createSign({ alg }, key)
+    .update(JSON.toString(payload))
+    .final();
+  return result.signatures[0].signature;
+};
+
+const signWithOtherAlg = (alg, payload, key) => jws.sign({
+  header: { alg },
+  payload,
+  privateKey: key,
+});
+
+/**
+ * JWS signatures shall use the PS256 or ES256 algorithms for signing.
+ * See: https://openid.net/specs/openid-financial-api-part-2.html#rfc.section.8.6
+ * Open Banking is also permitting RS256 for now to ease implementation.
+ * Some reference banks are also permitting HS256 for now to ease implementation.
+ */
+const createJsonWebSignature = async (payload, signingAlgs, clientSecret) => {
+  if (signingAlgs === ['none']) {
+    return signWithNone(payload);
+  }
+  if (signingAlgs.includes('ES256')) {
+    return signWithFapiAlg('ES256', payload);
+  }
+  if (signingAlgs.includes('PS256')) {
+    return signWithFapiAlg('PS256', payload);
+  }
+  if (signingAlgs.includes('HS256')) {
+    return signWithOtherAlg('HS256', payload, clientSecret);
+  }
+  if (signingAlgs.includes('RS256')) {
+    return signWithOtherAlg('RS256', payload, signingKey());
+  }
+  if (signingAlgs.includes('none')) {
+    return signWithNone(payload);
+  }
+  throw new Error(`${signingAlgs} not supported`);
 };
 
 exports.createClaims = createClaims;

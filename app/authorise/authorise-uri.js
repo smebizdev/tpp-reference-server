@@ -1,5 +1,7 @@
 const { createClaims, createJsonWebSignature } = require('./request-jws');
-const { authorisationEndpoint, getClientCredentials, issuer } = require('../authorisation-servers');
+const {
+  authorisationEndpoint, getClientCredentials, issuer, requestObjectSigningAlgs,
+} = require('../authorisation-servers');
 
 const env = require('env-var');
 const qs = require('qs');
@@ -18,15 +20,16 @@ const statePayload = (authorisationServerId, sessionId, scope, interactionId) =>
 
 const generateRedirectUri = async (authorisationServerId, requestId, scope,
   sessionId, interactionId) => {
-  const { clientId } = await getClientCredentials(authorisationServerId);
+  const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
   const state = statePayload(authorisationServerId, sessionId, scope, interactionId);
   const authEndpoint = await authorisationEndpoint(authorisationServerId);
   const authServerIssuer = await issuer(authorisationServerId);
+  const signingAlgs = await requestObjectSigningAlgs(authorisationServerId);
   const payload = createClaims(
     scope, requestId, clientId, authServerIssuer,
     registeredRedirectUrl, state, createClaims,
   );
-  const signature = createJsonWebSignature(payload);
+  const signature = await createJsonWebSignature(payload, signingAlgs, clientSecret);
   const uri =
     `${authEndpoint}?${qs.stringify({
       redirect_uri: registeredRedirectUrl,

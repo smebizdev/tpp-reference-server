@@ -122,3 +122,4 @@ const OBAccountPaymentServiceProviders = async (req, res) => {
 exports.extractAuthorisationServers = extractAuthorisationServers;
 exports.fetchOBAccountPaymentServiceProviders = fetchOBAccountPaymentServiceProviders;
 exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;
+exports.signingKey = signingKey;

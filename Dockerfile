@@ -1,4 +1,4 @@
-FROM node:8.3-alpine
+FROM node:8.4-alpine
 
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git curl
@@ -13,4 +13,3 @@ RUN npm install
 
 EXPOSE 8003
 CMD ["npm", "run", "foreman"]
-

@@ -14,6 +14,9 @@ const assert = require('assert');
 
 const nock = require('nock');
 
+const username = 'alice';
+const password = 'wonderland';
+
 const requestHeaders = {
   reqheaders: {
     'authorization': authorization,
@@ -33,7 +36,7 @@ nock(/example\.com/)
 const login = application => request(application)
   .post('/login')
   .set('Accept', 'x-www-form-urlencoded')
-  .send({ u: 'alice', p: 'wonderland' });
+  .send({ u: username, p: password });
 
 describe('Session Creation (Login)', () => {
   it('returns "Access-Control-Allow-Origin: *" header', (done) => {
@@ -161,7 +164,8 @@ describe('Proxy', () => {
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload).then(() => {
+      setTokenPayload(username, tokenPayload)
+      .then(() => {
         request(app)
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
@@ -172,14 +176,15 @@ describe('Proxy', () => {
             assert.equal(r.body.hi, 'ya');
             done();
           });
-      });
+      })
+      .catch((err) => console.log('ERRRRRR', err));
     });
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload).then(() => {
+      setTokenPayload(username, tokenPayload).then(() => {
         request(app)
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
@@ -195,7 +200,7 @@ describe('Proxy', () => {
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload).then(() => {
+      setTokenPayload(username, tokenPayload).then(() => {
         request(app)
           .get('/open-banking/non-existing')
           .set('Accept', 'application/json')
@@ -213,7 +218,7 @@ describe('Proxy', () => {
   it('should return 404 for path != /open-banking', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(sessionId, tokenPayload).then(() => {
+      setTokenPayload(username, tokenPayload).then(() => {
         request(app)
           .get('/open-banking-invalid')
           .set('Accept', 'application/json')

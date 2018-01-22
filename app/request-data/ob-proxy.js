@@ -3,6 +3,7 @@ const { setupMutualTLS } = require('../certs-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { accessToken } = require('../authorise');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
+const { session } = require('../session');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
@@ -21,10 +22,12 @@ const resourceRequestHandler = async (req, res) => {
   }
   const path = `/open-banking${req.path}`;
   const proxiedUrl = `${host}${path}`;
-  const token = await accessToken(sessionId);
+  const sessionData = JSON.parse(await session.getDataAsync(sessionId));
+  const token = await accessToken(sessionData.username);
   const bearerToken = `Bearer ${token}`;
 
   debug(`proxiedUrl ${proxiedUrl}`);
+  debug(`sessionData.username: ${sessionData.username}`);
   debug(`bearerToken ${bearerToken}`);
   debug(`xFapiFinancialId ${xFapiFinancialId}`);
 

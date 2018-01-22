@@ -60,9 +60,9 @@ const signWithNone = payload => jws.sign({
   payload,
 });
 
-const signWithFapiAlg = async (alg, payload) => {
-  const key = await jose.JWK.asKey(signingKey(), 'pem');
-  const result = await jose.JWS.createSign({ alg }, key)
+const signWithFapiAlg = async (alg, payload, key) => {
+  const keyObject = await jose.JWK.asKey(key, 'pem');
+  const result = await jose.JWS.createSign({ alg }, keyObject)
     .update(JSON.toString(payload))
     .final();
   return result.signatures[0].signature;
@@ -75,26 +75,28 @@ const signWithOtherAlg = (alg, payload, key) => jws.sign({
 });
 
 /**
- * JWS signatures shall use the PS256 or ES256 algorithms for signing.
+ * FAPI says JWS signatures shall use the PS256 or ES256 algorithms for signing.
  * See: https://openid.net/specs/openid-financial-api-part-2.html#rfc.section.8.6
- * Open Banking is also permitting RS256 for now to ease implementation.
+ *
+ * As the Open Banking certificates are RSA certificates, only PS256 will be supported.
+ * Open Banking is also permitting RS256 in MIT for now to ease implementation.
  * Some reference banks are also permitting HS256 for now to ease implementation.
  */
 const createJsonWebSignature = async (payload, signingAlgs, clientSecret) => {
   if (signingAlgs === ['none']) {
     return signWithNone(payload);
   }
-  if (signingAlgs.includes('ES256')) {
-    return signWithFapiAlg('ES256', payload);
-  }
-  if (signingAlgs.includes('PS256')) {
-    return signWithFapiAlg('PS256', payload);
+  const key = signingKey();
+  if (key.length > 0) {
+    if (signingAlgs.includes('PS256')) {
+      return signWithFapiAlg('PS256', payload, key);
+    }
+    if (signingAlgs.includes('RS256')) {
+      return signWithOtherAlg('RS256', payload, key);
+    }
   }
   if (signingAlgs.includes('HS256')) {
     return signWithOtherAlg('HS256', payload, clientSecret);
-  }
-  if (signingAlgs.includes('RS256')) {
-    return signWithOtherAlg('RS256', payload, signingKey());
   }
   if (signingAlgs.includes('none')) {
     return signWithNone(payload);

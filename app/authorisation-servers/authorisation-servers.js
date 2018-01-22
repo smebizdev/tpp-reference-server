@@ -1,4 +1,5 @@
 const error = require('debug')('error');
+const debug = require('debug')('debug');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
@@ -125,6 +126,7 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
     const authServer = await getAuthServerConfig(id);
     if (openidConfig) {
+      debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
       authServer.openIdConfig = openidConfig;
       await setAuthServerConfig(id, authServer);
     } else {
@@ -151,8 +153,12 @@ const updateOpenIdConfigs = async () => {
     const list = await allAuthorisationServers();
 
     await Promise.all(list.map(async (authServer) => {
-      const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
-      await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
+      try {
+        const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
+        await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
+      } catch (err) {
+        error(err);
+      }
     }));
   } catch (err) {
     error(err);

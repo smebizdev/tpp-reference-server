@@ -18,12 +18,12 @@ const checkCredentials = (u, p) => {
 const login = (() => {
   const authenticate = (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    let sid = '';
+    let sid;
     const { u } = req.body;
     const { p } = req.body;
     const allow = checkCredentials(u, p);
     if (allow) {
-      sid = session.newId();
+      sid = session.newSession(u);
       res.setHeader('Content-Type', 'application/json');
       res.status(200).send(JSON.stringify({ sid }));
     } else if (u === 'trigger-error') {

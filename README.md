@@ -24,7 +24,8 @@ Note: latest `master` branch code is actively under development and may not be s
 * [TPP Reference Server](#tpp-reference-server)
   * [Use latest release](#use-latest-release)
   * [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
-    * [Installation](#installation)
+    * [Installation via Docker](#installation-via-docker)
+    * [Installation on Local Machine](#installation-on-local-machine)
     * [Server setup](#server-setup)
     * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers)
     * [Run server](#run-server)
@@ -53,7 +54,43 @@ Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-
 
 __BEFORE PROCEEDING FURTHER__ install and run the reference mock server [as per these instructions](https://github.com/OpenBankingUK/reference-mock-server).
 
-### Installation
+### Installation via Docker
+
+To install as a container-based app we assume
+[Docker](https://www.docker.com/community-edition) ver17.12+ is installed.
+
+If not installed you can find [Docker Community Edition downloads here](https://www.docker.com/community-edition#/download).
+
+__BEFORE PROCEEDING FURTHER__ install the
+[reference mock server via Docker](https://github.com/OpenBankingUK/reference-mock-server),
+
+Then proceed with installing this server via Docker as follows.
+
+```sh
+cd tpp-reference-server
+docker build -t ob/tpp-server --build-arg TAG_VERSION=v0.x.0 .
+```
+
+Use `docker images` command to check `ob/tpp-server` has been created:
+
+```sh
+docker images
+# REPOSITORY                 TAG                 ...
+# ob/tpp-server              latest              ...
+# ob/reference-mock-server   latest              ...
+# node                       8.4-alpine          ...
+```
+
+Use `docker-compose up` to install `mongo` and `redis` images, and run both
+the reference mock server and the TPP reference server:
+
+```sh
+ASPSP_AUTH_HOST_IP=localhost docker-compose up
+```
+
+The TPP reference server should now be running on localhost:8003.
+
+### Installation on Local Machine
 
 #### NodeJS
 

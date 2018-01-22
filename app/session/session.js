@@ -3,8 +3,8 @@ const { store } = require('./persistence.js');
 const log = require('debug')('log');
 
 const session = (() => {
-  const setId = (sid, username) => store.set(sid, JSON.stringify({ sid, username }));
-  const getId = (sid, cb) => store.get(sid, cb);
+  const setData = (sid, username) => store.set(sid, JSON.stringify({ sid, username }));
+  const getData = (sid, cb) => store.get(sid, cb);
   const setAccessToken = accessToken => store.set('ob_directory_access_token', JSON.stringify(accessToken));
   const getAccessToken = cb => store.get('ob_directory_access_token', cb);
 
@@ -21,9 +21,9 @@ const session = (() => {
     store.get(candidate, sessHandler);
   };
 
-  const newId = (username) => {
+  const newSession = (username) => {
     const mySid = uuidv1();
-    setId(mySid, username);
+    setData(mySid, username);
     return mySid;
   };
 
@@ -32,12 +32,12 @@ const session = (() => {
   };
 
   return {
-    setId,
-    getId,
+    setData,
+    getData,
     setAccessToken,
     getAccessToken,
     destroy,
-    newId,
+    newSession,
     deleteAll,
   };
 })();

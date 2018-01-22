@@ -12,6 +12,8 @@ const {
   updateOpenIdConfigs,
   getClientCredentials,
   updateClientCredentials,
+  requestObjectSigningAlgs,
+  idTokenSigningAlgs,
 } = require('./authorisation-servers');
 
 exports.allAuthorisationServers = allAuthorisationServers;
@@ -27,3 +29,5 @@ exports.resourceServerPath = resourceServerPath;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
+exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
+exports.idTokenSigningAlgs = idTokenSigningAlgs;

@@ -1,4 +1,5 @@
 const error = require('debug')('error');
+const debug = require('debug')('debug');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
@@ -124,8 +125,13 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
     }
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
     const authServer = await getAuthServerConfig(id);
-    authServer.openIdConfig = openidConfig;
-    await setAuthServerConfig(id, authServer);
+    if (openidConfig) {
+      debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
+      authServer.openIdConfig = openidConfig;
+      await setAuthServerConfig(id, authServer);
+    } else {
+      error(`OpenID config at ${openidConfigUrl} is blank`);
+    }
   } catch (err) {
     error(`Error getting ${openidConfigUrl} : ${err.message}`);
   }
@@ -145,11 +151,14 @@ const updateClientCredentials = async (id, clientCredentials) => {
 const updateOpenIdConfigs = async () => {
   try {
     const list = await allAuthorisationServers();
-    const toUpdate = list.filter(item => !item.openIdConfig);
 
-    await Promise.all(toUpdate.map(async (authServer) => {
-      const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
-      await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
+    await Promise.all(list.map(async (authServer) => {
+      try {
+        const openidConfigUrl = authServer.obDirectoryConfig.OpenIDConfigEndPointUri;
+        await fetchAndStoreOpenIdConfig(authServer.id, openidConfigUrl);
+      } catch (err) {
+        error(err);
+      }
     }));
   } catch (err) {
     error(err);
@@ -178,38 +187,26 @@ const openIdConfig = async (id) => {
   }
 };
 
-const authorisationEndpoint = async (id) => {
+const openIdConfigValue = async (id, key) => {
   const config = await openIdConfig(id);
-  const endpoint = config ? config.authorization_endpoint : null;
-  if (endpoint === null) {
-    const err = new Error(`authorisation endpoint for auth server ${id} not found`);
+  const value = config ? config[key] : null;
+  if (value === null) {
+    const err = new Error(`${key} for auth server ${id} not found`);
     err.status = 500;
     throw err;
   }
-  return endpoint;
+  return value;
 };
 
-const issuer = async (id) => {
-  const config = await openIdConfig(id);
-  const uri = config ? config.issuer : null;
-  if (uri === null) {
-    const err = new Error(`issuer for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return uri;
-};
+const authorisationEndpoint = async id => openIdConfigValue(id, 'authorization_endpoint');
 
-const tokenEndpoint = async (id) => {
-  const config = await openIdConfig(id);
-  const endpoint = config ? config.token_endpoint : null;
-  if (endpoint === null) {
-    const err = new Error(`token endpoint for auth server ${id} not found`);
-    err.status = 500;
-    throw err;
-  }
-  return endpoint;
-};
+const requestObjectSigningAlgs = async id => openIdConfigValue(id, 'request_object_signing_alg_values_supported');
+
+const idTokenSigningAlgs = async id => openIdConfigValue(id, 'id_token_signing_alg_values_supported');
+
+const issuer = async id => openIdConfigValue(id, 'issuer');
+
+const tokenEndpoint = async id => openIdConfigValue(id, 'token_endpoint');
 
 exports.authorisationEndpoint = authorisationEndpoint;
 exports.issuer = issuer;
@@ -225,4 +222,6 @@ exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;
 exports.fapiFinancialIdFor = fapiFinancialIdFor;
 exports.requireAuthorisationServerId = requireAuthorisationServerId;
+exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
+exports.idTokenSigningAlgs = idTokenSigningAlgs;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;

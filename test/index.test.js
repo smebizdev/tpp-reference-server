@@ -164,8 +164,7 @@ describe('Proxy', () => {
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(username, tokenPayload)
-      .then(() => {
+      setTokenPayload(username, tokenPayload).then(() => {
         request(app)
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
@@ -176,8 +175,7 @@ describe('Proxy', () => {
             assert.equal(r.body.hi, 'ya');
             done();
           });
-      })
-      .catch((err) => console.log('ERRRRRR', err));
+      });
     });
   });
 

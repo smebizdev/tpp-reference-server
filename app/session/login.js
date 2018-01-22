@@ -23,7 +23,7 @@ const login = (() => {
     const { p } = req.body;
     const allow = checkCredentials(u, p);
     if (allow) {
-      sid = session.newId();
+      sid = session.newId(u);
       res.setHeader('Content-Type', 'application/json');
       res.status(200).send(JSON.stringify({ sid }));
     } else if (u === 'trigger-error') {

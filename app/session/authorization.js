@@ -1,7 +1,7 @@
 const { session } = require('./session');
 
 const validSession = (candidate, callback) => {
-  session.getData(candidate, (err, data) => callback(data && JSON.parse(data).sid === candidate));
+  session.getData(candidate, (err, data) => callback(data));
 };
 
 const requireAuthorization = (req, res, next) => {

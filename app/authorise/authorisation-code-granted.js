@@ -3,7 +3,6 @@ const { setTokenPayload } = require('./access-tokens');
 const { postToken } = require('./obtain-access-token');
 const { getClientCredentials } = require('../authorisation-servers');
 const { session } = require('../session');
-const util = require('util');
 const debug = require('debug')('debug');
 
 const redirectionUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();

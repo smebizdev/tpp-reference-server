@@ -3,7 +3,6 @@ const proxyquire = require('proxyquire');
 const env = require('env-var');
 const httpMocks = require('node-mocks-http');
 const sinon = require('sinon');
-const util = require('util');
 
 const redirectionUrl = 'http://localhost:9999/tpp/authorized';
 const clientId = 'id';
@@ -30,6 +29,7 @@ describe('Authorized Code Granted', () => {
   let postTokenStub;
   let setTokenPayloadStub;
   let getClientCredentialsStub;
+  let sessionGetDataStub;
   let request;
   let response;
 
@@ -37,7 +37,10 @@ describe('Authorized Code Granted', () => {
     setTokenPayloadStub = sinon.stub();
     postTokenStub = sinon.stub().returns(tokenResponsePayload);
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    sessionGetDataStub = sinon.stub().returns(JSON.stringify({ sid: sessionId, username: username }));
+    sessionGetDataStub = sinon.stub().returns(JSON.stringify({
+      sid: sessionId,
+      username,
+    }));
     redirection = proxyquire('../../app/authorise/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
@@ -49,8 +52,8 @@ describe('Authorized Code Granted', () => {
       './access-tokens': { setTokenPayload: setTokenPayloadStub },
       '../session': {
         session: {
-          getDataAsync: sessionGetDataStub
-        }
+          getDataAsync: sessionGetDataStub,
+        },
       },
     });
 

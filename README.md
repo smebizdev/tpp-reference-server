@@ -24,6 +24,7 @@ Note: latest `master` branch code is actively under development and may not be s
 * [TPP Reference Server](#tpp-reference-server)
   * [Use latest release](#use-latest-release)
   * [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
+    * [Installation](#installation)
     * [Installation via Docker](#installation-via-docker)
     * [Installation on Local Machine](#installation-on-local-machine)
     * [Server setup](#server-setup)
@@ -53,6 +54,11 @@ This assumes you do not have OB Directory access but want to kick the tyres to s
 Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide.
 
 __BEFORE PROCEEDING FURTHER__ install and run the reference mock server [as per these instructions](https://github.com/OpenBankingUK/reference-mock-server).
+
+### Installation
+
+Below are instructions for [installing via docker](#installation-via-docker),
+and alternatively [installing directly on your local machine](#installation-on-local-machine).
 
 ### Installation via Docker
 
@@ -89,6 +95,14 @@ ASPSP_AUTH_HOST_IP=localhost docker-compose up
 ```
 
 The TPP reference server should now be running on localhost:8003.
+
+
+To open shell in running container if needed:
+
+```sh
+docker ps | grep tpp-reference-server # to find CONTAINER_ID
+open shell > docker exec -it [CONTAINER_ID] bash
+```
 
 ### Installation on Local Machine
 

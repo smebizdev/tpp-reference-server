@@ -502,7 +502,11 @@ For example `/open-banking/v1.1` gives access to the 1.1 Read write Apis.
 
 #### GET Accounts for a user (Account and Transaction API)
 
-We have a hardcoded demo user `alice` in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
+We have a hardcoded demo user `alice` in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To 
+access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
+
+
+There is a second hardcoded user `kate` with password `lookingglass`, for the purpose of testing one user with consent and one without. 
 
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts

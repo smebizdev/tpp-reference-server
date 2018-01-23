@@ -3,19 +3,19 @@ const debug = require('debug')('debug');
 
 const ACCESS_TOKENS_COLLECTION = 'accessTokens';
 
-const tokenPayload = async sessionId => get(ACCESS_TOKENS_COLLECTION, sessionId);
+const tokenPayload = async username => get(ACCESS_TOKENS_COLLECTION, username);
 
-const setTokenPayload = async (sessionId, payload) =>
-  set(ACCESS_TOKENS_COLLECTION, payload, sessionId);
+const setTokenPayload = async (username, payload) =>
+  set(ACCESS_TOKENS_COLLECTION, payload, username);
 
-const accessToken = async (sessionId) => {
-  const payload = await tokenPayload(sessionId);
-  debug(`accessToken#sessionId: ${sessionId}`);
+const accessToken = async (username) => {
+  const payload = await tokenPayload(username);
+  debug(`accessToken#username: ${username}`);
   debug(`accessToken#payload: ${JSON.stringify(payload)}`);
   if (payload && payload.access_token) {
     return payload.access_token;
   }
-  const err = new Error(`access token for session ${sessionId} not found`);
+  const err = new Error(`access token for username ${username} not found`);
   err.status = 500;
   throw err;
 };

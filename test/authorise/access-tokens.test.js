@@ -5,7 +5,7 @@ const { ACCESS_TOKENS_COLLECTION } = require('../../app/authorise/access-tokens'
 
 const { drop } = require('../../app/storage.js');
 
-const sessionId = 'testSession';
+const username = 'testUsername';
 const token = 'testAccessToken';
 const tokenPayload = {
   access_token: token,
@@ -22,7 +22,7 @@ describe('setTokenPayload', () => {
   });
 
   it('stores payload and allows accessToken to be retrieved', async () => {
-    await setTokenPayload(sessionId, tokenPayload);
-    assert.equal(await accessToken(sessionId), token);
+    await setTokenPayload(username, tokenPayload);
+    assert.equal(await accessToken(username), token);
   });
 });

@@ -58,6 +58,18 @@ describe('Session Creation (Login)', () => {
       });
   });
 
+  it('returns a 200 for second user kate login /login', (done) => {
+    request(app)
+      .post('/login')
+      .set('Accept', 'x-www-form-urlencoded')
+      .send({ u: 'kate', p: 'lookingglass' })
+      .end((err, res) => {
+        assert.equal(res.status, 200);
+        done();
+      });
+  });
+
+
   it('returns an unauthorised status for an invalid set of credentials at /login', (done) => {
     request(app)
       .post('/login')

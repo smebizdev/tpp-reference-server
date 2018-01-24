@@ -23,13 +23,13 @@ Note: latest `master` branch code is actively under development and may not be s
 
 * [TPP Reference Server](#tpp-reference-server)
   * [Use latest release](#use-latest-release)
-  * [Quick start with Mock ASPSPs](#quick-start-with-mock-aspsps)
-    * [Installation](#installation)
+  * [Quick start with mocked API](#quick-start-with-mocked-api)
+    * [Installation](#installation---for-quick-start-with-mocked-api)
     * [Server setup](#server-setup)
     * [Configure ASPSP Authorisation Servers](#configure-aspsp-authorisation-servers)
     * [Run server](#run-server)
   * [Quick start after Open Banking Directory enrolment](#quick-start-after-open-banking-directory-enrolment)
-    * [Installation](#installation-1)
+    * [Installation](#installation---for-after-open-banking-directory-enrolment)
     * [Server setup](#server-setup-1)
     * [Turn on OB Directory access and mTLS](#turn-on-ob-directory-access-and-mtls)
     * [Configure Certs and Keys](#configure-certs-and-keys)
@@ -45,15 +45,20 @@ Note: latest `master` branch code is actively under development and may not be s
   * [Testing](#testing)
   * [eslint](#eslint)
 
-## Quick start with Mock ASPSPs
+## Quick start with mocked API
 
 This assumes you do not have OB Directory access but want to kick the tyres to see what's possible.
 
-Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server). It creates simulated endpoints to showcase what the Read/Write API can provide.
+Use our [reference mock server](https://github.com/OpenBankingUK/reference-mock-server).
+It creates simulated endpoints to showcase what the Read/Write API can provide.
 
 __BEFORE PROCEEDING FURTHER__ install and run the reference mock server [as per these instructions](https://github.com/OpenBankingUK/reference-mock-server).
 
-### Installation
+### Installation - for quick start with mocked API
+
+Below are instructions for installing directly on your local machine.
+
+Alternatively you can [install via Docker containers](./README-DOCKER.md).
 
 #### NodeJS
 
@@ -185,7 +190,7 @@ This assumes you have enrolled successfully with OB Directory and have access to
 
 Check [here for more info on how to complete this](https://www.openbanking.org.uk/directory/).
 
-### Installation
+### Installation - for after Open Banking Directory enrolment
 
 #### NodeJS
 
@@ -502,11 +507,11 @@ For example `/open-banking/v1.1` gives access to the 1.1 Read write Apis.
 
 #### GET Accounts for a user (Account and Transaction API)
 
-We have a hardcoded demo user `alice` in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To 
+We have a hardcoded demo user `alice` in [mock server](https://github.com/OpenBankingUK/reference-mock-server). To
 access demo accounts for this user please setup the following `ENVS` (already configured in [`.env.sample`](https://github.com/OpenBankingUK/tpp-reference-server/blob/master/.env.sample).
 
 
-There is a second hardcoded user `kate` with password `lookingglass`, for the purpose of testing one user with consent and one without. 
+There is a second hardcoded user `kate` with password `lookingglass`, for the purpose of testing one user with consent and one without.
 
 ```sh
 curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'x-authorization-server-id: aaaj4NmBD8lQxmLh2O' -H 'Accept: application/json'  http://localhost:8003/open-banking/v1.1/accounts

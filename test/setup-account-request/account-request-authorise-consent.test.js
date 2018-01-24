@@ -10,6 +10,7 @@ const qs = require('qs');
 const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
+const accountRequestId = 'account-request-id';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
@@ -74,12 +75,18 @@ const doPost = app => request(app)
 const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 
 describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
-  const setupAccountRequestStub = sinon.stub();
+  const setupAccountRequestStub = sinon.stub().returns(accountRequestId);
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
   const scope = 'openid accounts';
-  const expectedStateBase64 = statePayload(authorisationServerId, sessionId, scope, interactionId);
+  const expectedStateBase64 = statePayload(
+    authorisationServerId,
+    sessionId,
+    scope,
+    interactionId,
+    accountRequestId,
+  );
   const expectedRedirectHost = 'http://example.com/authorize';
   const expectedParams = {
     client_id: clientId,
@@ -94,6 +101,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     interactionId,
     scope,
     sessionId,
+    accountRequestId,
   };
 
   it('creates a redirect URI with a 200 code via the to /authorize endpoint', (done) => {

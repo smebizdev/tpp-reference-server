@@ -8,12 +8,13 @@ const qs = require('qs');
 
 const registeredRedirectUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
-const statePayload = (authorisationServerId, sessionId, scope, interactionId) => {
+const statePayload = (authorisationServerId, sessionId, scope, interactionId, accountRequestId) => {
   const state = {
     authorisationServerId,
     interactionId,
     sessionId,
     scope,
+    accountRequestId,
   };
   return Buffer.from(JSON.stringify(state)).toString('base64');
 };
@@ -21,7 +22,7 @@ const statePayload = (authorisationServerId, sessionId, scope, interactionId) =>
 const generateRedirectUri = async (authorisationServerId, requestId, scope,
   sessionId, interactionId) => {
   const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
-  const state = statePayload(authorisationServerId, sessionId, scope, interactionId);
+  const state = statePayload(authorisationServerId, sessionId, scope, interactionId, requestId);
   const authEndpoint = await authorisationEndpoint(authorisationServerId);
   const authServerIssuer = await issuer(authorisationServerId);
   const signingAlgs = await requestObjectSigningAlgs(authorisationServerId);

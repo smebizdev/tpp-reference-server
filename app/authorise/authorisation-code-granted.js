@@ -10,12 +10,13 @@ const redirectionUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 const handler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    const { authorisationServerId, code } = req.query;
+    debug(`#authorisationCodeGrantedHandler request payload: ${JSON.stringify(req.body)}`);
+    const { authorisationServerId, authorisationCode } = req.body;
     const { clientId, clientSecret } = await getClientCredentials(authorisationServerId);
     const accessTokenRequest = {
       grant_type: 'authorization_code',
       redirect_uri: redirectionUrl,
-      code,
+      code: authorisationCode,
     };
 
     const tokenPayload = await postToken(

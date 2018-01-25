@@ -58,13 +58,13 @@ describe('Authorized Code Granted', () => {
     });
 
     request = httpMocks.createRequest({
-      method: 'GET',
+      method: 'POST',
       url: '/tpp/authorized',
       headers: {
         authorization: sessionId,
       },
-      query: {
-        code: authorisationCode,
+      body: {
+        authorisationCode,
         authorisationServerId,
       },
     });

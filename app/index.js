@@ -43,7 +43,7 @@ app.all('/payment-submissions', requireAuthorization, requireAuthorisationServer
 app.post('/payment-submissions', paymentSubmission);
 
 app.all('/tpp/authorized', requireAuthorization);
-app.get('/tpp/authorized', authorisationCodeGrantedHandler);
+app.post('/tpp/authorized', authorisationCodeGrantedHandler);
 
 app.all('/open-banking/*', requireAuthorization, requireAuthorisationServerId);
 app.use('/open-banking', resourceRequestHandler);

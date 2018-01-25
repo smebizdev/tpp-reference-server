@@ -8,13 +8,13 @@ const qs = require('qs');
 
 const registeredRedirectUrl = env.get('SOFTWARE_STATEMENT_REDIRECT_URL').asString();
 
-const statePayload = (authorisationServerId, sessionId, scope, interactionId, accountRequestId) => {
+const statePayload = (authorisationServerId, sessionId, scope, interactionId, requestId) => {
   const state = {
     authorisationServerId,
     interactionId,
     sessionId,
     scope,
-    accountRequestId,
+    requestId,
   };
   return Buffer.from(JSON.stringify(state)).toString('base64');
 };

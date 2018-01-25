@@ -1,6 +1,7 @@
 const monk = require('monk');
 const error = require('debug')('error');
 const log = require('debug')('log');
+const debug = require('debug')('debug');
 
 let mongodbUri = 'localhost:27017/sample-tpp-server';
 if (process.env.MONGODB_URI) {
@@ -15,10 +16,10 @@ const db = monk(mongodbUri);
  * @param {string} id - `id` field to query.
  * @return {object} document with given `id` field, or null if none found.
  */
-const get = async (collection, id, fields = []) => {
+const get = async (collection, query = { id: null }, fields = []) => {
   try {
     const store = await db.get(collection);
-    return await store.findOne({ id }, ['-_id'].concat(fields));
+    return await store.findOne(query, ['-_id'].concat(fields));
   } catch (e) {
     error(`error in storage get: ${e.stack}`);
     throw e;
@@ -51,7 +52,7 @@ const set = async (collection, object, id) => {
     const item = Object.assign({ id }, object);
     const store = await db.get(collection);
     await store.createIndex('id'); // ensure id index exists
-    if (await get(collection, id)) {
+    if (await get(collection, { id })) {
       return await store.findOneAndUpdate({ id }, item);
     }
     return await store.insert(item);

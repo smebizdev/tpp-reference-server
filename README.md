@@ -491,10 +491,10 @@ This produces
 .exit
 ```
 
-* Then, perform a GET request against the TPP Server using `code` and parsed `authorisationServerId` from the `state`.
+* Then, perform a POST request against the TPP Server using `code` and parsed `authorisationServerId` from the `state`.
 
 ```sh
-curl -X GET -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json' --url "http://localhost:8003/tpp/authorized?code=spoofAuthorisationCode&authorisationServerId=aaaj4NmBD8lQxmLh2O"
+curl -X POST -H 'Authorization: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' -H 'Accept: application/json' -d '{"authorisationServerId": "aaaj4NmBD8lQxmLh2O", "interactionId": "8a2c9572-1f1f-407a-9526-5f834e7fc1ac", "sessionId": "c758b000-df52-11e7-83ea-d1671a959de0", "scope": "accounts", "authorisationCode": "spoofAuthorisationCode"}' http://localhost:8003/tpp/authorized
 ```
 
 This creates an `access-token` and allows authorized access to the APIs.

@@ -13,16 +13,24 @@ describe('storage set data with id', () => {
   };
   const id = 'testId';
 
-  it('then get with invalid id returns null', async () => {
+  it('then get with invalid query returns null', async () => {
     await set(collection, data, id);
-    const result = await get(collection, 'bad-id');
+    const query = { id: 'bad-id' };
+    const result = await get(collection, query);
     return assert.equal(null, result);
   });
 
-  it('then get with id returns same data', async () => {
+  it('then get with empty query returns null', async () => {
+    await set(collection, data, id);
+    const result = await get(collection, {});
+    return assert.equal(null, result);
+  });
+
+  it('then get with valid query returns same data', async () => {
     await set(collection, data, id);
     const expected = Object.assign({ id }, data);
-    const result = await get(collection, id);
+    const query = { id };
+    const result = await get(collection, query);
     return assert.deepEqual(expected, result);
   });
 
@@ -40,7 +48,8 @@ describe('storage set data with id', () => {
     await set(collection, newData, id);
 
     const expected = Object.assign({ id }, newData);
-    const result = await get(collection, id);
+    const query = { id };
+    const result = await get(collection, query);
     return assert.deepEqual(expected, result);
   });
 

@@ -25,6 +25,7 @@ const transformServerData = (data) => {
     id,
     logoUri,
     name,
+    accountsConsent: true,
   };
 };
 

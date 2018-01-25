@@ -28,7 +28,7 @@ const transformServerData = (data) => {
   };
 };
 
-const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
+const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, { id });
 
 const setAuthServerConfig = async (id, authServer) =>
   set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);

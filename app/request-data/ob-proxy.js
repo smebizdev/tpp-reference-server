@@ -14,6 +14,7 @@ const resourceRequestHandler = async (req, res) => {
 
   const sessionId = req.headers.authorization;
   let host;
+  let accessToken;
   try {
     host = await resourceServerPath(authServerId);
   } catch (err) {
@@ -25,8 +26,12 @@ const resourceRequestHandler = async (req, res) => {
   const sessionData = JSON.parse(await session.getDataAsync(sessionId));
   const { username } = sessionData;
   const scope = path.split('/')[3];
-  const consentKeys = { username, authorisationServerId: authServerId, scope };
-  const accessToken = await consentAccessToken(consentKeys);
+  try {
+    const consentKeys = { username, authorisationServerId: authServerId, scope };
+    accessToken = await consentAccessToken(consentKeys);
+  } catch (err) {
+    accessToken = null;
+  }
   const bearerToken = `Bearer ${accessToken}`;
 
   debug(`proxiedUrl: ${proxiedUrl}`);

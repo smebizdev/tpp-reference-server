@@ -5,7 +5,7 @@ const AUTH_SERVER_USER_CONSENTS_COLLECTION = 'authorisationServerUserConsents';
 
 const validateCompositeKey = (obj) => {
   if (!Object.keys(obj).includes('username', 'authorisationServerId', 'scope')) {
-    const err = new Error(`Incorrect conset compositeKey [${obj}]`);
+    const err = new Error(`Incorrect consent compositeKey [${obj}]`);
     err.status = 500;
     throw err;
   }
@@ -33,15 +33,20 @@ const consent = async (keys) => {
   debug(`consent#id (compositeKey): ${compositeKey}`);
   debug(`consent#payload: ${JSON.stringify(payload)}`);
   if (!payload) {
-    const err = new Error(`consent for id ${JSON.stringify(keys)} not found`);
+    const err = new Error(`User [${keys.username}] has not yet given consent to access their ${keys.scope}`);
     err.status = 500;
     throw err;
   }
   return payload;
 };
 
+const consentAccessToken = async (keys) => {
+  const existing = await consent(keys);
+  return existing.token.access_token;
+};
 
 exports.generateCompositeKey = generateCompositeKey;
 exports.setConsent = setConsent;
 exports.consent = consent;
+exports.consentAccessToken = consentAccessToken;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

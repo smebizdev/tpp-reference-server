@@ -44,8 +44,10 @@ const handler = async (req, res) => {
       accountRequestId,
       expirationDateTime: null,
       authorisationCode,
-      accessToken: tokenPayload,
+      token: tokenPayload,
     };
+    debug(`consent keys: [${ JSON.stringify({ username, authorisationServerId, scope }) }]`)
+    debug(`consentPayload: [${ JSON.stringify(consentPayload) }]`)
     await setConsent({ username, authorisationServerId, scope }, consentPayload);
     return res.status(204).send();
   } catch (err) {

@@ -13,7 +13,7 @@ const authorisationCode = '12345_67xxx';
 const sessionId = 'testSession';
 const username = 'testUser';
 const scope = 'accounts';
-const accountRequestId = 'testAccountRequestId'
+const accountRequestId = 'testAccountRequestId';
 
 const tokenRequestPayload = {
   grant_type: 'authorization_code', // eslint-disable-line quote-props
@@ -30,6 +30,7 @@ describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
   let setTokenPayloadStub;
+  let setConsentStub;
   let getClientCredentialsStub;
   let sessionGetDataStub;
   let request;
@@ -98,7 +99,7 @@ describe('Authorized Code Granted', () => {
 
     it('calls setConsent to store obtained consent', async () => {
       await redirection.authorisationCodeGrantedHandler(request, response);
-      const args = setConsentStub.getCalls()[0].args;
+      const { args } = setConsentStub.getCalls()[0];
       assert.deepEqual({ username, authorisationServerId, scope }, args[0]);
       assert.deepEqual(
         {
@@ -110,7 +111,8 @@ describe('Authorized Code Granted', () => {
           authorisationCode,
           token: tokenResponsePayload,
         },
-        args[1]);
+        args[1],
+      );
     });
 
     describe('error handling', () => {

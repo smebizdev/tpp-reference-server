@@ -34,8 +34,8 @@ const handler = async (req, res) => {
     debug(`tokenPayload: ${JSON.stringify(tokenPayload)}`);
 
     const sessionData = JSON.parse(await session.getDataAsync(sessionId));
-    const username = sessionData.username;
-    debug(`sessionData.username: ${sessionData.username}`);
+    const { username } = sessionData;
+    debug(`username: ${username}`);
     await setTokenPayload(sessionData.username, tokenPayload);
     const consentPayload = {
       username,
@@ -46,8 +46,7 @@ const handler = async (req, res) => {
       authorisationCode,
       token: tokenPayload,
     };
-    debug(`consent keys: [${ JSON.stringify({ username, authorisationServerId, scope }) }]`)
-    debug(`consentPayload: [${ JSON.stringify(consentPayload) }]`)
+
     await setConsent({ username, authorisationServerId, scope }, consentPayload);
     return res.status(204).send();
   } catch (err) {

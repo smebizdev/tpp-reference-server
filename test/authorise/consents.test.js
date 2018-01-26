@@ -16,7 +16,7 @@ const token = 'testAccessToken';
 const tokenPayload = {
   access_token: token,
   expires_in: 3600,
-  token_type : 'bearer',
+  token_type: 'bearer',
 };
 
 const consentPayload = {

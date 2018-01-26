@@ -3,7 +3,7 @@ const debug = require('debug')('debug');
 
 const ACCESS_TOKENS_COLLECTION = 'accessTokens';
 
-const tokenPayload = async username => get(ACCESS_TOKENS_COLLECTION, { id: username });
+const tokenPayload = async username => get(ACCESS_TOKENS_COLLECTION, username);
 
 const setTokenPayload = async (username, payload) =>
   set(ACCESS_TOKENS_COLLECTION, payload, username);

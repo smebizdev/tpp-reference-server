@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const { setConsent, consent } = require('../../app/authorise');
+const { setConsent, consent, filterConsented } = require('../../app/authorise');
 const { AUTH_SERVER_USER_CONSENTS_COLLECTION } = require('../../app/authorise/consents');
 
 const { drop } = require('../../app/storage.js');
@@ -43,5 +43,29 @@ describe('setConsents', () => {
     const stored = await consent(keys);
     assert.equal(stored.id, `${username}:::${authorisationServerId}:::${scope}`);
     assert.equal(stored.token.access_token, token);
+  });
+});
+
+describe('filterConsented', () => {
+  afterEach(async () => {
+    await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
+  });
+
+  describe('given auth server id with consent', () => {
+    beforeEach(async () => {
+      await setConsent(keys, consentPayload);
+    });
+
+    it('returns array containing that auth server id', async () => {
+      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      assert.deepEqual(consented, [authorisationServerId]);
+    });
+  });
+
+  describe('given auth server id without consent', () => {
+    it('returns empty array', async () => {
+      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      assert.deepEqual(consented, []);
+    });
   });
 });

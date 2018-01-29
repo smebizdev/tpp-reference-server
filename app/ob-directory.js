@@ -112,7 +112,7 @@ const fetchOBAccountPaymentServiceProviders = async () => {
   }
 };
 
-const OBAccountPaymentServiceProviders = async (req, res) => {
+const accountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const servers = await authorisationServersForClient();
   log(`servers length: ${servers.length}`);
@@ -121,5 +121,5 @@ const OBAccountPaymentServiceProviders = async (req, res) => {
 
 exports.extractAuthorisationServers = extractAuthorisationServers;
 exports.fetchOBAccountPaymentServiceProviders = fetchOBAccountPaymentServiceProviders;
-exports.OBAccountPaymentServiceProviders = OBAccountPaymentServiceProviders;
+exports.accountPaymentServiceProviders = accountPaymentServiceProviders;
 exports.signingKey = signingKey;

@@ -17,7 +17,7 @@ const sortByName = (list) => {
   return list;
 };
 
-const transformServerData = (data) => {
+const decorateServerDataForClient = (data) => {
   const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
@@ -169,7 +169,7 @@ const authorisationServersForClient = async () => {
   try {
     const allServers = await allAuthorisationServers();
     const registeredServers = allServers.filter(s => s.clientCredentials);
-    const servers = registeredServers.map(s => transformServerData(s.obDirectoryConfig));
+    const servers = registeredServers.map(s => decorateServerDataForClient(s.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
     error(e);

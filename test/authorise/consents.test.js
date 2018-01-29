@@ -51,18 +51,29 @@ describe('filterConsented', () => {
     await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
   });
 
-  describe('given auth server id with consent', () => {
+  describe('given authorisationServerId with authorisationCode in config', () => {
     beforeEach(async () => {
       await setConsent(keys, consentPayload);
     });
 
-    it('returns array containing that auth server id', async () => {
+    it('returns array containing authorisationServerId', async () => {
       const consented = await filterConsented(username, scope, [authorisationServerId]);
       assert.deepEqual(consented, [authorisationServerId]);
     });
   });
 
-  describe('given auth server id without consent', () => {
+  describe('given authorisationServerId with no authorisationCode in config', () => {
+    beforeEach(async () => {
+      await setConsent(keys, Object.assign(consentPayload, { authorisationCode: null }));
+    });
+
+    it('returns empty array', async () => {
+      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      assert.deepEqual(consented, []);
+    });
+  });
+
+  describe('given authorisationServerId without config', () => {
     it('returns empty array', async () => {
       const consented = await filterConsented(username, scope, [authorisationServerId]);
       assert.deepEqual(consented, []);

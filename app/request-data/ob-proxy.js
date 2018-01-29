@@ -23,10 +23,10 @@ const resourceRequestHandler = async (req, res) => {
   }
   const path = `/open-banking${req.path}`;
   const proxiedUrl = `${host}${path}`;
-  const sessionData = JSON.parse(await session.getDataAsync(sessionId));
-  const { username } = sessionData;
   const scope = path.split('/')[3];
   try {
+    const username = await session.getUsername(sessionId);
+    debug(`username: ${username}`);
     const consentKeys = { username, authorisationServerId: authServerId, scope };
     accessToken = await consentAccessToken(consentKeys);
   } catch (err) {
@@ -35,7 +35,6 @@ const resourceRequestHandler = async (req, res) => {
   const bearerToken = `Bearer ${accessToken}`;
 
   debug(`proxiedUrl: ${proxiedUrl}`);
-  debug(`username: ${username}`);
   debug(`scope: ${scope}`);
   debug(`bearerToken ${bearerToken}`);
   debug(`xFapiFinancialId ${xFapiFinancialId}`);

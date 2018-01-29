@@ -10,6 +10,11 @@ const session = (() => {
   const setAccessToken = accessToken => store.set('ob_directory_access_token', JSON.stringify(accessToken));
   const getAccessToken = cb => store.get('ob_directory_access_token', cb);
 
+  const getUsername = async (sessionId) => {
+    const sessionData = JSON.parse(await session.getDataAsync(sessionId));
+    return sessionData.username;
+  };
+
   const destroy = (candidate, cb) => {
     const sessHandler = (err, data) => {
       const sid = data && JSON.parse(data).sid;
@@ -39,6 +44,7 @@ const session = (() => {
     getDataAsync,
     setAccessToken,
     getAccessToken,
+    getUsername,
     destroy,
     newSession,
     deleteAll,

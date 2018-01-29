@@ -12,6 +12,8 @@ const accessToken = 'access-token';
 const authorisationCode = '12345_67xxx';
 const sessionId = 'testSession';
 const username = 'testUser';
+const scope = 'accounts';
+const accountRequestId = 'testAccountRequestId';
 
 const tokenRequestPayload = {
   grant_type: 'authorization_code', // eslint-disable-line quote-props
@@ -28,6 +30,7 @@ describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
   let setTokenPayloadStub;
+  let setConsentStub;
   let getClientCredentialsStub;
   let sessionGetDataStub;
   let request;
@@ -35,6 +38,7 @@ describe('Authorized Code Granted', () => {
 
   beforeEach(() => {
     setTokenPayloadStub = sinon.stub();
+    setConsentStub = sinon.stub();
     postTokenStub = sinon.stub().returns(tokenResponsePayload);
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
     sessionGetDataStub = sinon.stub().returns(JSON.stringify({
@@ -50,6 +54,7 @@ describe('Authorized Code Granted', () => {
         getClientCredentials: getClientCredentialsStub,
       },
       './access-tokens': { setTokenPayload: setTokenPayloadStub },
+      './consents': { setConsent: setConsentStub },
       '../session': {
         session: {
           getDataAsync: sessionGetDataStub,
@@ -66,6 +71,8 @@ describe('Authorized Code Granted', () => {
       body: {
         authorisationCode,
         authorisationServerId,
+        scope,
+        accountRequestId,
       },
     });
     response = httpMocks.createResponse();
@@ -88,6 +95,24 @@ describe('Authorized Code Granted', () => {
         clientId, clientSecret, tokenRequestPayload,
       ));
       assert(setTokenPayloadStub.calledWithExactly(username, tokenResponsePayload));
+    });
+
+    it('calls setConsent to store obtained consent', async () => {
+      await redirection.authorisationCodeGrantedHandler(request, response);
+      const { args } = setConsentStub.getCalls()[0];
+      assert.deepEqual({ username, authorisationServerId, scope }, args[0]);
+      assert.deepEqual(
+        {
+          username,
+          authorisationServerId,
+          scope,
+          accountRequestId,
+          expirationDateTime: null,
+          authorisationCode,
+          token: tokenResponsePayload,
+        },
+        args[1],
+      );
     });
 
     describe('error handling', () => {

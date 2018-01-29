@@ -139,16 +139,28 @@ describe('Session Deletion (Logout)', () => {
     await session.deleteAll();
   });
 });
-
+const scope = 'accounts';
+const accountRequestId = 'xxxxxx-xxxx-43c6-9c75-eaf01821375e';
+const authorisationCode = 'spoofAuthCode';
 const token = 'testAccessToken';
 const tokenPayload = {
   access_token: token,
   expires_in: 3600,
 };
 
-const { ACCESS_TOKENS_COLLECTION } = require('../app/authorise/access-tokens');
+const consentPayload = {
+  username,
+  authorisationServerId: authServerId,
+  scope,
+  accountRequestId,
+  expirationDateTime: null,
+  authorisationCode,
+  token: tokenPayload,
+};
+
+const { AUTH_SERVER_USER_CONSENTS_COLLECTION } = require('../app/authorise/consents');
 const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../app/authorisation-servers/authorisation-servers');
-const { setTokenPayload } = require('../app/authorise');
+const { setConsent } = require('../app/authorise');
 const { setAuthServerConfig } = require('../app/authorisation-servers/authorisation-servers');
 const { drop } = require('../app/storage.js');
 
@@ -166,7 +178,7 @@ describe('Proxy', () => {
 
   afterEach(async () => {
     await session.deleteAll();
-    await drop(ACCESS_TOKENS_COLLECTION);
+    await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
     await drop(ASPSP_AUTH_SERVERS_COLLECTION);
     delete process.env.DEBUG;
     delete process.env.OB_DIRECTORY_HOST;
@@ -176,7 +188,12 @@ describe('Proxy', () => {
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(username, tokenPayload).then(() => {
+      // setTokenPayload(username, tokenPayload).then(() => {
+      setConsent({
+        username,
+        authorisationServerId: authServerId,
+        scope,
+      }, consentPayload).then(() => {
         request(app)
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
@@ -194,7 +211,11 @@ describe('Proxy', () => {
   it('returns 400 response for missing x-authorization-server-id', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(username, tokenPayload).then(() => {
+      setConsent({
+        username,
+        authorisationServerId: authServerId,
+        scope,
+      }, consentPayload).then(() => {
         request(app)
           .get('/open-banking/v1.1/accounts')
           .set('Accept', 'application/json')
@@ -210,7 +231,11 @@ describe('Proxy', () => {
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(username, tokenPayload).then(() => {
+      setConsent({
+        username,
+        authorisationServerId: authServerId,
+        scope,
+      }, consentPayload).then(() => {
         request(app)
           .get('/open-banking/non-existing')
           .set('Accept', 'application/json')
@@ -228,7 +253,11 @@ describe('Proxy', () => {
   it('should return 404 for path != /open-banking', (done) => {
     login(app).end((err, res) => {
       const sessionId = res.body.sid;
-      setTokenPayload(username, tokenPayload).then(() => {
+      setConsent({
+        username,
+        authorisationServerId: authServerId,
+        scope,
+      }, consentPayload).then(() => {
         request(app)
           .get('/open-banking-invalid')
           .set('Accept', 'application/json')

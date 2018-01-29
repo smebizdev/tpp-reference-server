@@ -118,17 +118,21 @@ const allAuthorisationServers = async () => {
   }
 };
 
+const updateOpenIdConfig = async (id, openidConfig) => {
+  const authServer = await getAuthServerConfig(id);
+  debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
+  authServer.openIdConfig = openidConfig;
+  await setAuthServerConfig(id, authServer);
+};
+
 const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   try {
     if (openidConfigUrl === 'https://redirect.openbanking.org.uk') {
       return null; // ignore
     }
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
-    const authServer = await getAuthServerConfig(id);
     if (openidConfig) {
-      debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
-      authServer.openIdConfig = openidConfig;
-      await setAuthServerConfig(id, authServer);
+      await updateOpenIdConfig(id, openidConfig);
     } else {
       error(`OpenID config at ${openidConfigUrl} is blank`);
     }
@@ -217,6 +221,7 @@ exports.tokenEndpoint = tokenEndpoint;
 exports.resourceServerHost = resourceServerHost;
 exports.resourceServerPath = resourceServerPath;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
+exports.updateOpenIdConfig = updateOpenIdConfig;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;

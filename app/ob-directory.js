@@ -11,6 +11,7 @@ const {
   authorisationServersForClient,
   storeAuthorisationServers,
 } = require('./authorisation-servers');
+const { filterConsented } = require('./authorise');
 
 const NOT_PROVISIONED_FOR_OB_TOKEN = 'NO_TOKEN';
 
@@ -112,9 +113,24 @@ const fetchOBAccountPaymentServiceProviders = async () => {
   }
 };
 
+const accountPaymentServiceProvidersForUser = async (username) => {
+  const servers = await authorisationServersForClient();
+  const authServerIds = servers.map(config => config.id);
+  const consentedServerIds = await filterConsented(username, 'accounts', authServerIds);
+
+  servers.forEach((config) => {
+    const hasConsent = consentedServerIds.includes(config.id);
+    Object.assign(config, { accountsConsentGranted: hasConsent });
+  });
+  return servers;
+};
+
 const accountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const servers = await authorisationServersForClient();
+  const sessionId = req.headers.authorization;
+  const username = await session.getUsername(sessionId);
+  const servers = await accountPaymentServiceProvidersForUser(username);
+
   log(`servers length: ${servers.length}`);
   return res.json(servers);
 };

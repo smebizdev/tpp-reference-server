@@ -9,7 +9,7 @@ const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
 const { accountPaymentServiceProviders } = require('./ob-directory');
-const { accountRequestAuthoriseConsent } = require('./setup-account-request');
+const { accountRequestAuthoriseConsent, accountRequestRevokeConsent } = require('./setup-account-request');
 const { paymentAuthoriseConsent } = require('./setup-payment');
 const { paymentSubmission } = require('./submit-payment');
 const { authorisationCodeGrantedHandler } = require('./authorise');
@@ -35,6 +35,9 @@ app.use(
 
 app.all('/account-request-authorise-consent', requireAuthorization, requireAuthorisationServerId);
 app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
+
+app.all('/account-request-revoke-consent', requireAuthorization, requireAuthorisationServerId);
+app.post('/account-request-revoke-consent', accountRequestRevokeConsent);
 
 app.all('/payment-authorise-consent', requireAuthorization, requireAuthorisationServerId);
 app.post('/payment-authorise-consent', paymentAuthoriseConsent);

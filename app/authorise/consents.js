@@ -103,10 +103,16 @@ const filterConsented = async (username, scope, authorisationServerIds) => {
   return consented;
 };
 
+const consentAccountRequestId = async (keys) => {
+  const existing = await consent(keys);
+  return existing.accountRequestId;
+};
+
 exports.generateCompositeKey = generateCompositeKey;
 exports.setConsent = setConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
 exports.filterConsented = filterConsented;
 exports.getConsentStatus = getConsentStatus;
+exports.consentAccountRequestId = consentAccountRequestId;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

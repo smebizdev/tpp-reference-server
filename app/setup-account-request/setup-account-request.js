@@ -1,5 +1,6 @@
-const { accessTokenAndResourcePath } = require('../authorise');
-const { postAccountRequests } = require('./account-requests');
+const { accessTokenAndResourcePath, consentAccountRequestId } = require('../authorise');
+const { postAccountRequests, deleteAccountRequest } = require('./account-requests');
+const { getUsername } = require('../session/session');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
   const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
@@ -21,6 +22,41 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
   throw error;
 };
 
+
+const deleteRequest = async (
+  sessionId,
+  authorisationServerId,
+  fapiFinancialId,
+  fapiInteractionId,
+) => {
+  const fail = () => {
+    const error = new Error('Bad Request');
+    error.status = 400;
+    throw error;
+  };
+  const username = await getUsername(sessionId);
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
+  const keys = { username, authorisationServerId, scope: 'accounts' };
+  const accountRequestId = consentAccountRequestId(keys);
+  if (!accountRequestId) return fail();
+  const responseHeaders = await deleteAccountRequest(
+    resourcePath,
+    accessToken,
+    fapiFinancialId,
+    accountRequestId,
+    fapiInteractionId,
+  );
+  if (responseHeaders) {
+    const interactionId = responseHeaders['x-fapi-interaction-id'];
+    if (fapiInteractionId === interactionId) {
+      return 204;
+    }
+    return fail();
+  }
+  return fail();
+};
+
+
 const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   const accountRequestId = await createRequest(
@@ -32,3 +68,4 @@ const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
 };
 
 exports.setupAccountRequest = setupAccountRequest;
+exports.deleteRequest = deleteRequest;

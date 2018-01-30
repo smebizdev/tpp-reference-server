@@ -29,7 +29,6 @@ const tokenResponsePayload = {
 describe('Authorized Code Granted', () => {
   let redirection;
   let postTokenStub;
-  let setTokenPayloadStub;
   let setConsentStub;
   let getClientCredentialsStub;
   let getUsernameStub;
@@ -37,7 +36,6 @@ describe('Authorized Code Granted', () => {
   let response;
 
   beforeEach(() => {
-    setTokenPayloadStub = sinon.stub();
     setConsentStub = sinon.stub();
     postTokenStub = sinon.stub().returns(tokenResponsePayload);
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
@@ -50,7 +48,6 @@ describe('Authorized Code Granted', () => {
       '../authorisation-servers': {
         getClientCredentials: getClientCredentialsStub,
       },
-      './access-tokens': { setTokenPayload: setTokenPayloadStub },
       './consents': { setConsent: setConsentStub },
       '../session': {
         session: {
@@ -85,13 +82,12 @@ describe('Authorized Code Granted', () => {
       assert.equal(response.statusCode, 204);
     });
 
-    it('calls postToken to obtain and store an access token', async () => {
+    it('calls postToken to obtain an access token', async () => {
       await redirection.authorisationCodeGrantedHandler(request, response);
       assert(postTokenStub.calledWithExactly(
         authorisationServerId,
         clientId, clientSecret, tokenRequestPayload,
       ));
-      assert(setTokenPayloadStub.calledWithExactly(username, tokenResponsePayload));
     });
 
     it('calls setConsent to store obtained consent', async () => {

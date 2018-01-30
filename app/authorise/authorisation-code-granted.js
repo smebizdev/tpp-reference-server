@@ -1,5 +1,4 @@
 const env = require('env-var');
-const { setTokenPayload } = require('./access-tokens');
 const { setConsent } = require('./consents');
 const { postToken } = require('./obtain-access-token');
 const { getClientCredentials } = require('../authorisation-servers');
@@ -29,13 +28,14 @@ const handler = async (req, res) => {
       authorisationServerId, clientId,
       clientSecret, accessTokenRequest,
     );
+    debug(`tokenPayload: ${JSON.stringify(tokenPayload)}`);
+
     const sessionId = req.headers.authorization;
     debug(`sessionId: ${sessionId}`);
-    debug(`tokenPayload: ${JSON.stringify(tokenPayload)}`);
 
     const username = await session.getUsername(sessionId);
     debug(`username: ${username}`);
-    await setTokenPayload(username, tokenPayload);
+
     const consentPayload = {
       username,
       authorisationServerId,
@@ -45,6 +45,7 @@ const handler = async (req, res) => {
       authorisationCode,
       token: tokenPayload,
     };
+    debug(`consentPayload: ${JSON.stringify(consentPayload)}`);
 
     await setConsent({ username, authorisationServerId, scope }, consentPayload);
     return res.status(204).send();

@@ -36,7 +36,10 @@ const accountRequestRevokeConsent = async (req, res) => {
     const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
     debug(`In accountRequestRevokeConsent authorisationServerId: ${authorisationServerId}`);
     const interactionId = uuidv4();
-    const status = deleteRequest(sessionId, authorisationServerId, fapiFinancialId, interactionId);
+    const status = await deleteRequest(
+      sessionId, authorisationServerId,
+      fapiFinancialId, interactionId,
+    );
     return res.sendStatus(status);
   } catch (err) {
     return res.sendStatus(400);

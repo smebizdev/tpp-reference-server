@@ -1,5 +1,4 @@
 const env = require('env-var');
-const { setTokenPayload } = require('./access-tokens');
 const { setConsent } = require('./consents');
 const { postToken } = require('./obtain-access-token');
 const { getClientCredentials } = require('../authorisation-servers');
@@ -35,7 +34,6 @@ const handler = async (req, res) => {
 
     const username = await session.getUsername(sessionId);
     debug(`username: ${username}`);
-    await setTokenPayload(username, tokenPayload);
     const consentPayload = {
       username,
       authorisationServerId,

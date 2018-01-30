@@ -33,10 +33,9 @@ const handler = async (req, res) => {
     debug(`sessionId: ${sessionId}`);
     debug(`tokenPayload: ${JSON.stringify(tokenPayload)}`);
 
-    const sessionData = JSON.parse(await session.getDataAsync(sessionId));
-    const { username } = sessionData;
+    const username = await session.getUsername(sessionId);
     debug(`username: ${username}`);
-    await setTokenPayload(sessionData.username, tokenPayload);
+    await setTokenPayload(username, tokenPayload);
     const consentPayload = {
       username,
       authorisationServerId,

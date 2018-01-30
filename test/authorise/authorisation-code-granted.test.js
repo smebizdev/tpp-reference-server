@@ -32,7 +32,7 @@ describe('Authorized Code Granted', () => {
   let setTokenPayloadStub;
   let setConsentStub;
   let getClientCredentialsStub;
-  let sessionGetDataStub;
+  let getUsernameStub;
   let request;
   let response;
 
@@ -41,10 +41,7 @@ describe('Authorized Code Granted', () => {
     setConsentStub = sinon.stub();
     postTokenStub = sinon.stub().returns(tokenResponsePayload);
     getClientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
-    sessionGetDataStub = sinon.stub().returns(JSON.stringify({
-      sid: sessionId,
-      username,
-    }));
+    getUsernameStub = sinon.stub().returns(username);
     redirection = proxyquire('../../app/authorise/authorisation-code-granted.js', {
       'env-var': env.mock({
         SOFTWARE_STATEMENT_REDIRECT_URL: redirectionUrl,
@@ -57,7 +54,7 @@ describe('Authorized Code Granted', () => {
       './consents': { setConsent: setConsentStub },
       '../session': {
         session: {
-          getDataAsync: sessionGetDataStub,
+          getUsername: getUsernameStub,
         },
       },
     });

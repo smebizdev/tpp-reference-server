@@ -75,6 +75,22 @@ const drop = async (collection) => {
   }
 };
 
+/**
+ * Remove document with given id from collection
+ * @param collection
+ * @param id
+ * @returns {Promise.<*>}
+ */
+const remove = async (collection, id) => {
+  try {
+    const store = await db.get(collection);
+    return await store.remove({ id });
+  } catch (e) {
+    error(e);
+    throw e;
+  }
+};
+
 const close = async () => {
   try {
     await db.close();
@@ -87,4 +103,5 @@ exports.get = get;
 exports.getAll = getAll;
 exports.set = set;
 exports.drop = drop;
+exports.remove = remove;
 exports.close = close;

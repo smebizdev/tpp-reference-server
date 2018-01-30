@@ -1,4 +1,4 @@
-const { accessTokenAndResourcePath, consentAccountRequestId } = require('../authorise');
+const { accessTokenAndResourcePath, consentAccountRequestId, removeAuthServerUserConsent } = require('../authorise');
 const { postAccountRequests, deleteAccountRequest } = require('./account-requests');
 const { session } = require('../session');
 
@@ -49,6 +49,7 @@ const deleteRequest = async (
   if (responseHeaders) {
     const interactionId = responseHeaders['x-fapi-interaction-id'];
     if (fapiInteractionId === interactionId) {
+      await removeAuthServerUserConsent(keys);
       return 204;
     }
     return fail();

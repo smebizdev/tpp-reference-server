@@ -27,10 +27,14 @@ const setConsent = async (keys, payload) => {
 const consentPayload = async compositeKey =>
   get(AUTH_SERVER_USER_CONSENTS_COLLECTION, compositeKey);
 
-const consent = async (keys) => {
+const getConsent = async (keys) => {
   const compositeKey = generateCompositeKey(keys);
-  const payload = await consentPayload(compositeKey);
   debug(`consent#id (compositeKey): ${compositeKey}`);
+  return consentPayload(compositeKey);
+};
+
+const consent = async (keys) => {
+  const payload = await getConsent(keys);
   debug(`consent#payload: ${JSON.stringify(payload)}`);
   if (!payload) {
     const err = new Error(`User [${keys.username}] has not yet given consent to access their ${keys.scope}`);
@@ -45,8 +49,25 @@ const consentAccessToken = async (keys) => {
   return existing.token.access_token;
 };
 
+const hasConsent = async (keys) => {
+  const payload = await getConsent(keys);
+  return payload && payload.authorisationCode;
+};
+
+const filterConsented = async (username, scope, authorisationServerIds) => {
+  const consented = [];
+  await Promise.all(authorisationServerIds.map(async (authorisationServerId) => {
+    const keys = { username, authorisationServerId, scope };
+    if (await hasConsent(keys)) {
+      consented.push(authorisationServerId);
+    }
+  }));
+  return consented;
+};
+
 exports.generateCompositeKey = generateCompositeKey;
 exports.setConsent = setConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
+exports.filterConsented = filterConsented;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

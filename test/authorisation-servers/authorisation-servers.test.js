@@ -216,3 +216,7 @@ describe('authorisation servers', () => {
     });
   });
 });
+
+exports.flattenedObDirectoryAuthServerList = flattenedObDirectoryAuthServerList;
+exports.clientCredentials = clientCredentials;
+exports.openIdConfig = openIdConfig;

@@ -17,7 +17,7 @@ const sortByName = (list) => {
   return list;
 };
 
-const transformServerData = (data) => {
+const decorateServerDataForClient = (data) => {
   const id = data.Id;
   const logoUri = data.CustomerFriendlyLogoUri;
   const name = data.CustomerFriendlyName;
@@ -118,17 +118,21 @@ const allAuthorisationServers = async () => {
   }
 };
 
+const updateOpenIdConfig = async (id, openidConfig) => {
+  const authServer = await getAuthServerConfig(id);
+  debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
+  authServer.openIdConfig = openidConfig;
+  await setAuthServerConfig(id, authServer);
+};
+
 const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   try {
     if (openidConfigUrl === 'https://redirect.openbanking.org.uk') {
       return null; // ignore
     }
     const openidConfig = await getOpenIdConfig(openidConfigUrl);
-    const authServer = await getAuthServerConfig(id);
     if (openidConfig) {
-      debug(`openidConfig: ${JSON.stringify(openidConfig)}`);
-      authServer.openIdConfig = openidConfig;
-      await setAuthServerConfig(id, authServer);
+      await updateOpenIdConfig(id, openidConfig);
     } else {
       error(`OpenID config at ${openidConfigUrl} is blank`);
     }
@@ -169,7 +173,7 @@ const authorisationServersForClient = async () => {
   try {
     const allServers = await allAuthorisationServers();
     const registeredServers = allServers.filter(s => s.clientCredentials);
-    const servers = registeredServers.map(s => transformServerData(s.obDirectoryConfig));
+    const servers = registeredServers.map(s => decorateServerDataForClient(s.obDirectoryConfig));
     return sortByName(servers);
   } catch (e) {
     error(e);
@@ -217,6 +221,7 @@ exports.tokenEndpoint = tokenEndpoint;
 exports.resourceServerHost = resourceServerHost;
 exports.resourceServerPath = resourceServerPath;
 exports.updateOpenIdConfigs = updateOpenIdConfigs;
+exports.updateOpenIdConfig = updateOpenIdConfig;
 exports.getClientCredentials = getClientCredentials;
 exports.updateClientCredentials = updateClientCredentials;
 exports.setAuthServerConfig = setAuthServerConfig;

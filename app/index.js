@@ -8,7 +8,7 @@ const { requireAuthorization } = require('./session');
 const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
 const { resourceRequestHandler } = require('./request-data/ob-proxy.js');
-const { OBAccountPaymentServiceProviders } = require('./ob-directory');
+const { accountPaymentServiceProviders } = require('./ob-directory');
 const { accountRequestAuthoriseConsent } = require('./setup-account-request');
 const { paymentAuthoriseConsent } = require('./setup-payment');
 const { paymentSubmission } = require('./submit-payment');
@@ -30,7 +30,7 @@ app.use('/logout', login.logout);
 app.all('/account-payment-service-provider-authorisation-servers', requireAuthorization);
 app.use(
   '/account-payment-service-provider-authorisation-servers',
-  OBAccountPaymentServiceProviders,
+  accountPaymentServiceProviders,
 );
 
 app.all('/account-request-authorise-consent', requireAuthorization, requireAuthorisationServerId);

@@ -1,6 +1,6 @@
 const { accessTokenAndResourcePath, consentAccountRequestId } = require('../authorise');
 const { postAccountRequests, deleteAccountRequest } = require('./account-requests');
-const { getUsername } = require('../session/session');
+const { session } = require('../session');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
   const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
@@ -34,10 +34,10 @@ const deleteRequest = async (
     error.status = 400;
     throw error;
   };
-  const username = await getUsername(sessionId);
+  const username = await session.getUsername(sessionId);
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   const keys = { username, authorisationServerId, scope: 'accounts' };
-  const accountRequestId = consentAccountRequestId(keys);
+  const accountRequestId = await consentAccountRequestId(keys);
   if (!accountRequestId) return fail();
   const responseHeaders = await deleteAccountRequest(
     resourcePath,

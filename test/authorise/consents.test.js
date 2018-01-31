@@ -1,6 +1,11 @@
 const assert = require('assert');
+const proxyquire = require('proxyquire');
+const sinon = require('sinon');
 
-const { setConsent, consent, filterConsented } = require('../../app/authorise');
+const {
+  setConsent,
+  consent,
+} = require('../../app/authorise');
 const { AUTH_SERVER_USER_CONSENTS_COLLECTION } = require('../../app/authorise/consents');
 
 const { drop } = require('../../app/storage.js');
@@ -29,6 +34,8 @@ const consentPayload = {
   token: tokenPayload,
 };
 
+const consentStatus = 'Authorised';
+
 describe('setConsents', () => {
   beforeEach(async () => {
     await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
@@ -47,11 +54,30 @@ describe('setConsents', () => {
 });
 
 describe('filterConsented', () => {
+  const getAccountRequestStub = sinon.stub().returns({ Data: { Status: consentStatus } });
+  let filterConsented;
+  beforeEach(() => {
+    ({ filterConsented } = proxyquire(
+      '../../app/authorise/consents.js',
+      {
+        './setup-request': {
+          accessTokenAndResourcePath: () => ({}),
+        },
+        '../setup-account-request': {
+          getAccountRequest: getAccountRequestStub,
+        },
+        '../authorisation-servers': {
+          fapiFinancialIdFor: () => 'id',
+        },
+      },
+    ));
+  });
+
   afterEach(async () => {
     await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
   });
 
-  describe('given authorisationServerId with authorisationCode in config', () => {
+  describe('given authorisationServerId with authorisationCode and authorised status', () => {
     beforeEach(async () => {
       await setConsent(keys, consentPayload);
     });
@@ -73,10 +99,84 @@ describe('filterConsented', () => {
     });
   });
 
+  describe('given authorisationServerId with status revoked', () => {
+    beforeEach(async () => {
+      getAccountRequestStub.returns({ Data: { Status: 'Revoked' } });
+      await setConsent(keys, Object.assign(consentPayload, { authorisationCode: null }));
+    });
+
+    it('returns empty array', async () => {
+      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      assert.deepEqual(consented, []);
+    });
+  });
+
   describe('given authorisationServerId without config', () => {
     it('returns empty array', async () => {
       const consented = await filterConsented(username, scope, [authorisationServerId]);
       assert.deepEqual(consented, []);
+    });
+  });
+});
+
+describe('getConsentStatus', () => {
+  const fapiFinancialId = 'testFapiFinancialId';
+  const grantCredentialToken = 'grant-credential-access-token';
+  const resourcePath = 'http://resource-server.com/open-banking/v1.1';
+  const getAccountRequestStub = sinon.stub();
+  let getConsentStatus;
+
+  describe('successful', () => {
+    beforeEach(() => {
+      getAccountRequestStub.returns({ Data: { Status: consentStatus } });
+      ({ getConsentStatus } = proxyquire(
+        '../../app/authorise/consents.js',
+        {
+          './setup-request': {
+            accessTokenAndResourcePath: () => ({ accessToken: grantCredentialToken, resourcePath }),
+          },
+          '../setup-account-request': {
+            getAccountRequest: getAccountRequestStub,
+          },
+          '../authorisation-servers': {
+            fapiFinancialIdFor: () => fapiFinancialId,
+          },
+        },
+      ));
+    });
+
+    it('makes remote call to get account request', async () => {
+      await getConsentStatus(accountRequestId, authorisationServerId);
+      assert(getAccountRequestStub.calledWithExactly(
+        accountRequestId,
+        resourcePath,
+        grantCredentialToken,
+        fapiFinancialId,
+      ));
+    });
+
+    it('gets the status for an existing consent', async () => {
+      const actual = await getConsentStatus(accountRequestId, authorisationServerId);
+      assert.equal(actual, consentStatus);
+    });
+  });
+
+  describe('errors', () => {
+    it('throws error for missing payload', async () => {
+      try {
+        await getConsentStatus(accountRequestId, authorisationServerId);
+      } catch (err) {
+        assert(err);
+      }
+    });
+
+    it('throws error for missing Data payload', async () => {
+      getAccountRequestStub.returns({});
+      try {
+        await getConsentStatus(accountRequestId, authorisationServerId);
+      } catch (err) {
+        assert(err);
+      }
     });
   });
 });

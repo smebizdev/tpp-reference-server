@@ -1,4 +1,7 @@
 const { get, set } = require('../storage');
+const { accessTokenAndResourcePath } = require('./setup-request');
+const { fapiFinancialIdFor } = require('../authorisation-servers');
+const { getAccountRequest } = require('../setup-account-request');
 const debug = require('debug')('debug');
 
 const AUTH_SERVER_USER_CONSENTS_COLLECTION = 'authorisationServerUserConsents';
@@ -49,9 +52,38 @@ const consentAccessToken = async (keys) => {
   return existing.token.access_token;
 };
 
+const getConsentStatus = async (accountRequestId, authorisationServerId) => {
+  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
+  debug(`getConsentStatus#accessToken: ${accessToken}`);
+  debug(`getConsentStatus#resourcePath: ${resourcePath}`);
+
+  const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
+  debug(`getConsentStatus#fapiFinancialId: ${fapiFinancialId}`);
+
+  const response = await getAccountRequest(
+    accountRequestId,
+    resourcePath,
+    accessToken,
+    fapiFinancialId,
+  );
+  debug(`getConsentStatus#getAccountRequest: ${JSON.stringify(response)}`);
+
+  if (!response || !response.Data) {
+    const error = new Error(`Bad account request response: "${JSON.stringify(response)}"`);
+    error.status = 500;
+    throw error;
+  }
+  const result = response.Data.Status;
+  debug(`getAccountRequestStatus#Status: ${result}`);
+  return result;
+};
+
 const hasConsent = async (keys) => {
   const payload = await getConsent(keys);
-  return payload && payload.authorisationCode;
+  if (!payload) return false;
+
+  const status = await getConsentStatus(payload.accountRequestId, payload.authorisationServerId);
+  return payload.authorisationCode && status === 'Authorised';
 };
 
 const filterConsented = async (username, scope, authorisationServerIds) => {
@@ -70,4 +102,5 @@ exports.setConsent = setConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
 exports.filterConsented = filterConsented;
+exports.getConsentStatus = getConsentStatus;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

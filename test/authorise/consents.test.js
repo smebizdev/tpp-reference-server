@@ -63,7 +63,7 @@ describe('filterConsented', () => {
         './setup-request': {
           accessTokenAndResourcePath: () => ({}),
         },
-        '../setup-account-request': {
+        '../setup-account-request/account-requests': {
           getAccountRequest: getAccountRequestStub,
         },
         '../authorisation-servers': {
@@ -135,7 +135,7 @@ describe('getConsentStatus', () => {
           './setup-request': {
             accessTokenAndResourcePath: () => ({ accessToken: grantCredentialToken, resourcePath }),
           },
-          '../setup-account-request': {
+          '../setup-account-request/account-requests': {
             getAccountRequest: getAccountRequestStub,
           },
           '../authorisation-servers': {

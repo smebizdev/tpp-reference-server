@@ -1,7 +1,7 @@
 const { get, set } = require('../storage');
 const { accessTokenAndResourcePath } = require('./setup-request');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
-const { getAccountRequest } = require('../setup-account-request');
+const { getAccountRequest } = require('../setup-account-request/account-requests');
 const debug = require('debug')('debug');
 
 const AUTH_SERVER_USER_CONSENTS_COLLECTION = 'authorisationServerUserConsents';

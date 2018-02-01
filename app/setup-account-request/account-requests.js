@@ -23,6 +23,8 @@ const buildAccountRequestData = () => ({
   Risk: {},
 });
 
+const APPLICATION_JSON = 'application/json; charset=utf-8';
+
 /*
  * For now only support Client Credentials Grant Type (OAuth 2.0).
  * @resourceServerPath e.g. http://example.com/open-banking/v1.1
@@ -35,8 +37,8 @@ const postAccountRequests = async (resourceServerPath, accessToken,
     log(`POST to ${accountRequestsUri}`);
     const response = await setupMutualTLS(request.post(accountRequestsUri))
       .set('authorization', `Bearer ${accessToken}`)
-      .set('content-type', 'application/json; charset=utf-8')
-      .set('accept', 'application/json; charset=utf-8')
+      .set('content-type', APPLICATION_JSON)
+      .set('accept', APPLICATION_JSON)
       .set('x-fapi-financial-id', fapiFinancialId)
       .send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
@@ -87,14 +89,14 @@ const deleteAccountRequest = async (
     log(`DELETE to ${accountRequestDeleteUri}`);
     const response = await setupMutualTLS(request.del(accountRequestDeleteUri))
       .set('authorization', `Bearer ${accessToken}`)
-      .set('content-type', 'application/json; charset=utf-8')
-      .set('accept', 'application/json; charset=utf-8')
+      .set('content-type', APPLICATION_JSON)
+      .set('accept', APPLICATION_JSON)
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', fapiInteractionId)
       .send();
     debug(`${response.status} response for ${accountRequestDeleteUri}`);
-    if (response.status.toString() === '204') {
-      return response.headers;
+    if (response.status === 204) {
+      return true;
     }
     const error = new Error('Bad Request');
     error.status = 400;

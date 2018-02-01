@@ -6,6 +6,8 @@ const { setupAccountRequest } = require('../../app/setup-account-request'); // e
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
+const interactionId = 'testInteractionId';
+const headers = { fapiFinancialId, interactionId };
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
@@ -39,10 +41,11 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('AwaitingAuthorisation'));
 
     it('returns accountRequestId from postAccountRequests call', async () => {
-      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+      const id = await setupAccountRequestProxy(authorisationServerId, headers);
       assert.equal(id, accountRequestId);
 
-      assert(accountRequestsStub.calledWithExactly(resourcePath, { accessToken, fapiFinancialId }));
+      const headersWithToken = { accessToken, fapiFinancialId, interactionId };
+      assert(accountRequestsStub.calledWithExactly(resourcePath, headersWithToken));
     });
   });
 
@@ -50,7 +53,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('Authorised'));
 
     it('returns accountRequestId from postAccountRequests call', async () => {
-      const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
+      const id = await setupAccountRequestProxy(authorisationServerId, headers);
       assert.equal(id, accountRequestId);
     });
   });
@@ -60,7 +63,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        async () => setupAccountRequestProxy(authorisationServerId, headers),
         500, 'Account request response status: "Rejected"',
       );
     });
@@ -71,7 +74,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        async () => setupAccountRequestProxy(authorisationServerId, headers),
         500, 'Account request response status: "Revoked"',
       );
     });
@@ -82,7 +85,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, fapiFinancialId),
+        async () => setupAccountRequestProxy(authorisationServerId, headers),
         500, 'Account request response missing payload',
       );
     });

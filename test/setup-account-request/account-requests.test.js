@@ -43,7 +43,7 @@ describe('postAccountRequests', () => {
 
   it('returns data when 201 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const headers = { accessToken, fapiFinancialId };
+    const headers = { accessToken, fapiFinancialId, interactionId };
     const result = await postAccountRequests(resourceServerPath, headers);
     assert.deepEqual(result, response);
   });

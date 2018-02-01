@@ -29,7 +29,7 @@ const APPLICATION_JSON = 'application/json; charset=utf-8';
 const verifyHeaders = (headers) => {
   assert.ok(headers.accessToken, 'accessToken missing from headers');
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
-  // assert.ok(headers.interactionId, 'interactionId missing from headers');
+  assert.ok(headers.interactionId, 'interactionId missing from headers');
 };
 
 /*

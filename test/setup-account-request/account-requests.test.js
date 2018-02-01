@@ -1,4 +1,5 @@
 const {
+  deleteAccountRequest,
   postAccountRequests,
   getAccountRequest,
   buildAccountRequestData,
@@ -27,6 +28,7 @@ const response = {
 
 const accessToken = '2YotnFZFEjr1zCsicMWpAA';
 const fapiFinancialId = 'abc';
+const interactionId = 'xyz';
 
 describe('postAccountRequests', () => {
   nock(/example\.com/)
@@ -41,11 +43,8 @@ describe('postAccountRequests', () => {
 
   it('returns data when 201 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const result = await postAccountRequests(
-      resourceServerPath,
-      accessToken,
-      fapiFinancialId,
-    );
+    const headers = { accessToken, fapiFinancialId, interactionId };
+    const result = await postAccountRequests(resourceServerPath, headers);
     assert.deepEqual(result, response);
   });
 });
@@ -70,5 +69,24 @@ describe('getAccountRequest', () => {
       fapiFinancialId,
     );
     assert.deepEqual(result, response);
+  });
+});
+
+describe('deleteAccountRequest', () => {
+  nock(/example\.com/)
+    .delete(`/prefix/open-banking/v1.1/account-requests/${accountRequestId}`)
+    .matchHeader('authorization', `Bearer ${accessToken}`) // required
+    .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
+    .matchHeader('x-fapi-interaction-id', interactionId) // required
+    // optional x-jws-signature
+    // optional x-fapi-customer-last-logged-time
+    // optional x-fapi-customer-ip-address
+    .reply(204);
+
+  it('returns true when 204 No Content', async () => {
+    const resourceServerPath = 'http://example.com/prefix';
+    const headers = { accessToken, fapiFinancialId, interactionId };
+    const result = await deleteAccountRequest(accountRequestId, resourceServerPath, headers);
+    assert.deepEqual(result, true);
   });
 });

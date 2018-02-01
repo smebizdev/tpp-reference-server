@@ -1,4 +1,4 @@
-const { get, set } = require('../storage');
+const { get, set, remove } = require('../storage');
 const { accessTokenAndResourcePath } = require('./setup-request');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const { getAccountRequest } = require('../setup-account-request/account-requests');
@@ -26,6 +26,12 @@ const setConsent = async (keys, payload) => {
   const compositeKey = generateCompositeKey(keys);
   debug(`#setConsent compositeKey: [${compositeKey}]`);
   await set(AUTH_SERVER_USER_CONSENTS_COLLECTION, payload, compositeKey);
+};
+
+const deleteConsent = async (keys) => {
+  debug(`#deleteConsent keys: [${JSON.stringify(keys)}]`);
+  const compositeKey = generateCompositeKey(keys);
+  await remove(AUTH_SERVER_USER_CONSENTS_COLLECTION, compositeKey);
 };
 
 const consentPayload = async compositeKey =>
@@ -103,10 +109,18 @@ const filterConsented = async (username, scope, authorisationServerIds) => {
   return consented;
 };
 
+const consentAccountRequestId = async (keys) => {
+  const existing = await consent(keys);
+  return existing.accountRequestId;
+};
+
 exports.generateCompositeKey = generateCompositeKey;
 exports.setConsent = setConsent;
+exports.getConsent = getConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
 exports.filterConsented = filterConsented;
 exports.getConsentStatus = getConsentStatus;
+exports.consentAccountRequestId = consentAccountRequestId;
+exports.deleteConsent = deleteConsent;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

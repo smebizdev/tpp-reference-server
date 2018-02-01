@@ -1,8 +1,8 @@
 const { accessTokenAndResourcePath } = require('../authorise');
 const { postAccountRequests } = require('./account-requests');
 
-const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
-  const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
+const createRequest = async (resourcePath, headers) => {
+  const response = await postAccountRequests(resourcePath, headers);
   let error;
   if (response.Data) {
     const status = response.Data.Status;
@@ -21,13 +21,10 @@ const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
   throw error;
 };
 
-const setupAccountRequest = async (authorisationServerId, fapiFinancialId) => {
+const setupAccountRequest = async (authorisationServerId, headers) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const accountRequestId = await createRequest(
-    resourcePath,
-    accessToken,
-    fapiFinancialId,
-  );
+  const headersWithToken = Object.assign(headers, { accessToken });
+  const accountRequestId = await createRequest(resourcePath, headersWithToken);
   return accountRequestId;
 };
 

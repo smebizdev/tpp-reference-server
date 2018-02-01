@@ -120,7 +120,10 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(authorisationServerId, fapiFinancialId));
+        assert(setupAccountRequestStub.calledWithExactly(
+          authorisationServerId,
+          { fapiFinancialId, interactionId },
+        ));
         done();
       });
   });
@@ -142,7 +145,10 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.deepEqual(r.body, { message });
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(authorisationServerId, fapiFinancialId));
+        assert(setupAccountRequestStub.calledWithExactly(
+          authorisationServerId,
+          { fapiFinancialId, interactionId },
+        ));
         done();
       });
   });

@@ -48,5 +48,33 @@ const postAccountRequests = async (resourceServerPath, accessToken,
   }
 };
 
+/*
+ * For now only support Client Credentials Grant Type (OAuth 2.0).
+ * @resourceServerPath e.g. http://example.com/open-banking/v1.1
+ */
+const getAccountRequest = async (
+  accountRequestId,
+  resourceServerPath,
+  accessToken,
+  fapiFinancialId,
+) => {
+  try {
+    const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests/${accountRequestId}`;
+    log(`GET to ${accountRequestsUri}`);
+    const response = await setupMutualTLS(request.get(accountRequestsUri))
+      .set('authorization', `Bearer ${accessToken}`)
+      .set('content-type', 'application/json; charset=utf-8')
+      .set('accept', 'application/json; charset=utf-8')
+      .set('x-fapi-financial-id', fapiFinancialId);
+    debug(`${response.status} response for ${accountRequestsUri}`);
+    return response.body;
+  } catch (err) {
+    const error = new Error(err.message);
+    error.status = err.response ? err.response.status : 500;
+    throw error;
+  }
+};
+
 exports.buildAccountRequestData = buildAccountRequestData;
 exports.postAccountRequests = postAccountRequests;
+exports.getAccountRequest = getAccountRequest;

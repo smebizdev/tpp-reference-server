@@ -42,7 +42,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       const id = await setupAccountRequestProxy(authorisationServerId, fapiFinancialId);
       assert.equal(id, accountRequestId);
 
-      assert(accountRequestsStub.calledWithExactly(resourcePath, accessToken, fapiFinancialId));
+      assert(accountRequestsStub.calledWithExactly(resourcePath, { accessToken, fapiFinancialId }));
     });
   });
 

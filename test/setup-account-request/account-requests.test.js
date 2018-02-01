@@ -28,7 +28,7 @@ const response = {
 
 const accessToken = '2YotnFZFEjr1zCsicMWpAA';
 const fapiFinancialId = 'abc';
-const fapiInteractionId = 'xyz';
+const interactionId = 'xyz';
 
 describe('postAccountRequests', () => {
   nock(/example\.com/)
@@ -77,7 +77,7 @@ describe('deleteAccountRequest', () => {
     .delete(`/prefix/open-banking/v1.1/account-requests/${accountRequestId}`)
     .matchHeader('authorization', `Bearer ${accessToken}`) // required
     .matchHeader('x-fapi-financial-id', fapiFinancialId) // required
-    .matchHeader('x-fapi-interaction-id', fapiInteractionId) // required
+    .matchHeader('x-fapi-interaction-id', interactionId) // required
     // optional x-jws-signature
     // optional x-fapi-customer-last-logged-time
     // optional x-fapi-customer-ip-address
@@ -85,13 +85,8 @@ describe('deleteAccountRequest', () => {
 
   it('returns true when 204 No Content', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const result = await deleteAccountRequest(
-      resourceServerPath,
-      accessToken,
-      fapiFinancialId,
-      accountRequestId,
-      fapiInteractionId,
-    );
+    const headers = { accessToken, fapiFinancialId, interactionId };
+    const result = await deleteAccountRequest(accountRequestId, resourceServerPath, headers);
     assert.deepEqual(result, true);
   });
 });

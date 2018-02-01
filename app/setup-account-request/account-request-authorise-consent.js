@@ -1,6 +1,8 @@
-const { setupAccountRequest, deleteRequest } = require('./setup-account-request');
+const { setupAccountRequest } = require('./setup-account-request');
+const { deleteRequest } = require('./delete-account-request');
 const { generateRedirectUri } = require('../authorise');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
+const { session } = require('../session');
 
 const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
@@ -32,20 +34,18 @@ const accountRequestRevokeConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const sessionId = req.headers['authorization'];
+    const username = await session.getUsername(sessionId);
     const authorisationServerId = req.headers['x-authorization-server-id'];
     const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
     debug(`In accountRequestRevokeConsent authorisationServerId: ${authorisationServerId}`);
     const interactionId = uuidv4();
-    const status = await deleteRequest(
-      sessionId, authorisationServerId,
-      fapiFinancialId, interactionId,
-    );
+    const headers = { fapiFinancialId, interactionId };
+    const status = await deleteRequest(username, authorisationServerId, headers);
     return res.sendStatus(status);
   } catch (err) {
     return res.sendStatus(400);
   }
 };
-
 
 exports.accountRequestAuthoriseConsent = accountRequestAuthoriseConsent;
 exports.accountRequestRevokeConsent = accountRequestRevokeConsent;

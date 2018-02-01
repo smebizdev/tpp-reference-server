@@ -3,7 +3,12 @@ const proxyquire = require('proxyquire');
 const sinon = require('sinon');
 
 const {
-  setConsent, consent, consentAccessToken, consentAccountRequestId,
+  setConsent,
+  consent,
+  consentAccessToken,
+  consentAccountRequestId,
+  deleteConsent,
+  getConsent,
 } = require('../../app/authorise');
 const { AUTH_SERVER_USER_CONSENTS_COLLECTION } = require('../../app/authorise/consents');
 
@@ -60,6 +65,23 @@ describe('setConsents', () => {
     await setConsent(keys, consentPayload);
     const storedAccountRequestId = await consentAccountRequestId(keys);
     assert.equal(storedAccountRequestId, accountRequestId);
+  });
+});
+
+describe('deleteConsent', () => {
+  beforeEach(async () => {
+    await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
+  });
+
+  afterEach(async () => {
+    await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
+  });
+
+  it('stores payload and allows consent to be retrieved by keys id', async () => {
+    await setConsent(keys, consentPayload);
+    await deleteConsent(keys);
+    const result = await getConsent(keys);
+    assert.equal(result, null);
   });
 });
 

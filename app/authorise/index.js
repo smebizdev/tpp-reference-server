@@ -2,11 +2,12 @@ const { createClaims, createJsonWebSignature } = require('./request-jws');
 const { generateRedirectUri } = require('./authorise-uri');
 const {
   setConsent,
+  getConsent,
   consent,
   consentAccessToken,
   filterConsented,
   consentAccountRequestId,
-  removeAuthServerUserConsent,
+  deleteConsent,
 } = require('./consents');
 const { authorisationCodeGrantedHandler } = require('./authorisation-code-granted');
 const { createAccessToken } = require('./obtain-access-token');
@@ -20,7 +21,8 @@ exports.filterConsented = filterConsented;
 exports.generateRedirectUri = generateRedirectUri;
 exports.createAccessToken = createAccessToken;
 exports.setConsent = setConsent;
+exports.getConsent = getConsent;
 exports.consent = consent;
 exports.consentAccountRequestId = consentAccountRequestId;
 exports.consentAccessToken = consentAccessToken;
-exports.removeAuthServerUserConsent = removeAuthServerUserConsent;
+exports.deleteConsent = deleteConsent;

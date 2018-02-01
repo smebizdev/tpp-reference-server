@@ -28,8 +28,8 @@ const setConsent = async (keys, payload) => {
   await set(AUTH_SERVER_USER_CONSENTS_COLLECTION, payload, compositeKey);
 };
 
-const removeAuthServerUserConsent = async (keys) => {
-  debug(`#removeAuthServerUserConsent keys: [${JSON.stringify(keys)}]`);
+const deleteConsent = async (keys) => {
+  debug(`#deleteConsent keys: [${JSON.stringify(keys)}]`);
   const compositeKey = generateCompositeKey(keys);
   await remove(AUTH_SERVER_USER_CONSENTS_COLLECTION, compositeKey);
 };
@@ -116,10 +116,11 @@ const consentAccountRequestId = async (keys) => {
 
 exports.generateCompositeKey = generateCompositeKey;
 exports.setConsent = setConsent;
+exports.getConsent = getConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
 exports.filterConsented = filterConsented;
 exports.getConsentStatus = getConsentStatus;
 exports.consentAccountRequestId = consentAccountRequestId;
-exports.removeAuthServerUserConsent = removeAuthServerUserConsent;
+exports.deleteConsent = deleteConsent;
 exports.AUTH_SERVER_USER_CONSENTS_COLLECTION = AUTH_SERVER_USER_CONSENTS_COLLECTION;

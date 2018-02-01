@@ -2,6 +2,7 @@ const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
+const assert = require('assert');
 
 const buildAccountRequestData = () => ({
   Data: {
@@ -25,21 +26,27 @@ const buildAccountRequestData = () => ({
 
 const APPLICATION_JSON = 'application/json; charset=utf-8';
 
+const verifyHeaders = (headers) => {
+  assert.ok(headers.accessToken, 'accessToken missing from headers');
+  assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
+  // assert.ok(headers.interactionId, 'interactionId missing from headers');
+};
+
 /*
  * For now only support Client Credentials Grant Type (OAuth 2.0).
  * @resourceServerPath e.g. http://example.com/open-banking/v1.1
  */
-const postAccountRequests = async (resourceServerPath, accessToken,
-  fapiFinancialId) => {
+const postAccountRequests = async (resourceServerPath, headers) => {
   try {
+    verifyHeaders(headers);
     const body = buildAccountRequestData();
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
     const response = await setupMutualTLS(request.post(accountRequestsUri))
-      .set('authorization', `Bearer ${accessToken}`)
+      .set('authorization', `Bearer ${headers.accessToken}`)
       .set('content-type', APPLICATION_JSON)
       .set('accept', APPLICATION_JSON)
-      .set('x-fapi-financial-id', fapiFinancialId)
+      .set('x-fapi-financial-id', headers.fapiFinancialId)
       .send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;

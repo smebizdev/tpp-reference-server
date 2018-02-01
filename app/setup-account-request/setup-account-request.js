@@ -3,7 +3,8 @@ const { postAccountRequests, deleteAccountRequest } = require('./account-request
 const { session } = require('../session');
 
 const createRequest = async (resourcePath, accessToken, fapiFinancialId) => {
-  const response = await postAccountRequests(resourcePath, accessToken, fapiFinancialId);
+  const headers = { accessToken, fapiFinancialId };
+  const response = await postAccountRequests(resourcePath, headers);
   let error;
   if (response.Data) {
     const status = response.Data.Status;

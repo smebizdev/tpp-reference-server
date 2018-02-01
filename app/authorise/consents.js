@@ -74,16 +74,16 @@ const getConsentStatus = async (accountRequestId, authorisationServerId) => {
     throw error;
   }
   const result = response.Data.Status;
-  debug(`getAccountRequestStatus#Status: ${result}`);
+  debug(`getConsentStatus#Status: ${result}`);
   return result;
 };
 
 const hasConsent = async (keys) => {
   const payload = await getConsent(keys);
-  if (!payload) return false;
+  if (!payload || !payload.authorisationCode) return false;
 
   const status = await getConsentStatus(payload.accountRequestId, payload.authorisationServerId);
-  return payload.authorisationCode && status === 'Authorised';
+  return status === 'Authorised';
 };
 
 const filterConsented = async (username, scope, authorisationServerIds) => {

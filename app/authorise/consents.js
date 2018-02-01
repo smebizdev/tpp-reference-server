@@ -3,6 +3,7 @@ const { accessTokenAndResourcePath } = require('./setup-request');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const { getAccountRequest } = require('../setup-account-request/account-requests');
 const debug = require('debug')('debug');
+const error = require('debug')('error');
 
 const AUTH_SERVER_USER_CONSENTS_COLLECTION = 'authorisationServerUserConsents';
 
@@ -69,9 +70,9 @@ const getConsentStatus = async (accountRequestId, authorisationServerId) => {
   debug(`getConsentStatus#getAccountRequest: ${JSON.stringify(response)}`);
 
   if (!response || !response.Data) {
-    const error = new Error(`Bad account request response: "${JSON.stringify(response)}"`);
-    error.status = 500;
-    throw error;
+    const err = new Error(`Bad account request response: "${JSON.stringify(response)}"`);
+    err.status = 500;
+    throw err;
   }
   const result = response.Data.Status;
   debug(`getConsentStatus#Status: ${result}`);
@@ -82,8 +83,13 @@ const hasConsent = async (keys) => {
   const payload = await getConsent(keys);
   if (!payload || !payload.authorisationCode) return false;
 
-  const status = await getConsentStatus(payload.accountRequestId, payload.authorisationServerId);
-  return status === 'Authorised';
+  try {
+    const status = await getConsentStatus(payload.accountRequestId, payload.authorisationServerId);
+    return status === 'Authorised';
+  } catch (e) {
+    error(e);
+    return false;
+  }
 };
 
 const filterConsented = async (username, scope, authorisationServerIds) => {

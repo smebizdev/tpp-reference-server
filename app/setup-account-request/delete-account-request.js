@@ -2,11 +2,12 @@ const { accessTokenAndResourcePath, consentAccountRequestId, deleteConsent } = r
 const { deleteAccountRequest } = require('./account-requests');
 
 const deleteRequest = async (username, authorisationServerId, headers) => {
-  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const headersWithToken = Object.assign(headers, { accessToken });
   const keys = { username, authorisationServerId, scope: 'accounts' };
   const accountRequestId = await consentAccountRequestId(keys);
+
   if (accountRequestId) {
+    const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
+    const headersWithToken = Object.assign(headers, { accessToken });
     const success = await deleteAccountRequest(accountRequestId, resourcePath, headersWithToken);
     if (success) {
       await deleteConsent(keys);

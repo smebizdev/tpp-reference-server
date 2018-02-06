@@ -32,6 +32,16 @@ const verifyHeaders = (headers) => {
   assert.ok(headers.interactionId, 'interactionId missing from headers');
 };
 
+const setHeaders = (requestObj, headers) => requestObj
+  .set('authorization', `Bearer ${headers.accessToken}`)
+  .set('content-type', APPLICATION_JSON)
+  .set('accept', APPLICATION_JSON)
+  .set('x-fapi-interaction-id', headers.interactionId)
+  .set('x-fapi-financial-id', headers.fapiFinancialId);
+
+const createRequest = (requestObj, headers) =>
+  setHeaders(setupMutualTLS(requestObj), headers);
+
 /*
  * For now only support Client Credentials Grant Type (OAuth 2.0).
  * @resourceServerPath e.g. http://example.com/open-banking/v1.1
@@ -42,12 +52,7 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const body = buildAccountRequestData();
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
-    const response = await setupMutualTLS(request.post(accountRequestsUri))
-      .set('authorization', `Bearer ${headers.accessToken}`)
-      .set('content-type', APPLICATION_JSON)
-      .set('accept', APPLICATION_JSON)
-      .set('x-fapi-interaction-id', headers.interactionId)
-      .set('x-fapi-financial-id', headers.fapiFinancialId)
+    const response = await createRequest(request.post(accountRequestsUri), headers)
       .send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
@@ -67,12 +72,8 @@ const getAccountRequest = async (accountRequestId, resourceServerPath, headers) 
     verifyHeaders(headers);
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests/${accountRequestId}`;
     log(`GET to ${accountRequestsUri}`);
-    const response = await setupMutualTLS(request.get(accountRequestsUri))
-      .set('authorization', `Bearer ${headers.accessToken}`)
-      .set('content-type', 'application/json; charset=utf-8')
-      .set('accept', 'application/json; charset=utf-8')
-      .set('x-fapi-interaction-id', headers.interactionId)
-      .set('x-fapi-financial-id', headers.fapiFinancialId);
+    const response = await createRequest(request.get(accountRequestsUri), headers)
+      .send();
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {
@@ -87,20 +88,13 @@ const deleteAccountRequest = async (accountRequestId, resourceServerPath, header
     verifyHeaders(headers);
     const accountRequestDeleteUri = `${resourceServerPath}/open-banking/v1.1/account-requests/${accountRequestId}`;
     log(`DELETE to ${accountRequestDeleteUri}`);
-    const response = await setupMutualTLS(request.del(accountRequestDeleteUri))
-      .set('authorization', `Bearer ${headers.accessToken}`)
-      .set('content-type', APPLICATION_JSON)
-      .set('accept', APPLICATION_JSON)
-      .set('x-fapi-financial-id', headers.fapiFinancialId)
-      .set('x-fapi-interaction-id', headers.interactionId)
+    const response = await createRequest(request.del(accountRequestDeleteUri), headers)
       .send();
     debug(`${response.status} response for ${accountRequestDeleteUri}`);
     if (response.status === 204) {
       return true;
     }
-    const error = new Error('Bad Request');
-    error.status = 400;
-    throw error;
+    throw new Error('Bad Request');
   } catch (err) {
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 400;

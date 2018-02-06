@@ -62,12 +62,8 @@ describe('getAccountRequest', () => {
 
   it('returns data when 200 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const result = await getAccountRequest(
-      accountRequestId,
-      resourceServerPath,
-      accessToken,
-      fapiFinancialId,
-    );
+    const headers = { accessToken, fapiFinancialId, interactionId };
+    const result = await getAccountRequest(accountRequestId, resourceServerPath, headers);
     assert.deepEqual(result, response);
   });
 });

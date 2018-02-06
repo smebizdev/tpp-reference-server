@@ -2,6 +2,7 @@ const { get, set, remove } = require('../storage');
 const { accessTokenAndResourcePath } = require('./setup-request');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const { getAccountRequest } = require('../setup-account-request/account-requests');
+const uuidv4 = require('uuid/v4');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
@@ -66,13 +67,9 @@ const getConsentStatus = async (accountRequestId, authorisationServerId) => {
 
   const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
   debug(`getConsentStatus#fapiFinancialId: ${fapiFinancialId}`);
-
-  const response = await getAccountRequest(
-    accountRequestId,
-    resourcePath,
-    accessToken,
-    fapiFinancialId,
-  );
+  const interactionId = uuidv4();
+  const headers = { accessToken, fapiFinancialId, interactionId };
+  const response = await getAccountRequest(accountRequestId, resourcePath, headers);
   debug(`getConsentStatus#getAccountRequest: ${JSON.stringify(response)}`);
 
   if (!response || !response.Data) {

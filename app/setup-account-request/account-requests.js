@@ -46,6 +46,7 @@ const postAccountRequests = async (resourceServerPath, headers) => {
       .set('authorization', `Bearer ${headers.accessToken}`)
       .set('content-type', APPLICATION_JSON)
       .set('accept', APPLICATION_JSON)
+      .set('x-fapi-interaction-id', headers.interactionId)
       .set('x-fapi-financial-id', headers.fapiFinancialId)
       .send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
@@ -61,20 +62,17 @@ const postAccountRequests = async (resourceServerPath, headers) => {
  * For now only support Client Credentials Grant Type (OAuth 2.0).
  * @resourceServerPath e.g. http://example.com/open-banking/v1.1
  */
-const getAccountRequest = async (
-  accountRequestId,
-  resourceServerPath,
-  accessToken,
-  fapiFinancialId,
-) => {
+const getAccountRequest = async (accountRequestId, resourceServerPath, headers) => {
   try {
+    verifyHeaders(headers);
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests/${accountRequestId}`;
     log(`GET to ${accountRequestsUri}`);
     const response = await setupMutualTLS(request.get(accountRequestsUri))
-      .set('authorization', `Bearer ${accessToken}`)
+      .set('authorization', `Bearer ${headers.accessToken}`)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8')
-      .set('x-fapi-financial-id', fapiFinancialId);
+      .set('x-fapi-interaction-id', headers.interactionId)
+      .set('x-fapi-financial-id', headers.fapiFinancialId);
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {

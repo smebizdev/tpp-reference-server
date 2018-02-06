@@ -153,7 +153,8 @@ describe('filterConsented', () => {
 
 describe('getConsentStatus', () => {
   const fapiFinancialId = 'testFapiFinancialId';
-  const grantCredentialToken = 'grant-credential-access-token';
+  const interactionId = 'testInteractionId';
+  const accessToken = 'grant-credential-access-token';
   const resourcePath = 'http://resource-server.com/open-banking/v1.1';
   const getAccountRequestStub = sinon.stub();
   let getConsentStatus;
@@ -165,7 +166,7 @@ describe('getConsentStatus', () => {
         '../../app/authorise/consents.js',
         {
           './setup-request': {
-            accessTokenAndResourcePath: () => ({ accessToken: grantCredentialToken, resourcePath }),
+            accessTokenAndResourcePath: () => ({ accessToken, resourcePath }),
           },
           '../setup-account-request/account-requests': {
             getAccountRequest: getAccountRequestStub,
@@ -173,18 +174,16 @@ describe('getConsentStatus', () => {
           '../authorisation-servers': {
             fapiFinancialIdFor: () => fapiFinancialId,
           },
+          'uuid/v4': () => interactionId,
+
         },
       ));
     });
 
     it('makes remote call to get account request', async () => {
       await getConsentStatus(accountRequestId, authorisationServerId);
-      assert(getAccountRequestStub.calledWithExactly(
-        accountRequestId,
-        resourcePath,
-        grantCredentialToken,
-        fapiFinancialId,
-      ));
+      const headers = { accessToken, fapiFinancialId, interactionId };
+      assert(getAccountRequestStub.calledWithExactly(accountRequestId, resourcePath, headers));
     });
 
     it('gets the status for an existing consent', async () => {

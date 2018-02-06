@@ -7,6 +7,16 @@ const { session } = require('../session');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
+const bunyan = require('bunyan');
+const superagentLogger = require('superagent-bunyan');
+
+const logger = bunyan.createLogger({
+  name: 'ob-proxy.log',
+  streams: [{
+    path: './resource.log',
+  }],
+});
+
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const authServerId = req.headers['x-authorization-server-id'];
@@ -44,6 +54,7 @@ const resourceRequestHandler = async (req, res) => {
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
+      .use(superagentLogger(logger))
       .send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

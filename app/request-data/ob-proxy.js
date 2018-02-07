@@ -4,6 +4,7 @@ const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessToken } = require('../authorise');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const { session } = require('../session');
+const uuidv4 = require('uuid/v4');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
@@ -50,11 +51,13 @@ const resourceRequestHandler = async (req, res) => {
   debug(`xFapiFinancialId ${xFapiFinancialId}`);
 
   try {
+    const interactionId = uuidv4();
     const response = await setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
-      .use(superagentLogger(logger))
+      .set('x-fapi-interaction-id', interactionId)
+      .use(superagentLogger(logger, interactionId))
       .send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

@@ -57,7 +57,7 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
       .set('x-fapi-interaction-id', interactionId)
-      .use(superagentLogger(logger, interactionId))
+      .use(superagentLogger(logger, interactionId, { sessionId }))
       .send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

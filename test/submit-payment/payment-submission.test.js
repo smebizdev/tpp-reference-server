@@ -7,8 +7,9 @@ const bodyParser = require('body-parser');
 
 const fapiFinancialId = 'testFapiFinancialId';
 const authServerId = 'testAuthServerId';
+const username = 'testUsername';
 
-const setupApp = (submitPaymentStub) => {
+const setupApp = (submitPaymentStub, consentAccessTokenStub) => {
   const { paymentSubmission } = proxyquire(
     '../../app/submit-payment/payment-submission.js',
     {
@@ -18,6 +19,12 @@ const setupApp = (submitPaymentStub) => {
       '../authorisation-servers': {
         fapiFinancialIdFor: () => fapiFinancialId,
       },
+      '../authorise': {
+        consentAccessToken: consentAccessTokenStub,
+      },
+      '../session': {
+        getUsername: () => username,
+      },
     },
   );
   const app = express();
@@ -26,8 +33,10 @@ const setupApp = (submitPaymentStub) => {
   return app;
 };
 
+
 const interactionId = 'testInteractionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
+const accessToken = 'testAccessToken';
 
 const doPost = app => request(app)
   .post('/payment-submissions')
@@ -37,7 +46,8 @@ const doPost = app => request(app)
 
 describe('/payment-submission with successful submitPayment', () => {
   const submitPaymentStub = sinon.stub().returns(PAYMENT_SUBMISSION_ID);
-  const app = setupApp(submitPaymentStub);
+  const consentAccessTokenStub = sinon.stub().returns(accessToken);
+  const app = setupApp(submitPaymentStub, consentAccessTokenStub);
 
   it('make payment submission and returns paymentSubmissionId', (done) => {
     doPost(app)
@@ -57,7 +67,8 @@ describe('/payment-submit with error thrown by submitPayment', () => {
   const error = new Error(message);
   error.status = status;
   const submitPaymentStub = sinon.stub().throws(error);
-  const app = setupApp(submitPaymentStub);
+  const consentAccessTokenStub = sinon.stub().returns(accessToken);
+  const app = setupApp(submitPaymentStub, consentAccessTokenStub);
 
   it('returns status from error', (done) => {
     doPost(app)

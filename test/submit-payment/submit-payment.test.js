@@ -43,7 +43,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
   const paymentsSuccessStub = sinon.stub().returns(PaymentsSubmissionSuccessResponse());
   const paymentsRejectedStub = sinon.stub().returns(PaymentsSubmissionRejectedResponse());
-  const accessTokenAndResourcePathProxy = sinon.stub().returns({ accessToken, resourcePath });
+  const resourceServerPathProxy = sinon.stub().returns(resourcePath);
   const retrievePaymentDetailsStub = sinon.stub().returns({
     PaymentId,
     CreditorAccount,
@@ -52,17 +52,20 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
 
   const setup = paymentStub => () => {
     submitPaymentProxy = proxyquire('../../app/submit-payment/submit-payment', {
-      '../authorise': { accessTokenAndResourcePath: accessTokenAndResourcePathProxy },
+      '../authorisation-servers': { resourceServerPath: resourceServerPathProxy },
       '../setup-payment/payments': { postPayments: paymentStub },
       '../setup-payment/persistence': { retrievePaymentDetails: retrievePaymentDetailsStub },
     }).submitPayment;
+  };
+
+  const headers = {
+    fapiFinancialId, idempotencyKey, interactionId, accessToken,
   };
 
   describe('When Submitted Payment is in status AcceptedSettlementInProcess', () => {
     before(setup(paymentsSuccessStub));
 
     it('Returns PaymentSubmissionId from postPayments call', async () => {
-      const headers = { fapiFinancialId, idempotencyKey, interactionId };
       const id = await submitPaymentProxy(authorisationServerId, headers);
       assert.equal(id, PAYMENT_SUBMISSION_ID);
       assert.ok(paymentsSuccessStub.calledWithExactly(
@@ -84,7 +87,6 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
     before(setup(paymentsRejectedStub));
     it('returns an error from postPayments call', async () => {
       try {
-        const headers = { fapiFinancialId, idempotencyKey, interactionId };
         await submitPaymentProxy(authorisationServerId, headers);
       } catch (err) {
         assert.equal(err.status, 500);

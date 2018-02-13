@@ -1,4 +1,4 @@
-const { accessTokenAndResourcePath } = require('../authorise');
+const { resourceServerPath } = require('../authorisation-servers');
 const { verifyHeaders, postPayments } = require('../setup-payment/payments');
 const { retrievePaymentDetails } = require('../setup-payment/persistence');
 
@@ -21,11 +21,10 @@ const makePayment = async (resourcePath, headers, paymentData) => {
 };
 
 const submitPayment = async (authorisationServerId, headers) => {
-  const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const headersWithToken = Object.assign(headers, { accessToken });
+  const resourcePath = await resourceServerPath(authorisationServerId);
   verifyHeaders(headers);
   const paymentData = await retrievePaymentDetails(headers.interactionId);
-  const response = await makePayment(resourcePath, headersWithToken, paymentData);
+  const response = await makePayment(resourcePath, headers, paymentData);
   return response;
 };
 

@@ -52,3 +52,4 @@ const session = (() => {
 })();
 
 exports.session = session;
+exports.getUsername = session.getUsername;

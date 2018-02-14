@@ -4,12 +4,14 @@ const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 const assert = require('assert');
+const { setupResponseLogging } = require('../response-logger');
 
 const verifyHeaders = (headers) => {
   assert.ok(headers.accessToken, 'accessToken missing from headers');
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
   assert.ok(headers.interactionId, 'interactionId missing from headers');
   assert.ok(headers.idempotencyKey, 'idempotencyKey missing from headers');
+  assert.ok(headers.sessionId, 'sessionId missing from headers');
 };
 
 /**
@@ -31,6 +33,7 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
     if (headers.jwsSignature) payment.set('x-jws-signature', headers.jwsSignature);
 
+    setupResponseLogging(payment, headers.interactionId, { sessionId: headers.sessionId });
     payment.send(paymentData);
     const response = await payment;
     debug(`${response.status} response for ${paymentsUri}`);

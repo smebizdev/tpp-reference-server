@@ -6,6 +6,7 @@ const { setupPayment } = require('../../app/setup-account-request'); // eslint-d
 
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
+const sessionId = 'testSessionId';
 
 describe('setupPayment called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
@@ -63,7 +64,9 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
   };
 
   const doSetupPayment = async () => {
-    const headers = { fapiFinancialId, idempotencyKey, interactionId };
+    const headers = {
+      fapiFinancialId, idempotencyKey, interactionId, sessionId,
+    };
     return setupPaymentProxy(authorisationServerId, headers, CreditorAccount, InstructedAmount);
   };
 
@@ -78,7 +81,7 @@ describe('setupPayment called with authorisationServerId and fapiFinancialId', (
         resourcePath,
         '/open-banking/v1.1/payments',
         {
-          accessToken, fapiFinancialId, idempotencyKey, interactionId,
+          accessToken, fapiFinancialId, idempotencyKey, interactionId, sessionId,
         }, // headers
         buildPaymentStubResponse,
       ));

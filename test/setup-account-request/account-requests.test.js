@@ -29,6 +29,10 @@ const response = {
 const accessToken = '2YotnFZFEjr1zCsicMWpAA';
 const fapiFinancialId = 'abc';
 const interactionId = 'xyz';
+const sessionId = 'testSessionId';
+const headers = {
+  accessToken, fapiFinancialId, interactionId, sessionId,
+};
 
 describe('postAccountRequests', () => {
   nock(/example\.com/)
@@ -43,7 +47,6 @@ describe('postAccountRequests', () => {
 
   it('returns data when 201 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const headers = { accessToken, fapiFinancialId, interactionId };
     const result = await postAccountRequests(resourceServerPath, headers);
     assert.deepEqual(result, response);
   });
@@ -62,7 +65,6 @@ describe('getAccountRequest', () => {
 
   it('returns data when 200 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const headers = { accessToken, fapiFinancialId, interactionId };
     const result = await getAccountRequest(accountRequestId, resourceServerPath, headers);
     assert.deepEqual(result, response);
   });
@@ -81,7 +83,6 @@ describe('deleteAccountRequest', () => {
 
   it('returns true when 204 No Content', async () => {
     const resourceServerPath = 'http://example.com/prefix';
-    const headers = { accessToken, fapiFinancialId, interactionId };
     const result = await deleteAccountRequest(accountRequestId, resourceServerPath, headers);
     assert.deepEqual(result, true);
   });

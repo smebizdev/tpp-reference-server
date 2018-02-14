@@ -3,6 +3,7 @@ const { setupMutualTLS } = require('../certs-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const assert = require('assert');
+const { setupResponseLogging } = require('../response-logger');
 
 const buildAccountRequestData = () => ({
   Data: {
@@ -30,6 +31,7 @@ const verifyHeaders = (headers) => {
   assert.ok(headers.accessToken, 'accessToken missing from headers');
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
   assert.ok(headers.interactionId, 'interactionId missing from headers');
+  assert.ok(headers.sessionId, 'sessionId missing from headers');
 };
 
 const setHeaders = (requestObj, headers) => requestObj
@@ -39,8 +41,11 @@ const setHeaders = (requestObj, headers) => requestObj
   .set('x-fapi-interaction-id', headers.interactionId)
   .set('x-fapi-financial-id', headers.fapiFinancialId);
 
-const createRequest = (requestObj, headers) =>
-  setHeaders(setupMutualTLS(requestObj), headers);
+const createRequest = (requestObj, headers) => {
+  const req = setHeaders(setupMutualTLS(requestObj), headers);
+  setupResponseLogging(req, headers.interactionId, { sessionId: headers.sessionId });
+  return req;
+};
 
 /*
  * For now only support Client Credentials Grant Type (OAuth 2.0).

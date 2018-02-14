@@ -122,7 +122,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId },
+          { fapiFinancialId, interactionId, sessionId },
         ));
         done();
       });
@@ -147,7 +147,7 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId },
+          { fapiFinancialId, interactionId, sessionId },
         ));
         done();
       });

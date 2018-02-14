@@ -15,6 +15,7 @@ const { AUTH_SERVER_USER_CONSENTS_COLLECTION } = require('../../app/authorise/co
 const { drop } = require('../../app/storage.js');
 
 const username = 'testUsername';
+const sessionId = 'testSessionId';
 const authorisationServerId = 'a123';
 const scope = 'accounts';
 const keys = { username, authorisationServerId, scope };
@@ -115,7 +116,7 @@ describe('filterConsented', () => {
     });
 
     it('returns array containing authorisationServerId', async () => {
-      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      const consented = await filterConsented(username, scope, sessionId, [authorisationServerId]);
       assert.deepEqual(consented, [authorisationServerId]);
     });
   });
@@ -126,7 +127,7 @@ describe('filterConsented', () => {
     });
 
     it('returns empty array', async () => {
-      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      const consented = await filterConsented(username, scope, sessionId, [authorisationServerId]);
       assert.deepEqual(consented, []);
     });
   });
@@ -138,14 +139,14 @@ describe('filterConsented', () => {
     });
 
     it('returns empty array', async () => {
-      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      const consented = await filterConsented(username, scope, sessionId, [authorisationServerId]);
       assert.deepEqual(consented, []);
     });
   });
 
   describe('given authorisationServerId without config', () => {
     it('returns empty array', async () => {
-      const consented = await filterConsented(username, scope, [authorisationServerId]);
+      const consented = await filterConsented(username, scope, sessionId, [authorisationServerId]);
       assert.deepEqual(consented, []);
     });
   });
@@ -175,19 +176,20 @@ describe('getConsentStatus', () => {
             fapiFinancialIdFor: () => fapiFinancialId,
           },
           'uuid/v4': () => interactionId,
-
         },
       ));
     });
 
     it('makes remote call to get account request', async () => {
-      await getConsentStatus(accountRequestId, authorisationServerId);
-      const headers = { accessToken, fapiFinancialId, interactionId };
+      await getConsentStatus(accountRequestId, authorisationServerId, sessionId);
+      const headers = {
+        accessToken, fapiFinancialId, interactionId, sessionId,
+      };
       assert(getAccountRequestStub.calledWithExactly(accountRequestId, resourcePath, headers));
     });
 
     it('gets the status for an existing consent', async () => {
-      const actual = await getConsentStatus(accountRequestId, authorisationServerId);
+      const actual = await getConsentStatus(accountRequestId, authorisationServerId, sessionId);
       assert.equal(actual, consentStatus);
     });
   });
@@ -195,7 +197,7 @@ describe('getConsentStatus', () => {
   describe('errors', () => {
     it('throws error for missing payload', async () => {
       try {
-        await getConsentStatus(accountRequestId, authorisationServerId);
+        await getConsentStatus(accountRequestId, authorisationServerId, sessionId);
       } catch (err) {
         assert(err);
       }
@@ -204,7 +206,7 @@ describe('getConsentStatus', () => {
     it('throws error for missing Data payload', async () => {
       getAccountRequestStub.returns({});
       try {
-        await getConsentStatus(accountRequestId, authorisationServerId);
+        await getConsentStatus(accountRequestId, authorisationServerId, sessionId);
       } catch (err) {
         assert(err);
       }

@@ -11,7 +11,7 @@ const logger = bunyan.createLogger({
 
 const setupResponseLogging = (requestObj, interactionId, extras) => {
   if (process.env.NODE_ENV !== 'test' && process.env.LOG_ASPSP_RESPONSES === 'true') {
-    assert.ok(extras.sessionId, 'sessionId missing from logging');
+    assert.ok(extras.sessionId, 'sessionId missing from setupResponseLogging call');
     requestObj.use(superagentLogger(logger, interactionId, extras));
   }
 };

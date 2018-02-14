@@ -17,7 +17,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 
     debug(`authorisationServerId: ${authorisationServerId}`);
     const interactionId = uuidv4();
-    const headers = { fapiFinancialId, interactionId };
+    const headers = { fapiFinancialId, interactionId, sessionId };
     const accountRequestId = await setupAccountRequest(authorisationServerId, headers);
 
     const interactionId2 = uuidv4();
@@ -41,7 +41,7 @@ const accountRequestRevokeConsent = async (req, res) => {
     const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
     debug(`In accountRequestRevokeConsent authorisationServerId: ${authorisationServerId}`);
     const interactionId = uuidv4();
-    const headers = { fapiFinancialId, interactionId };
+    const headers = { fapiFinancialId, interactionId, sessionId };
     const status = await deleteRequest(username, authorisationServerId, headers);
     return res.sendStatus(status);
   } catch (err) {

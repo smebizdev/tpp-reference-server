@@ -60,7 +60,7 @@ const consentAccessToken = async (keys) => {
   return existing.token.access_token;
 };
 
-const getConsentStatus = async (accountRequestId, authorisationServerId) => {
+const getConsentStatus = async (accountRequestId, authorisationServerId, sessionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   debug(`getConsentStatus#accessToken: ${accessToken}`);
   debug(`getConsentStatus#resourcePath: ${resourcePath}`);
@@ -68,7 +68,9 @@ const getConsentStatus = async (accountRequestId, authorisationServerId) => {
   const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
   debug(`getConsentStatus#fapiFinancialId: ${fapiFinancialId}`);
   const interactionId = uuidv4();
-  const headers = { accessToken, fapiFinancialId, interactionId };
+  const headers = {
+    accessToken, fapiFinancialId, interactionId, sessionId,
+  };
   const response = await getAccountRequest(accountRequestId, resourcePath, headers);
   debug(`getConsentStatus#getAccountRequest: ${JSON.stringify(response)}`);
 
@@ -82,12 +84,16 @@ const getConsentStatus = async (accountRequestId, authorisationServerId) => {
   return result;
 };
 
-const hasConsent = async (keys) => {
+const hasConsent = async (keys, sessionId) => {
   const payload = await getConsent(keys);
   if (!payload || !payload.authorisationCode) return false;
 
   try {
-    const status = await getConsentStatus(payload.accountRequestId, payload.authorisationServerId);
+    const status = await getConsentStatus(
+      payload.accountRequestId,
+      payload.authorisationServerId,
+      sessionId,
+    );
     return status === 'Authorised';
   } catch (e) {
     error(e);
@@ -95,11 +101,11 @@ const hasConsent = async (keys) => {
   }
 };
 
-const filterConsented = async (username, scope, authorisationServerIds) => {
+const filterConsented = async (username, scope, sessionId, authorisationServerIds) => {
   const consented = [];
   await Promise.all(authorisationServerIds.map(async (authorisationServerId) => {
     const keys = { username, authorisationServerId, scope };
-    if (await hasConsent(keys)) {
+    if (await hasConsent(keys, sessionId)) {
       consented.push(authorisationServerId);
     }
   }));

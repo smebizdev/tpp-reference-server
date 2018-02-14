@@ -4,19 +4,10 @@ const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessToken } = require('../authorise');
 const { fapiFinancialIdFor } = require('../authorisation-servers');
 const { session } = require('../session');
+const { setupResponseLogging } = require('../response-logger');
 const uuidv4 = require('uuid/v4');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
-
-const bunyan = require('bunyan');
-const superagentLogger = require('superagent-bunyan');
-
-const logger = bunyan.createLogger({
-  name: 'ob-proxy.log',
-  streams: [{
-    path: './resource.log',
-  }],
-});
 
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -57,9 +48,7 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
-    if (process.env.LOG_ASPSP_RESPONSES) {
-      call.use(superagentLogger(logger, interactionId, { sessionId }));
-    }
+    setupResponseLogging(call, interactionId, { sessionId });
     const response = await call.send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

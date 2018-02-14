@@ -16,7 +16,7 @@ const paymentSubmission = async (req, res) => {
     const sessionId = req.headers['authorization'];
     const username = await getUsername(sessionId);
     const keys = { username, authorisationServerId, scope: 'payments' };
-    const accessToken = consentAccessToken(keys);
+    const accessToken = await consentAccessToken(keys);
     const headers = {
       fapiFinancialId, idempotencyKey, interactionId, accessToken,
     };

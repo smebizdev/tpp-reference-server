@@ -52,13 +52,15 @@ const resourceRequestHandler = async (req, res) => {
 
   try {
     const interactionId = uuidv4();
-    const response = await setupMutualTLS(request.get(proxiedUrl))
+    const call = setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
-      .set('x-fapi-interaction-id', interactionId)
-      .use(superagentLogger(logger, interactionId, { sessionId }))
-      .send();
+      .set('x-fapi-interaction-id', interactionId);
+    if (process.env.LOG_ASPSP_RESPONSES) {
+      call.use(superagentLogger(logger, interactionId, { sessionId }));
+    }
+    const response = await call.send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);
 

@@ -26,9 +26,8 @@ const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId, headers } = await extractHeaders(req.headers);
-    const permissions = DefaultPermissions;
-    const headersWithPermissions = Object.assign(headers, { permissions });
-    const accountRequestId = await setupAccountRequest(
+    const headersWithPermissions = Object.assign(headers, { permissions: DefaultPermissions });
+    const { accountRequestId, permissions } = await setupAccountRequest( // eslint-disable-line
       authorisationServerId,
       headersWithPermissions,
     );

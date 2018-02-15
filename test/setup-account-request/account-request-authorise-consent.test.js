@@ -79,7 +79,8 @@ const doPost = app => request(app)
 const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 
 describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
-  const setupAccountRequestStub = sinon.stub().returns(accountRequestId);
+  const permissions = DefaultPermissions;
+  const setupAccountRequestStub = sinon.stub().returns({ accountRequestId, permissions });
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 

@@ -7,8 +7,11 @@ const createRequest = async (resourcePath, headers) => {
   if (response.Data) {
     const status = response.Data.Status;
     if (status === 'AwaitingAuthorisation' || status === 'Authorised') {
-      if (response.Data.AccountRequestId) {
-        return response.Data.AccountRequestId;
+      if (response.Data.AccountRequestId && response.Data.Permissions) {
+        return {
+          accountRequestId: response.Data.AccountRequestId,
+          permissions: response.Data.Permissions,
+        };
       }
     } else {
       error = new Error(`Account request response status: "${status}"`);

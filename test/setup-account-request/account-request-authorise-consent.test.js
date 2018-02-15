@@ -10,21 +10,22 @@ const qs = require('qs');
 const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
+const sessionId = 'testSession';
+const username = 'testUsername';
 const accountRequestId = 'account-request-id';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
 const issuer = 'http://example.com';
 const jsonWebSignature = 'testSignedPayload';
-const key = 'testKey';
-const interactionId = key;
+const interactionId = 'testInteractionId';
+const interactionId2 = 'testInteractionId2';
 const fapiFinancialId = 'testFapiFinancialId';
 
 const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
-  const keyStub = sinon.stub().returns(key);
   const requestObjectSigningAlgsStub = sinon.stub().returns(['none']);
   const { generateRedirectUri } = proxyquire(
     '../../app/authorise/authorise-uri.js',
@@ -52,10 +53,15 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
-      '../authorisation-servers': {
-        fapiFinancialIdFor: () => fapiFinancialId,
+      '../session': {
+        extractHeaders: () => ({
+          authorisationServerId,
+          headers: {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
+        }),
       },
-      'uuid/v4': keyStub,
+      'uuid/v4': sinon.stub().returns(interactionId2),
     },
   );
   const app = express();
@@ -63,8 +69,6 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
   app.post('/account-request-authorise-consent', accountRequestAuthoriseConsent);
   return app;
 };
-
-const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/account-request-authorise-consent')
@@ -84,7 +88,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
     authorisationServerId,
     sessionId,
     scope,
-    interactionId,
+    interactionId2,
     accountRequestId,
   );
   const expectedRedirectHost = 'http://example.com/authorize';
@@ -98,7 +102,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   };
   const expectedState = {
     authorisationServerId,
-    interactionId,
+    interactionId: interactionId2,
     scope,
     sessionId,
     accountRequestId,
@@ -122,7 +126,9 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId, sessionId },
+          {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
         ));
         done();
       });
@@ -147,7 +153,9 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId, sessionId },
+          {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
         ));
         done();
       });

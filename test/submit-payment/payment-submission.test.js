@@ -6,7 +6,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const fapiFinancialId = 'testFapiFinancialId';
-const authServerId = 'testAuthServerId';
+const authorisationServerId = 'testAuthServerId';
+const interactionId = 'testInteractionId';
+const sessionId = 'testSessionId';
 const username = 'testUsername';
 
 const setupApp = (submitPaymentStub, consentAccessTokenStub) => {
@@ -16,14 +18,16 @@ const setupApp = (submitPaymentStub, consentAccessTokenStub) => {
       './submit-payment': {
         submitPayment: submitPaymentStub,
       },
-      '../authorisation-servers': {
-        fapiFinancialIdFor: () => fapiFinancialId,
-      },
       '../authorise': {
         consentAccessToken: consentAccessTokenStub,
       },
       '../session': {
-        getUsername: () => username,
+        extractHeaders: () => ({
+          authorisationServerId,
+          headers: {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
+        }),
       },
     },
   );
@@ -33,14 +37,12 @@ const setupApp = (submitPaymentStub, consentAccessTokenStub) => {
   return app;
 };
 
-
-const interactionId = 'testInteractionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 const accessToken = 'testAccessToken';
 
 const doPost = app => request(app)
   .post('/payment-submissions')
-  .set('x-authorization-server-id', authServerId)
+  .set('x-authorization-server-id', authorisationServerId)
   .set('x-fapi-interaction-id', interactionId)
   .send();
 

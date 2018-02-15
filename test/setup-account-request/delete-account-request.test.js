@@ -6,10 +6,13 @@ const { checkErrorThrown } = require('../utils');
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
 const interactionId = 'testInteractionId';
-const headers = { fapiFinancialId, interactionId };
+const sessionId = 'testSessionId';
+const username = 'testUsername';
+const headers = {
+  fapiFinancialId, interactionId, sessionId, username,
+};
 
 describe('deleteAccountRequest called with authorisationServerId and fapiFinancialId', () => {
-  const username = 'user';
   const accessToken = 'access-token';
   const resourceServer = 'http://resource-server.com';
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
@@ -39,9 +42,11 @@ describe('deleteAccountRequest called with authorisationServerId and fapiFinanci
     before(setup(true));
 
     it('returns 204 from deleteRequests call', async () => {
-      const status = await deleteRequestProxy(username, authorisationServerId, headers);
+      const status = await deleteRequestProxy(authorisationServerId, headers);
       assert.equal(status, 204);
-      const headersWithToken = { accessToken, fapiFinancialId, interactionId };
+      const headersWithToken = {
+        accessToken, fapiFinancialId, interactionId, sessionId, username,
+      };
       assert(deleteAccountRequestStub.calledWithExactly(
         accountRequestId,
         resourcePath,
@@ -55,7 +60,7 @@ describe('deleteAccountRequest called with authorisationServerId and fapiFinanci
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => deleteRequestProxy(username, authorisationServerId, headers),
+        async () => deleteRequestProxy(authorisationServerId, headers),
         400, 'Bad Request',
       );
     });

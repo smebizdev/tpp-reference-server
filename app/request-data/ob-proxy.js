@@ -2,23 +2,19 @@ const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessToken } = require('../authorise');
-const { fapiFinancialIdFor } = require('../authorisation-servers');
-const { session } = require('../session');
+const { session, extractHeaders } = require('../session');
 const { setupResponseLogging } = require('../response-logger');
-const uuidv4 = require('uuid/v4');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const authServerId = req.headers['x-authorization-server-id'];
-  const xFapiFinancialId = await fapiFinancialIdFor(authServerId);
-
-  const sessionId = req.headers.authorization;
+  const { authorisationServerId, headers } = await extractHeaders(req.headers);
+  const { interactionId, fapiFinancialId, sessionId } = headers;
   let host;
   let accessToken;
   try {
-    host = await resourceServerPath(authServerId);
+    host = await resourceServerPath(authorisationServerId);
   } catch (err) {
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);
@@ -29,7 +25,7 @@ const resourceRequestHandler = async (req, res) => {
   try {
     const username = await session.getUsername(sessionId);
     debug(`username: ${username}`);
-    const consentKeys = { username, authorisationServerId: authServerId, scope };
+    const consentKeys = { username, authorisationServerId, scope };
     accessToken = await consentAccessToken(consentKeys);
   } catch (err) {
     accessToken = null;
@@ -39,14 +35,13 @@ const resourceRequestHandler = async (req, res) => {
   debug(`proxiedUrl: ${proxiedUrl}`);
   debug(`scope: ${scope}`);
   debug(`bearerToken ${bearerToken}`);
-  debug(`xFapiFinancialId ${xFapiFinancialId}`);
+  debug(`fapiFinancialId ${fapiFinancialId}`);
 
   try {
-    const interactionId = uuidv4();
     const call = setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
-      .set('x-fapi-financial-id', xFapiFinancialId)
+      .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
     setupResponseLogging(call, { interactionId, sessionId });
     const response = await call.send();

@@ -10,6 +10,8 @@ const qs = require('qs');
 const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
+const sessionId = 'testSessionId';
+const username = 'testUsername';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
 const redirectUrl = 'http://example.com/redirect';
@@ -51,8 +53,13 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
       '../authorise': {
         generateRedirectUri,
       },
-      '../authorisation-servers': {
-        fapiFinancialIdFor: () => fapiFinancialId,
+      '../session': {
+        extractHeaders: () => ({
+          authorisationServerId,
+          headers: {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
+        }),
       },
       'uuid/v4': keyStub,
     },
@@ -62,8 +69,6 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
   app.post('/payment-authorise-consent', paymentAuthoriseConsent);
   return app;
 };
-
-const sessionId = 'testSession';
 
 const doPost = app => request(app)
   .post('/payment-authorise-consent')

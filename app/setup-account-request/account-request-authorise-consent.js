@@ -28,7 +28,7 @@ const accountRequestRevokeConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId, headers } = await extractHeaders(req.headers);
-    const status = await deleteRequest(headers.username, authorisationServerId, headers);
+    const status = await deleteRequest(authorisationServerId, headers);
     return res.sendStatus(status);
   } catch (err) {
     return res.sendStatus(400);

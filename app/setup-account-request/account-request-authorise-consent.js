@@ -7,11 +7,31 @@ const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 
+const DefaultPermissions = [
+  'ReadAccountsDetail',
+  'ReadBalances',
+  'ReadBeneficiariesDetail',
+  'ReadDirectDebits',
+  'ReadProducts',
+  'ReadStandingOrdersDetail',
+  'ReadTransactionsCredits',
+  'ReadTransactionsDebits',
+  'ReadTransactionsDetail',
+];
+// ExpirationDateTime: // not populated - the permissions will be open ended
+// TransactionFromDateTime: // not populated - request from the earliest available transaction
+// TransactionToDateTime: // not populated - request to the latest available transactions
+
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId, headers } = await extractHeaders(req.headers);
-    const accountRequestId = await setupAccountRequest(authorisationServerId, headers);
+    const permissions = DefaultPermissions;
+    const headersWithPermissions = Object.assign(headers, { permissions });
+    const accountRequestId = await setupAccountRequest(
+      authorisationServerId,
+      headersWithPermissions,
+    );
     const interactionId2 = uuidv4();
     const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', headers.sessionId, interactionId2);
 
@@ -37,3 +57,4 @@ const accountRequestRevokeConsent = async (req, res) => {
 
 exports.accountRequestAuthoriseConsent = accountRequestAuthoriseConsent;
 exports.accountRequestRevokeConsent = accountRequestRevokeConsent;
+exports.DefaultPermissions = DefaultPermissions;

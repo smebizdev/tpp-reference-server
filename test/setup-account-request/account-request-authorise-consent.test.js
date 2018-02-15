@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const env = require('env-var');
 const qs = require('qs');
-
+const { DefaultPermissions } = require('../../app/setup-account-request/account-request-authorise-consent.js');
 const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
@@ -127,7 +127,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
           {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
         done();
@@ -154,7 +154,7 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
           {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
         done();

@@ -35,6 +35,7 @@ describe('postPayments request to remote payment endpoints', () => {
 
   const accessToken = '2YotnFZFEjr1zCsicMWpAA';
   const fapiFinancialId = 'abc';
+  const sessionId = 'testSessionId';
   const idempotencyKey = 'id-key-blah';
   const interactionId = 'xyz';
   const customerIp = '10.10.0.1';
@@ -49,6 +50,7 @@ describe('postPayments request to remote payment endpoints', () => {
     fapiFinancialId,
     idempotencyKey,
     jwsSignature,
+    sessionId,
   };
 
   const paymentData = {

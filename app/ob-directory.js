@@ -113,10 +113,10 @@ const fetchOBAccountPaymentServiceProviders = async () => {
   }
 };
 
-const accountPaymentServiceProvidersForUser = async (username) => {
+const accountPaymentServiceProvidersForUser = async (username, sessionId) => {
   const servers = await authorisationServersForClient();
   const authServerIds = servers.map(config => config.id);
-  const consentedServerIds = await filterConsented(username, 'accounts', authServerIds);
+  const consentedServerIds = await filterConsented(username, 'accounts', sessionId, authServerIds);
 
   servers.forEach((config) => {
     const hasConsent = consentedServerIds.includes(config.id);
@@ -129,7 +129,7 @@ const accountPaymentServiceProviders = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const sessionId = req.headers.authorization;
   const username = await session.getUsername(sessionId);
-  const servers = await accountPaymentServiceProvidersForUser(username);
+  const servers = await accountPaymentServiceProvidersForUser(username, sessionId);
 
   log(`servers length: ${servers.length}`);
   return res.json(servers);

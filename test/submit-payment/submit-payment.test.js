@@ -5,6 +5,7 @@ const sinon = require('sinon');
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
 const interactionId = 'interaction-1234';
+const sessionId = 'testSessionId';
 const PAYMENT_SUBMISSION_ID = 'PS456';
 
 describe('submitPayment called with authorisationServerId and fapiFinancialId', () => {
@@ -59,7 +60,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
   };
 
   const headers = {
-    fapiFinancialId, idempotencyKey, interactionId, accessToken,
+    fapiFinancialId, idempotencyKey, interactionId, accessToken, sessionId,
   };
 
   describe('When Submitted Payment is in status AcceptedSettlementInProcess', () => {
@@ -72,7 +73,7 @@ describe('submitPayment called with authorisationServerId and fapiFinancialId', 
         resourcePath,
         '/open-banking/v1.1/payment-submissions',
         {
-          accessToken, fapiFinancialId, idempotencyKey, interactionId,
+          accessToken, fapiFinancialId, idempotencyKey, interactionId, sessionId,
         },
         {
           PaymentId,

@@ -4,12 +4,14 @@ const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 const assert = require('assert');
+const { setupResponseLogging } = require('../response-logger');
 
 const verifyHeaders = (headers) => {
   assert.ok(headers.accessToken, 'accessToken missing from headers');
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
   assert.ok(headers.interactionId, 'interactionId missing from headers');
   assert.ok(headers.idempotencyKey, 'idempotencyKey missing from headers');
+  assert.ok(headers.sessionId, 'sessionId missing from headers');
 };
 
 /**
@@ -20,10 +22,11 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     verifyHeaders(headers);
     const paymentsUri = `${resourceServerPath}${paymentPathEndpoint}`;
     log(`POST to ${paymentsUri}`);
+    const { interactionId, sessionId } = headers;
     const payment = setupMutualTLS(request.post(paymentsUri))
       .set('authorization', `Bearer ${headers.accessToken}`)
       .set('x-fapi-financial-id', headers.fapiFinancialId)
-      .set('x-fapi-interaction-id', headers.interactionId)
+      .set('x-fapi-interaction-id', interactionId)
       .set('x-idempotency-key', headers.idempotencyKey)
       .set('content-type', 'application/json; charset=utf-8')
       .set('accept', 'application/json; charset=utf-8');
@@ -31,6 +34,7 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     if (headers.customerIp) payment.set('x-fapi-customer-ip-address', headers.customerIp);
     if (headers.jwsSignature) payment.set('x-jws-signature', headers.jwsSignature);
 
+    setupResponseLogging(payment, { interactionId, sessionId });
     payment.send(paymentData);
     const response = await payment;
     debug(`${response.status} response for ${paymentsUri}`);

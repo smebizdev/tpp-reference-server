@@ -6,7 +6,7 @@ const extractHeaders = async (headers) => {
   const sessionId = headers['authorization'];
   const authorisationServerId = headers['x-authorization-server-id'];
   const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
-  const interactionId = uuidv4();
+  const interactionId = headers['x-fapi-interaction-id'] || uuidv4();
   const username = await getUsername(sessionId);
 
   return {

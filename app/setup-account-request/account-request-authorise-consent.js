@@ -1,7 +1,7 @@
 const { setupAccountRequest } = require('./setup-account-request');
 const { deleteRequest } = require('./delete-account-request');
 const { generateRedirectUri } = require('../authorise');
-const { session, extractHeaders } = require('../session');
+const { extractHeaders } = require('../session');
 
 const uuidv4 = require('uuid/v4');
 const error = require('debug')('error');
@@ -28,8 +28,7 @@ const accountRequestRevokeConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     const { authorisationServerId, headers } = await extractHeaders(req.headers);
-    const username = await session.getUsername(headers.sessionId);
-    const status = await deleteRequest(username, authorisationServerId, headers);
+    const status = await deleteRequest(headers.username, authorisationServerId, headers);
     return res.sendStatus(status);
   } catch (err) {
     return res.sendStatus(400);

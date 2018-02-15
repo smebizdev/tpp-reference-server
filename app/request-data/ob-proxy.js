@@ -2,7 +2,7 @@ const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessToken } = require('../authorise');
-const { session, extractHeaders } = require('../session');
+const { extractHeaders } = require('../session');
 const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
@@ -10,7 +10,9 @@ const error = require('debug')('error');
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const { authorisationServerId, headers } = await extractHeaders(req.headers);
-  const { interactionId, fapiFinancialId, sessionId } = headers;
+  const {
+    interactionId, fapiFinancialId, sessionId, username,
+  } = headers;
   let host;
   let accessToken;
   try {
@@ -23,8 +25,6 @@ const resourceRequestHandler = async (req, res) => {
   const proxiedUrl = `${host}${path}`;
   const scope = path.split('/')[3];
   try {
-    const username = await session.getUsername(sessionId);
-    debug(`username: ${username}`);
     const consentKeys = { username, authorisationServerId, scope };
     accessToken = await consentAccessToken(consentKeys);
   } catch (err) {

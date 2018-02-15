@@ -11,6 +11,7 @@ const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
 const sessionId = 'testSession';
+const username = 'testUsername';
 const accountRequestId = 'account-request-id';
 const clientId = 'testClientId';
 const clientSecret = 'testClientSecret';
@@ -55,7 +56,9 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       '../session': {
         extractHeaders: () => ({
           authorisationServerId,
-          headers: { fapiFinancialId, interactionId, sessionId },
+          headers: {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
         }),
       },
       'uuid/v4': sinon.stub().returns(interactionId2),
@@ -123,7 +126,9 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId, sessionId },
+          {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
         ));
         done();
       });
@@ -148,7 +153,9 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.equal(header, '*');
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
-          { fapiFinancialId, interactionId, sessionId },
+          {
+            fapiFinancialId, interactionId, sessionId, username,
+          },
         ));
         done();
       });

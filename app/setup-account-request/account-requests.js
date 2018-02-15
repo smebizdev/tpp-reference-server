@@ -43,7 +43,8 @@ const setHeaders = (requestObj, headers) => requestObj
 
 const createRequest = (requestObj, headers) => {
   const req = setHeaders(setupMutualTLS(requestObj), headers);
-  setupResponseLogging(req, headers.interactionId, { sessionId: headers.sessionId });
+  const { interactionId, sessionId } = headers;
+  setupResponseLogging(req, { interactionId, sessionId });
   return req;
 };
 

@@ -48,7 +48,7 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', xFapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
-    setupResponseLogging(call, interactionId, { sessionId });
+    setupResponseLogging(call, { interactionId, sessionId });
     const response = await call.send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

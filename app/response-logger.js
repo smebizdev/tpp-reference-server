@@ -9,10 +9,12 @@ const logger = bunyan.createLogger({
   }],
 });
 
-const setupResponseLogging = (requestObj, interactionId, extras) => {
+const setupResponseLogging = (requestObj, extras) => {
   if (process.env.NODE_ENV !== 'test' && process.env.LOG_ASPSP_RESPONSES === 'true') {
     assert.ok(extras.sessionId, 'sessionId missing from setupResponseLogging call');
-    requestObj.use(superagentLogger(logger, interactionId, extras));
+    assert.ok(extras.interactionId, 'interactionId missing from setupResponseLogging call');
+    const requestId = `${Date.now()}-${Math.random()}`.replace('0.', '');
+    requestObj.use(superagentLogger(logger, requestId, extras));
   }
 };
 

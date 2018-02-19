@@ -67,6 +67,13 @@ const consentAccessToken = async (keys) => {
   return existing.token.access_token;
 };
 
+const consentAccessTokenAndPermissions = async (keys) => {
+  const existing = await consent(keys);
+  const accessToken = existing.token.access_token;
+  const { permissions } = existing;
+  return { accessToken, permissions };
+};
+
 const getConsentStatus = async (accountRequestId, authorisationServerId, sessionId) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
   debug(`getConsentStatus#accessToken: ${accessToken}`);
@@ -129,6 +136,7 @@ exports.setConsent = setConsent;
 exports.getConsent = getConsent;
 exports.consent = consent;
 exports.consentAccessToken = consentAccessToken;
+exports.consentAccessTokenAndPermissions = consentAccessTokenAndPermissions;
 exports.filterConsented = filterConsented;
 exports.getConsentStatus = getConsentStatus;
 exports.consentAccountRequestId = consentAccountRequestId;

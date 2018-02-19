@@ -5,6 +5,7 @@ const {
   getConsent,
   consent,
   consentAccessToken,
+  consentAccessTokenAndPermissions,
   filterConsented,
   consentAccountRequestId,
   deleteConsent,
@@ -25,4 +26,5 @@ exports.getConsent = getConsent;
 exports.consent = consent;
 exports.consentAccountRequestId = consentAccountRequestId;
 exports.consentAccessToken = consentAccessToken;
+exports.consentAccessTokenAndPermissions = consentAccessTokenAndPermissions;
 exports.deleteConsent = deleteConsent;

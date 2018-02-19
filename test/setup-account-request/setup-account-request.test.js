@@ -7,20 +7,26 @@ const { setupAccountRequest } = require('../../app/setup-account-request'); // e
 const authorisationServerId = 'testAuthorisationServerId';
 const fapiFinancialId = 'testFinancialId';
 const interactionId = 'testInteractionId';
-const headers = { fapiFinancialId, interactionId };
+const sessionId = 'testSessionId';
+const username = 'testUsername';
+const testPermissions = ['ReadAccountsDetail'];
+const headers = {
+  fapiFinancialId, interactionId, sessionId, username, permissions: testPermissions,
+};
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
   const accessToken = 'access-token';
   const resourceServer = 'http://resource-server.com';
   const resourcePath = `${resourceServer}/open-banking/v1.1`;
-  const accountRequestId = '88379';
+  const testAccountRequest = '88379';
   let setupAccountRequestProxy;
   let accessTokenAndResourcePathProxy;
   let accountRequestsStub;
   const accountRequestsResponse = status => ({
     Data: {
-      AccountRequestId: accountRequestId,
+      AccountRequestId: testAccountRequest,
       Status: status,
+      Permissions: testPermissions,
     },
   });
 
@@ -40,11 +46,11 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   describe('when AwaitingAuthorisation', () => {
     before(setup('AwaitingAuthorisation'));
 
-    it('returns accountRequestId from postAccountRequests call', async () => {
-      const id = await setupAccountRequestProxy(authorisationServerId, headers);
-      assert.equal(id, accountRequestId);
-
-      const headersWithToken = { accessToken, fapiFinancialId, interactionId };
+    it('returns { accountRequestId, permissions } from postAccountRequests call', async () => {
+      const { accountRequestId, permissions } = await setupAccountRequestProxy(authorisationServerId, headers); // eslint-disable-line
+      assert.equal(accountRequestId, testAccountRequest);
+      assert.equal(permissions, testPermissions);
+      const headersWithToken = Object.assign(headers, { accessToken });
       assert(accountRequestsStub.calledWithExactly(resourcePath, headersWithToken));
     });
   });
@@ -52,9 +58,10 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
   describe('when Authorised', () => {
     before(setup('Authorised'));
 
-    it('returns accountRequestId from postAccountRequests call', async () => {
-      const id = await setupAccountRequestProxy(authorisationServerId, headers);
-      assert.equal(id, accountRequestId);
+    it('returns { accountRequestId, permissions } from postAccountRequests call', async () => {
+      const { accountRequestId, permissions } = await setupAccountRequestProxy(authorisationServerId, headers); // eslint-disable-line
+      assert.equal(accountRequestId, testAccountRequest);
+      assert.equal(permissions, testPermissions);
     });
   });
 

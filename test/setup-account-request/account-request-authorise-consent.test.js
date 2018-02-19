@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const env = require('env-var');
 const qs = require('qs');
-
+const { DefaultPermissions } = require('../../app/setup-account-request/account-request-authorise-consent.js');
 const { statePayload } = require('../../app/authorise/authorise-uri.js');
 
 const authorisationServerId = '123';
@@ -79,7 +79,8 @@ const doPost = app => request(app)
 const parseState = state => JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
 
 describe('/account-request-authorise-consent with successful setupAccountRequest', () => {
-  const setupAccountRequestStub = sinon.stub().returns(accountRequestId);
+  const permissions = DefaultPermissions;
+  const setupAccountRequestStub = sinon.stub().returns({ accountRequestId, permissions });
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
   const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
 
@@ -127,7 +128,7 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
           {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
         done();
@@ -154,7 +155,7 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert(setupAccountRequestStub.calledWithExactly(
           authorisationServerId,
           {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
         done();

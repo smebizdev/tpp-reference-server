@@ -5,23 +5,8 @@ const debug = require('debug')('debug');
 const assert = require('assert');
 const { setupResponseLogging } = require('../response-logger');
 
-const buildAccountRequestData = () => ({
-  Data: {
-    Permissions: [
-      'ReadAccountsDetail',
-      'ReadBalances',
-      'ReadBeneficiariesDetail',
-      'ReadDirectDebits',
-      'ReadProducts',
-      'ReadStandingOrdersDetail',
-      'ReadTransactionsCredits',
-      'ReadTransactionsDebits',
-      'ReadTransactionsDetail',
-    ],
-    // ExpirationDateTime: // not populated - the permissions will be open ended
-    // TransactionFromDateTime: // not populated - request from the earliest available transaction
-    // TransactionToDateTime: // not populated - request to the latest available transactions
-  },
+const buildAccountRequestData = Permissions => ({
+  Data: { Permissions },
   Risk: {},
 });
 
@@ -55,7 +40,7 @@ const createRequest = (requestObj, headers) => {
 const postAccountRequests = async (resourceServerPath, headers) => {
   try {
     verifyHeaders(headers);
-    const body = buildAccountRequestData();
+    const body = buildAccountRequestData(headers.permissions);
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
     const response = await createRequest(request.post(accountRequestsUri), headers)

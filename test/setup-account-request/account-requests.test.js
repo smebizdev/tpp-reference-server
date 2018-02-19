@@ -8,7 +8,8 @@ const assert = require('assert');
 
 const nock = require('nock');
 
-const requestBody = buildAccountRequestData();
+const permissions = ['ReadAccountsDetail'];
+const requestBody = buildAccountRequestData(permissions);
 const accountRequestId = '88379';
 const response = {
   Data: {
@@ -31,7 +32,7 @@ const fapiFinancialId = 'abc';
 const interactionId = 'xyz';
 const sessionId = 'testSessionId';
 const headers = {
-  accessToken, fapiFinancialId, interactionId, sessionId,
+  accessToken, fapiFinancialId, interactionId, sessionId, permissions,
 };
 
 describe('postAccountRequests', () => {

@@ -34,7 +34,7 @@ describe('storage set data with id', () => {
   });
 
   it('called second time overwrites data', async () => {
-    const newData = Object.assign(data, { CustomerFriendlyName: 'New Name' });
+    const newData = Object.assign({ CustomerFriendlyName: 'New Name' }, data);
 
     await set(collection, data, id);
     await set(collection, newData, id);

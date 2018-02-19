@@ -43,7 +43,7 @@ const setupPayment = async (authorisationServerId,
     CreditorAccount, InstructedAmount,
   );
 
-  const headersWithToken = Object.assign(headers, { accessToken });
+  const headersWithToken = Object.assign({ accessToken }, headers);
   const paymentId = await createRequest(
     resourcePath,
     headersWithToken,

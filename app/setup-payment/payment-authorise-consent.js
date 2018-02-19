@@ -13,7 +13,7 @@ const paymentAuthoriseConsent = async (req, res) => {
     const { InstructedAmount } = req.body;
     const idempotencyKey = uuidv4();
     const paymentId = await setupPayment(
-      authorisationServerId, Object.assign(headers, { idempotencyKey }),
+      authorisationServerId, Object.assign({ idempotencyKey }, headers),
       CreditorAccount, InstructedAmount,
     );
 

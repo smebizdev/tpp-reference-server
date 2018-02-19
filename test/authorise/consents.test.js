@@ -123,7 +123,7 @@ describe('filterConsented', () => {
 
   describe('given authorisationServerId with no authorisationCode in config', () => {
     beforeEach(async () => {
-      await setConsent(keys, Object.assign(consentPayload, { authorisationCode: null }));
+      await setConsent(keys, Object.assign({}, consentPayload, { authorisationCode: null }));
     });
 
     it('returns empty array', async () => {
@@ -135,7 +135,7 @@ describe('filterConsented', () => {
   describe('given authorisationServerId with status revoked', () => {
     beforeEach(async () => {
       getAccountRequestStub.returns({ Data: { Status: 'Revoked' } });
-      await setConsent(keys, Object.assign(consentPayload, { authorisationCode: null }));
+      await setConsent(keys, Object.assign({}, consentPayload, { authorisationCode: null }));
     });
 
     it('returns empty array', async () => {

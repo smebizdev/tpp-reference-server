@@ -13,7 +13,7 @@ const paymentSubmission = async (req, res) => {
     const idempotencyKey = uuidv4();
     const keys = { username, authorisationServerId, scope: 'payments' };
     const accessToken = await consentAccessToken(keys);
-    const headersWithToken = Object.assign(headers, { idempotencyKey, accessToken });
+    const headersWithToken = Object.assign({ idempotencyKey, accessToken }, headers);
     const paymentSubmissionId = await submitPayment(authorisationServerId, headersWithToken);
 
     debug(`Payment Submission succesfully completed. Id: ${paymentSubmissionId}`);

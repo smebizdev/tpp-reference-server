@@ -1,7 +1,7 @@
 const request = require('superagent');
 const { setupMutualTLS } = require('../certs-util');
 const { resourceServerPath } = require('../authorisation-servers');
-const { consentAccessToken } = require('../authorise');
+const { consentAccessTokenAndPermissions } = require('../authorise');
 const { extractHeaders } = require('../session');
 const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
@@ -15,6 +15,7 @@ const resourceRequestHandler = async (req, res) => {
   } = headers;
   let host;
   let accessToken;
+  let permissions;
   try {
     host = await resourceServerPath(authorisationServerId);
   } catch (err) {
@@ -26,9 +27,12 @@ const resourceRequestHandler = async (req, res) => {
   const scope = path.split('/')[3];
   try {
     const consentKeys = { username, authorisationServerId, scope };
-    accessToken = await consentAccessToken(consentKeys);
+    const data = await consentAccessTokenAndPermissions(consentKeys);
+    accessToken = data.accessToken; // eslint-disable-line
+    permissions = data.permissions; // eslint-disable-line
   } catch (err) {
     accessToken = null;
+    permissions = null;
   }
   const bearerToken = `Bearer ${accessToken}`;
 
@@ -43,7 +47,7 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
-    setupResponseLogging(call, { interactionId, sessionId });
+    setupResponseLogging(call, { interactionId, sessionId, permissions });
     const response = await call.send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

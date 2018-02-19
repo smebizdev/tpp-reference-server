@@ -39,7 +39,7 @@ describe('extractHeaders from request headers', () => {
   describe('when x-fapi-interaction-id in headers', () => {
     it('returns headers with same interactionId', async () => {
       const interactionId = 'existingId';
-      const value = await extractHeaders(Object.assign(requestHeaders, { 'x-fapi-interaction-id': interactionId }));
+      const value = await extractHeaders(Object.assign({ 'x-fapi-interaction-id': interactionId }, requestHeaders));
       assert.equal(value.authorisationServerId, authorisationServerId);
       assert.deepEqual(value.headers, {
         fapiFinancialId, interactionId, sessionId, username,

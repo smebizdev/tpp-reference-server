@@ -50,7 +50,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
       const { accountRequestId, permissions } = await setupAccountRequestProxy(authorisationServerId, headers); // eslint-disable-line
       assert.equal(accountRequestId, testAccountRequest);
       assert.equal(permissions, testPermissions);
-      const headersWithToken = Object.assign(headers, { accessToken });
+      const headersWithToken = Object.assign({ accessToken }, headers);
       assert(accountRequestsStub.calledWithExactly(resourcePath, headersWithToken));
     });
   });

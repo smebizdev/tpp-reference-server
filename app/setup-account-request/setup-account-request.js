@@ -26,7 +26,7 @@ const createRequest = async (resourcePath, headers) => {
 
 const setupAccountRequest = async (authorisationServerId, headers) => {
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-  const headersWithToken = Object.assign(headers, { accessToken });
+  const headersWithToken = Object.assign({ accessToken }, headers);
   const accountRequestId = await createRequest(resourcePath, headersWithToken);
   return accountRequestId;
 };

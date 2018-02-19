@@ -7,7 +7,7 @@ const deleteRequest = async (authorisationServerId, headers) => {
 
   if (accountRequestId) {
     const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);
-    const headersWithToken = Object.assign(headers, { accessToken });
+    const headersWithToken = Object.assign({ accessToken }, headers);
     const success = await deleteAccountRequest(accountRequestId, resourcePath, headersWithToken);
     if (success) {
       await deleteConsent(keys);

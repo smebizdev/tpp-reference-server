@@ -28,6 +28,15 @@ const tokenPayload = {
   expires_in: 3600,
   token_type: 'bearer',
 };
+const permissions = ['ReadAccountsDetail'];
+
+const accountRequestPayload = {
+  username,
+  authorisationServerId,
+  scope,
+  accountRequestId,
+  permissions,
+};
 
 const consentPayload = {
   username,
@@ -50,10 +59,25 @@ describe('setConsents', () => {
     await drop(AUTH_SERVER_USER_CONSENTS_COLLECTION);
   });
 
-  it('stores payload and allows consent to be retrieved by keys id', async () => {
-    await setConsent(keys, consentPayload);
+  it('stores account request payload and allows to be retrieved', async () => {
+    await setConsent(keys, accountRequestPayload);
     const stored = await consent(keys);
     assert.equal(stored.id, `${username}:::${authorisationServerId}:::${scope}`);
+  });
+
+  it('stores consent payload, keeping permissions from stored account request with same accountRequestId', async () => {
+    await setConsent(keys, accountRequestPayload);
+    await setConsent(keys, consentPayload);
+    const stored = await consent(keys);
+    assert.deepEqual(stored.permissions, accountRequestPayload.permissions);
+  });
+
+  it('stores consent payload, without permissions from stored account request with different accountRequestId', async () => {
+    const accountRequestWithDifferentId = Object.assign({}, accountRequestPayload, { accountRequestId: 'differentId' });
+    await setConsent(keys, accountRequestWithDifferentId);
+    await setConsent(keys, consentPayload);
+    const stored = await consent(keys);
+    assert.equal(stored.permissions, null);
   });
 
   it('stores payload and allows consent access_token to be retrieved', async () => {

@@ -21,14 +21,6 @@ const generateCompositeKey = (obj) => {
   return `${obj.username}:::${obj.authorisationServerId}:::${obj.scope}`;
 };
 
-const setConsent = async (keys, payload) => {
-  debug(`#setConsent keys: [${JSON.stringify(keys)}]`);
-  debug(`#setConsent payload: [${JSON.stringify(payload)}]`);
-  const compositeKey = generateCompositeKey(keys);
-  debug(`#setConsent compositeKey: [${compositeKey}]`);
-  await set(AUTH_SERVER_USER_CONSENTS_COLLECTION, payload, compositeKey);
-};
-
 const deleteConsent = async (keys) => {
   debug(`#deleteConsent keys: [${JSON.stringify(keys)}]`);
   const compositeKey = generateCompositeKey(keys);
@@ -53,6 +45,21 @@ const consent = async (keys) => {
     throw err;
   }
   return payload;
+};
+
+const setConsent = async (keys, payload) => {
+  debug(`#setConsent keys: [${JSON.stringify(keys)}]`);
+  debug(`#setConsent payload: [${JSON.stringify(payload)}]`);
+  const stored = await getConsent(keys);
+  let toStore;
+  if (stored && stored.accountRequestId === payload.accountRequestId) {
+    toStore = Object.assign({}, payload, { permissions: stored.permissions });
+  } else {
+    toStore = payload;
+  }
+  const compositeKey = generateCompositeKey(keys);
+  debug(`#setConsent compositeKey: [${compositeKey}]`);
+  await set(AUTH_SERVER_USER_CONSENTS_COLLECTION, toStore, compositeKey);
 };
 
 const consentAccessToken = async (keys) => {

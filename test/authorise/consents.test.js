@@ -6,6 +6,7 @@ const {
   setConsent,
   consent,
   consentAccessToken,
+  consentAccessTokenAndPermissions,
   consentAccountRequestId,
   deleteConsent,
   getConsent,
@@ -84,6 +85,14 @@ describe('setConsents', () => {
     await setConsent(keys, consentPayload);
     const storedAccessToken = await consentAccessToken(keys);
     assert.equal(storedAccessToken, token);
+  });
+
+  it('stores payload and allows consent access_token and permissions to be retrieved', async () => {
+    await setConsent(keys, accountRequestPayload);
+    await setConsent(keys, consentPayload);
+    const data = await consentAccessTokenAndPermissions(keys);
+    assert.equal(data.accessToken, token);
+    assert.deepEqual(data.permissions, permissions);
   });
 
   it('stores payload and allows consent accountRequestId to be retrieved', async () => {

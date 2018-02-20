@@ -22,7 +22,7 @@ const interactionId = 'testInteractionId';
 const interactionId2 = 'testInteractionId2';
 const fapiFinancialId = 'testFapiFinancialId';
 
-const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
+const setupApp = (setupAccountRequestStub, authorisationEndpointStub, setConsentStub) => {
   const clientCredentialsStub = sinon.stub().returns({ clientId, clientSecret });
   const createJsonWebSignatureStub = sinon.stub().returns(jsonWebSignature);
   const issuerStub = sinon.stub().returns(issuer);
@@ -52,6 +52,7 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub) => {
       },
       '../authorise': {
         generateRedirectUri,
+        setConsent: setConsentStub,
       },
       '../session': {
         extractHeaders: () => ({
@@ -82,7 +83,8 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
   const permissions = DefaultPermissions;
   const setupAccountRequestStub = sinon.stub().returns({ accountRequestId, permissions });
   const authorisationEndpointStub = sinon.stub().returns('http://example.com/authorize');
-  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
+  const setConsentStub = sinon.stub();
+  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub, setConsentStub);
 
   const scope = 'openid accounts';
   const expectedStateBase64 = statePayload(
@@ -131,6 +133,9 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
             fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
+        const keys = { username, authorisationServerId, scope: 'accounts' };
+        const payload = { accountRequestId, permissions };
+        assert(setConsentStub.calledWithExactly(keys, payload));
         done();
       });
   });
@@ -143,7 +148,8 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
   error.status = status;
   const setupAccountRequestStub = sinon.stub().throws(error);
   const authorisationEndpointStub = sinon.stub();
-  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub);
+  const setConsentStub = sinon.stub();
+  const app = setupApp(setupAccountRequestStub, authorisationEndpointStub, setConsentStub);
 
   it('returns status from error', (done) => {
     doPost(app)
@@ -158,6 +164,7 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
             fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
           },
         ));
+        assert.equal(setConsentStub.called, false);
         done();
       });
   });

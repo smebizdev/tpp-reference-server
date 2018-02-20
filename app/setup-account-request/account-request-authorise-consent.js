@@ -1,6 +1,6 @@
 const { setupAccountRequest } = require('./setup-account-request');
 const { deleteRequest } = require('./delete-account-request');
-const { generateRedirectUri } = require('../authorise');
+const { generateRedirectUri, setConsent } = require('../authorise');
 const { extractHeaders } = require('../session');
 
 const uuidv4 = require('uuid/v4');
@@ -22,6 +22,12 @@ const DefaultPermissions = [
 // TransactionFromDateTime: // not populated - request from the earliest available transaction
 // TransactionToDateTime: // not populated - request to the latest available transactions
 
+const storePermissions = async (username, authorisationServerId, accountRequestId, permissions) => {
+  const keys = { username, authorisationServerId, scope: 'accounts' };
+  const accountRequest = { accountRequestId, permissions };
+  await setConsent(keys, accountRequest);
+};
+
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
@@ -35,6 +41,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
     const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', headers.sessionId, interactionId2);
 
     debug(`authorize URL is: ${uri}`);
+    await storePermissions(headers.username, authorisationServerId, accountRequestId, permissions);
     return res.status(200).send({ uri }); // We can't intercept a 302 !
   } catch (err) {
     error(err);

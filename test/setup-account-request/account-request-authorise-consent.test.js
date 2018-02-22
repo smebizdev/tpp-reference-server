@@ -157,12 +157,6 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.deepEqual(r.body, { message });
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        // assert(setupAccountRequestStub.calledWithExactly(
-        //   authorisationServerId,
-        //   {
-        //     fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
-        //   },
-        // ));
         assert(setupAccountRequestStub.calledWithExactly({
           fapiFinancialId,
           interactionId,

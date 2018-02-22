@@ -59,9 +59,7 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
           // headers: {
           //   fapiFinancialId, interactionId, sessionId, username,
           // },
-          headers: {
-            fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
-          },
+          fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
         }),
       },
       'uuid/v4': keyStub,

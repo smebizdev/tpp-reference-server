@@ -9,7 +9,7 @@ const paymentAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
     // const { authorisationServerId, headers } = await extractHeaders(req.headers);
-    const { headers } = await extractHeaders(req.headers);
+    const headers = await extractHeaders(req.headers);
     const { authorisationServerId } = headers;
     const { CreditorAccount } = req.body;
     const { InstructedAmount } = req.body;

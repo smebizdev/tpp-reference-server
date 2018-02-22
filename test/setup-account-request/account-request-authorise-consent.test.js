@@ -57,9 +57,7 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub, setConsent
       '../session': {
         extractHeaders: () => ({
           // authorisationServerId,
-          headers: {
-            fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
-          },
+          fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
         }),
       },
       'uuid/v4': sinon.stub().returns(interactionId2),

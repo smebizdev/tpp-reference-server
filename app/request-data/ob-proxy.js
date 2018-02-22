@@ -9,10 +9,9 @@ const error = require('debug')('error');
 
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const { headers } = await extractHeaders(req.headers);
   const {
     interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
-  } = headers;
+  } = await extractHeaders(req.headers);
   let host;
   let accessToken;
   let permissions;

@@ -31,14 +31,9 @@ const storePermissions = async (username, authorisationServerId, accountRequestI
 const accountRequestAuthoriseConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    // const { authorisationServerId, headers } = await extractHeaders(req.headers);
     const headers = await extractHeaders(req.headers);
     const { authorisationServerId, username, sessionId } = headers;
     const headersWithPermissions = Object.assign({ permissions: DefaultPermissions }, headers);
-    // const { accountRequestId, permissions } = await setupAccountRequest( // eslint-disable-line
-    //   authorisationServerId,
-    //   headersWithPermissions,
-    // );
     const { accountRequestId, permissions } = await setupAccountRequest(headersWithPermissions);
     const interactionId2 = uuidv4();
     const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', sessionId, interactionId2);
@@ -56,9 +51,7 @@ const accountRequestAuthoriseConsent = async (req, res) => {
 const accountRequestRevokeConsent = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   try {
-    // const { authorisationServerId, headers } = await extractHeaders(req.headers);
     const headers = await extractHeaders(req.headers);
-    // const status = await deleteRequest(authorisationServerId, headers);
     const status = await deleteRequest(headers);
     return res.sendStatus(status);
   } catch (err) {

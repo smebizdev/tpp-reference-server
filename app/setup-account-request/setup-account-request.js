@@ -24,7 +24,6 @@ const createRequest = async (resourcePath, headers) => {
   throw error;
 };
 
-// const setupAccountRequest = async (authorisationServerId, headers) => {
 const setupAccountRequest = async (headers) => {
   const { authorisationServerId } = headers;
   const { accessToken, resourcePath } = await accessTokenAndResourcePath(authorisationServerId);

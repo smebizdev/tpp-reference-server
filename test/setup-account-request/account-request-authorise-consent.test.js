@@ -56,7 +56,6 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub, setConsent
       },
       '../session': {
         extractHeaders: () => ({
-          // authorisationServerId,
           fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
         }),
       },
@@ -125,12 +124,6 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        // assert(setupAccountRequestStub.calledWithExactly(
-        //   authorisationServerId,
-        //   {
-        //     fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
-        //   },
-        // ));
         assert(setupAccountRequestStub.calledWithExactly({
           fapiFinancialId,
           interactionId,

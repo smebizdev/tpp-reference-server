@@ -22,12 +22,6 @@ const setupApp = (submitPaymentStub, consentAccessTokenStub) => {
         consentAccessToken: consentAccessTokenStub,
       },
       '../session': {
-        // extractHeaders: () => ({
-        //   authorisationServerId,
-        //   headers: {
-        //     fapiFinancialId, interactionId, sessionId, username,
-        //   },
-        // }),
         extractHeaders: () => ({
           fapiFinancialId, interactionId, sessionId, username,
         }),

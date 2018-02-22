@@ -75,7 +75,6 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        // async () => setupAccountRequestProxy(authorisationServerId, headers),
         async () => setupAccountRequestProxy(headers),
         500, 'Account request response status: "Rejected"',
       );
@@ -87,7 +86,6 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        // async () => setupAccountRequestProxy(authorisationServerId, headers),
         async () => setupAccountRequestProxy(headers),
         500, 'Account request response status: "Revoked"',
       );
@@ -99,7 +97,6 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error', async () => {
       await checkErrorThrown(
-        // async () => setupAccountRequestProxy(authorisationServerId, headers),
         async () => setupAccountRequestProxy(headers),
         500, 'Account request response missing payload',
       );

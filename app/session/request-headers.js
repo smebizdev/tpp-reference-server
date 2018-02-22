@@ -10,9 +10,9 @@ const extractHeaders = async (headers) => {
   const username = await getUsername(sessionId);
 
   return {
-    authorisationServerId,
+    // authorisationServerId,
     headers: {
-      fapiFinancialId, interactionId, sessionId, username,
+      authorisationServerId, fapiFinancialId, interactionId, sessionId, username,
     },
   };
 };

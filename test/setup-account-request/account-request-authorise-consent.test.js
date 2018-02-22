@@ -56,9 +56,9 @@ const setupApp = (setupAccountRequestStub, authorisationEndpointStub, setConsent
       },
       '../session': {
         extractHeaders: () => ({
-          authorisationServerId,
+          // authorisationServerId,
           headers: {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
           },
         }),
       },
@@ -127,12 +127,20 @@ describe('/account-request-authorise-consent with successful setupAccountRequest
         assert.deepEqual(params, expectedParams);
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(
+        // assert(setupAccountRequestStub.calledWithExactly(
+        //   authorisationServerId,
+        //   {
+        //     fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
+        //   },
+        // ));
+        assert(setupAccountRequestStub.calledWithExactly({
+          fapiFinancialId,
+          interactionId,
+          sessionId,
+          username,
+          permissions: DefaultPermissions,
           authorisationServerId,
-          {
-            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
-          },
-        ));
+        }));
         const keys = { username, authorisationServerId, scope: 'accounts' };
         const payload = { accountRequestId, permissions };
         assert(setConsentStub.calledWithExactly(keys, payload));
@@ -158,12 +166,20 @@ describe('/account-request-authorise-consent with error thrown by setupAccountRe
         assert.deepEqual(r.body, { message });
         const header = r.headers['access-control-allow-origin'];
         assert.equal(header, '*');
-        assert(setupAccountRequestStub.calledWithExactly(
+        // assert(setupAccountRequestStub.calledWithExactly(
+        //   authorisationServerId,
+        //   {
+        //     fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
+        //   },
+        // ));
+        assert(setupAccountRequestStub.calledWithExactly({
+          fapiFinancialId,
+          interactionId,
+          sessionId,
+          username,
+          permissions: DefaultPermissions,
           authorisationServerId,
-          {
-            fapiFinancialId, interactionId, sessionId, username, permissions: DefaultPermissions,
-          },
-        ));
+        }));
         assert.equal(setConsentStub.called, false);
         done();
       });

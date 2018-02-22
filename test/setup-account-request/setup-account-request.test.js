@@ -11,7 +11,12 @@ const sessionId = 'testSessionId';
 const username = 'testUsername';
 const testPermissions = ['ReadAccountsDetail'];
 const headers = {
-  fapiFinancialId, interactionId, sessionId, username, permissions: testPermissions,
+  fapiFinancialId,
+  interactionId,
+  sessionId,
+  username,
+  permissions: testPermissions,
+  authorisationServerId,
 };
 
 describe('setupAccountRequest called with authorisationServerId and fapiFinancialId', () => {
@@ -47,7 +52,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('AwaitingAuthorisation'));
 
     it('returns { accountRequestId, permissions } from postAccountRequests call', async () => {
-      const { accountRequestId, permissions } = await setupAccountRequestProxy(authorisationServerId, headers); // eslint-disable-line
+      const { accountRequestId, permissions } = await setupAccountRequestProxy(headers); // eslint-disable-line
       assert.equal(accountRequestId, testAccountRequest);
       assert.equal(permissions, testPermissions);
       const headersWithToken = Object.assign({ accessToken }, headers);
@@ -59,7 +64,7 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
     before(setup('Authorised'));
 
     it('returns { accountRequestId, permissions } from postAccountRequests call', async () => {
-      const { accountRequestId, permissions } = await setupAccountRequestProxy(authorisationServerId, headers); // eslint-disable-line
+      const { accountRequestId, permissions } = await setupAccountRequestProxy(headers); // eslint-disable-line
       assert.equal(accountRequestId, testAccountRequest);
       assert.equal(permissions, testPermissions);
     });
@@ -70,7 +75,8 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, headers),
+        // async () => setupAccountRequestProxy(authorisationServerId, headers),
+        async () => setupAccountRequestProxy(headers),
         500, 'Account request response status: "Rejected"',
       );
     });
@@ -81,7 +87,8 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, headers),
+        // async () => setupAccountRequestProxy(authorisationServerId, headers),
+        async () => setupAccountRequestProxy(headers),
         500, 'Account request response status: "Revoked"',
       );
     });
@@ -92,7 +99,8 @@ describe('setupAccountRequest called with authorisationServerId and fapiFinancia
 
     it('throws error', async () => {
       await checkErrorThrown(
-        async () => setupAccountRequestProxy(authorisationServerId, headers),
+        // async () => setupAccountRequestProxy(authorisationServerId, headers),
+        async () => setupAccountRequestProxy(headers),
         500, 'Account request response missing payload',
       );
     });

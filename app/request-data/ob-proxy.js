@@ -9,9 +9,9 @@ const error = require('debug')('error');
 
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const { authorisationServerId, headers } = await extractHeaders(req.headers);
+  const { headers } = await extractHeaders(req.headers);
   const {
-    interactionId, fapiFinancialId, sessionId, username,
+    interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
   } = headers;
   let host;
   let accessToken;
@@ -47,7 +47,12 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
-    setupResponseLogging(call, { interactionId, sessionId, permissions });
+    setupResponseLogging(call, {
+      interactionId,
+      sessionId,
+      permissions,
+      authorisationServerId,
+    });
     const response = await call.send();
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);

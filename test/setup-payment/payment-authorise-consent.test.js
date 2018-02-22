@@ -55,9 +55,12 @@ const setupApp = (setupPaymentStub, authorisationEndpointStub) => {
       },
       '../session': {
         extractHeaders: () => ({
-          authorisationServerId,
+          // authorisationServerId,
+          // headers: {
+          //   fapiFinancialId, interactionId, sessionId, username,
+          // },
           headers: {
-            fapiFinancialId, interactionId, sessionId, username,
+            fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
           },
         }),
       },

@@ -30,9 +30,10 @@ describe('extractHeaders from request headers', () => {
   it('returns authorisationServerId and headers object', async () => {
     const interactionId = generatedInteractionId;
     const value = await extractHeaders(requestHeaders);
-    assert.equal(value.authorisationServerId, authorisationServerId);
+    // assert.equal(value.authorisationServerId, authorisationServerId);
+    // assert.equal(value.authorisationServerId, authorisationServerId);
     assert.deepEqual(value.headers, {
-      fapiFinancialId, interactionId, sessionId, username,
+      fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
     });
   });
 
@@ -40,9 +41,9 @@ describe('extractHeaders from request headers', () => {
     it('returns headers with same interactionId', async () => {
       const interactionId = 'existingId';
       const value = await extractHeaders(Object.assign({ 'x-fapi-interaction-id': interactionId }, requestHeaders));
-      assert.equal(value.authorisationServerId, authorisationServerId);
+      // assert.equal(value.authorisationServerId, authorisationServerId);
       assert.deepEqual(value.headers, {
-        fapiFinancialId, interactionId, sessionId, username,
+        fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
       });
     });
   });

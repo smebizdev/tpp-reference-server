@@ -216,7 +216,7 @@ describe('getConsentStatus', () => {
     it('makes remote call to get account request', async () => {
       await getConsentStatus(accountRequestId, authorisationServerId, sessionId);
       const headers = {
-        accessToken, fapiFinancialId, interactionId, sessionId,
+        accessToken, fapiFinancialId, interactionId, sessionId, authorisationServerId,
       };
       assert(getAccountRequestStub.calledWithExactly(accountRequestId, resourcePath, headers));
     });

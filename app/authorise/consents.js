@@ -83,7 +83,7 @@ const getConsentStatus = async (accountRequestId, authorisationServerId, session
   debug(`getConsentStatus#fapiFinancialId: ${fapiFinancialId}`);
   const interactionId = uuidv4();
   const headers = {
-    accessToken, fapiFinancialId, interactionId, sessionId,
+    accessToken, fapiFinancialId, interactionId, sessionId, authorisationServerId,
   };
   const response = await getAccountRequest(accountRequestId, resourcePath, headers);
   debug(`getConsentStatus#getAccountRequest: ${JSON.stringify(response)}`);

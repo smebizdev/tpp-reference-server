@@ -9,7 +9,7 @@ const interactionId = 'testInteractionId';
 const sessionId = 'testSessionId';
 const username = 'testUsername';
 const headers = {
-  fapiFinancialId, interactionId, sessionId, username,
+  fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
 };
 
 describe('deleteAccountRequest called with authorisationServerId and fapiFinancialId', () => {
@@ -42,10 +42,10 @@ describe('deleteAccountRequest called with authorisationServerId and fapiFinanci
     before(setup(true));
 
     it('returns 204 from deleteRequests call', async () => {
-      const status = await deleteRequestProxy(authorisationServerId, headers);
+      const status = await deleteRequestProxy(headers);
       assert.equal(status, 204);
       const headersWithToken = {
-        accessToken, fapiFinancialId, interactionId, sessionId, username,
+        accessToken, fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
       };
       assert(deleteAccountRequestStub.calledWithExactly(
         accountRequestId,
@@ -60,7 +60,7 @@ describe('deleteAccountRequest called with authorisationServerId and fapiFinanci
 
     it('throws error for now', async () => {
       await checkErrorThrown(
-        async () => deleteRequestProxy(authorisationServerId, headers),
+        async () => deleteRequestProxy(headers),
         400, 'Bad Request',
       );
     });

@@ -1,8 +1,9 @@
 const { accessTokenAndResourcePath, consentAccountRequestId, deleteConsent } = require('../authorise');
 const { deleteAccountRequest } = require('./account-requests');
 
-const deleteRequest = async (authorisationServerId, headers) => {
-  const keys = { username: headers.username, authorisationServerId, scope: 'accounts' };
+const deleteRequest = async (headers) => {
+  const { authorisationServerId, username } = headers;
+  const keys = { username, authorisationServerId, scope: 'accounts' };
   const accountRequestId = await consentAccountRequestId(keys);
 
   if (accountRequestId) {

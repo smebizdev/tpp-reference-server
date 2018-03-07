@@ -1,6 +1,7 @@
 const jws = require('jws');
 const jose = require('node-jose');
 
+const signingKid = () => process.env.SIGNING_KID || '';
 const signingKey = () => Buffer.from(process.env.SIGNING_KEY || '', 'base64').toString();
 
 /**
@@ -60,12 +61,18 @@ const signWithNone = payload => jws.sign({
   payload,
 });
 
-const signWithFapiAlg = async (alg, payload, key) => {
-  const keyObject = await jose.JWK.asKey(key, 'pem');
-  const result = await jose.JWS.createSign({ alg }, keyObject)
-    .update(JSON.toString(payload))
+const signWithFapiAlg = async (alg, payload, key, kid) => {
+  const privateSigningKey = await jose.JWK.asKey(key, 'pem');
+  const signatureConfig = {
+    fields: { alg, kid },
+    format: 'compact',
+  };
+
+  const result = await jose.JWS.createSign(signatureConfig, privateSigningKey)
+    .update(JSON.stringify(payload), 'utf-8')
     .final();
-  return result.signatures[0].signature;
+
+  return result;
 };
 
 const signWithOtherAlg = (alg, payload, key) => jws.sign({
@@ -89,7 +96,7 @@ const createJsonWebSignature = async (payload, signingAlgs, clientSecret) => {
   const key = signingKey();
   if (key.length > 0) {
     if (signingAlgs.includes('PS256')) {
-      return signWithFapiAlg('PS256', payload, key);
+      return signWithFapiAlg('PS256', payload, key, signingKid());
     }
     if (signingAlgs.includes('RS256')) {
       return signWithOtherAlg('RS256', payload, key);

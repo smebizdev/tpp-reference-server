@@ -18,6 +18,7 @@ const {
   fapiFinancialIdFor,
   requestObjectSigningAlgs,
   idTokenSigningAlgs,
+  updateRegisteredConfig,
 } = require('../../app/authorisation-servers');
 
 const nock = require('nock');
@@ -59,6 +60,10 @@ const clientCredentials = [
   ),
 ];
 
+const registeredConfig = {
+  request_object_signing_alg: [ "PS256" ],
+};
+
 const withOpenIdConfig = {
   id: authServerId,
   obDirectoryConfig: {
@@ -81,6 +86,18 @@ const withClientCredsConfig = {
     OBOrganisationId: 'aaa-example-org',
   },
   clientCredentials,
+};
+
+const withRegisteredConfig = {
+  id: authServerId,
+  obDirectoryConfig: {
+    BaseApiDNSUri: baseApiDNSUri,
+    CustomerFriendlyName: 'AAA Example Bank',
+    OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
+  },
+  registeredConfig,
 };
 
 const callAndGetLatestConfig = async (fn, authorisationServerId, data) => {
@@ -170,6 +187,22 @@ describe('authorisation servers', () => {
         toUpdate,
       );
       assert.deepEqual(authServerConfig.clientCredentials, [toUpdate]);
+    });
+  });
+
+  describe('updateRegisteredConfig', () => {
+    it('before called registered config not present', async () => {
+      const list = await allAuthorisationServers();
+      const authServerConfig = list[0];
+      assert.ok(!authServerConfig.registeredConfig, 'registeredConfig not present');
+    });
+
+    it('stores registeredConfig in db', async () => {
+      await updateRegisteredConfig(authServerId, registeredConfig);
+      const list = await allAuthorisationServers();
+      const authServerConfig = list[0];
+      assert.ok(authServerConfig.registeredConfig, 'registeredConfig present');
+      assert.deepEqual(authServerConfig, withRegisteredConfig);
     });
   });
 

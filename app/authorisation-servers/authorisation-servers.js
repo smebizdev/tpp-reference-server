@@ -171,6 +171,16 @@ const updateClientCredentials = async (id, newCredentials) => {
   return true;
 };
 
+const updateRegisteredConfig = async (id, config) => {
+  const authServer = await getAuthServerConfig(id);
+  if (!authServer) {
+    throw new Error('Auth Server Not Found !');
+  }
+  authServer.registeredConfig = Object.assign(authServer.registeredConfig || {}, config);
+  await setAuthServerConfig(id, authServer);
+  return true;
+};
+
 const updateOpenIdConfigs = async () => {
   try {
     const list = await allAuthorisationServers();
@@ -248,5 +258,6 @@ exports.fapiFinancialIdFor = fapiFinancialIdFor;
 exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
 exports.idTokenSigningAlgs = idTokenSigningAlgs;
+exports.updateRegisteredConfig = updateRegisteredConfig;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;
 exports.NO_SOFTWARE_STATEMENT_ID = NO_SOFTWARE_STATEMENT_ID;

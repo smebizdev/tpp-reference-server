@@ -171,12 +171,33 @@ const updateClientCredentials = async (id, newCredentials) => {
   return true;
 };
 
-const updateRegisteredConfig = async (id, config) => {
+const getRegisteredConfig = async (authServerId) => {
+  const authServer = await getAuthServerConfig(authServerId);
+  const softwareStatementId = getSoftwareStatementId();
+  if (authServer
+    && authServer.registeredConfigs
+    && authServer.registeredConfigs.length > 0) {
+    return authServer.registeredConfigs.find(config =>
+      config.softwareStatementId === softwareStatementId);
+  }
+
+  const err = new Error(`Registered config not found for authServerId: [${authServerId}], softwareStatementId: [${softwareStatementId}]`);
+  err.status = 500;
+  throw err;
+};
+
+const updateRegisteredConfig = async (id, newConfig) => {
   const authServer = await getAuthServerConfig(id);
+  const softwareStatementId = getSoftwareStatementId();
   if (!authServer) {
     throw new Error('Auth Server Not Found !');
   }
-  authServer.registeredConfig = Object.assign(authServer.registeredConfig || {}, config);
+  authServer.registeredConfigs = authServer.registeredConfigs || [];
+  const found = authServer.registeredConfigs.find(config =>
+    config.softwareStatementId === softwareStatementId);
+  const updated = Object.assign(found || { softwareStatementId }, newConfig);
+  if (!found) authServer.registeredConfigs.push(updated);
+
   await setAuthServerConfig(id, authServer);
   return true;
 };
@@ -259,5 +280,6 @@ exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
 exports.idTokenSigningAlgs = idTokenSigningAlgs;
 exports.updateRegisteredConfig = updateRegisteredConfig;
+exports.getRegisteredConfig = getRegisteredConfig;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;
 exports.NO_SOFTWARE_STATEMENT_ID = NO_SOFTWARE_STATEMENT_ID;

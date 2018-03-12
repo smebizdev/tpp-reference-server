@@ -15,6 +15,7 @@ const {
   requestObjectSigningAlgs,
   idTokenSigningAlgs,
   updateRegisteredConfig,
+  getRegisteredConfig,
 } = require('./authorisation-servers');
 
 exports.allAuthorisationServers = allAuthorisationServers;
@@ -33,3 +34,4 @@ exports.updateClientCredentials = updateClientCredentials;
 exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
 exports.idTokenSigningAlgs = idTokenSigningAlgs;
 exports.updateRegisteredConfig = updateRegisteredConfig;
+exports.getRegisteredConfig = getRegisteredConfig;

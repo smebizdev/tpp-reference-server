@@ -44,10 +44,12 @@ const openIdConfig = {
   token_endpoint: expectedTokenEndpoint,
 };
 
-const clientCredentials = {
+const newClientCredentials = {
   clientId: 'a-client-id',
   clientSecret: 'a-client-secret',
 };
+
+const clientCredentials = [Object.assign({ softwareStatementId: 'local' }, newClientCredentials)];
 
 const withOpenIdConfig = {
   id: authServerId,
@@ -71,6 +73,12 @@ const withClientCredsConfig = {
     OBOrganisationId: 'aaa-example-org',
   },
   clientCredentials,
+};
+
+const callAndGetLatestConfig = async (fn, authorisationServerId, data) => {
+  if (fn) await fn(authorisationServerId, data);
+  const list = await allAuthorisationServers();
+  return list[0];
 };
 
 describe('authorisation servers', () => {
@@ -101,7 +109,7 @@ describe('authorisation servers', () => {
 
   describe('getClientCredentials', () => {
     beforeEach(async () => {
-      await updateClientCredentials(authServerId, clientCredentials);
+      await updateClientCredentials(authServerId, newClientCredentials);
     });
 
     describe('called with invalid authServerId', () => {
@@ -117,23 +125,43 @@ describe('authorisation servers', () => {
 
     it('retrieves client credentials for an authorisationServerId', async () => {
       const found = await getClientCredentials(authServerId);
-      assert.deepEqual(found, clientCredentials);
+      assert.deepEqual(found, clientCredentials[0]);
     });
   });
 
   describe('updateClientCredentials', () => {
     it('before called clientCredentials not present', async () => {
-      const list = await allAuthorisationServers();
-      const authServerConfig = list[0];
+      const authServerConfig = await callAndGetLatestConfig();
       assert.ok(!authServerConfig.clientCredentials, 'clientCredentials not present');
     });
 
-    it('stores clientCredential in db', async () => {
-      await updateClientCredentials(authServerId, clientCredentials);
-      const list = await allAuthorisationServers();
-      const authServerConfig = list[0];
+    it('stores clientCredential in db when not OB provisioned', async () => {
+      const authServerConfig = await callAndGetLatestConfig(
+        updateClientCredentials,
+        authServerId,
+        newClientCredentials,
+      );
       assert.ok(authServerConfig.clientCredentials, 'clientCredentials present');
       assert.deepEqual(authServerConfig, withClientCredsConfig);
+    });
+
+    it('updates existing clientCredential in db when not OB provisioned', async () => {
+      let authServerConfig;
+
+      authServerConfig = await callAndGetLatestConfig(
+        updateClientCredentials,
+        authServerId,
+        newClientCredentials,
+      );
+      assert.deepEqual(authServerConfig, withClientCredsConfig);
+
+      const toUpdate = Object.assign(clientCredentials[0], { clientId: 'new-id' });
+      authServerConfig = await callAndGetLatestConfig(
+        updateClientCredentials,
+        authServerId,
+        toUpdate,
+      );
+      assert.deepEqual(authServerConfig.clientCredentials, [toUpdate]);
     });
   });
 
@@ -190,15 +218,12 @@ describe('authorisation servers', () => {
       .reply(200, openIdConfig);
 
     it('before called openIdConfig not present', async () => {
-      const list = await allAuthorisationServers();
-      const authServerConfig = list[0];
+      const authServerConfig = await callAndGetLatestConfig();
       assert.ok(!authServerConfig.openIdConfig, 'openIdConfig not present');
     });
 
     it('retrieves openIdConfig and stores in db', async () => {
-      await updateOpenIdConfigs();
-      const list = await allAuthorisationServers();
-      const authServerConfig = list[0];
+      const authServerConfig = await callAndGetLatestConfig(updateOpenIdConfigs);
       assert.ok(authServerConfig.openIdConfig, 'openIdConfig present');
       assert.deepEqual(authServerConfig, withOpenIdConfig);
 

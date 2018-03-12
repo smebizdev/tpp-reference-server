@@ -3,6 +3,7 @@ const debug = require('debug')('debug');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
+const NO_SOFTWARE_STATEMENT_ID = 'local';
 const ASPSP_AUTH_SERVERS_COLLECTION = 'aspspAuthorisationServers';
 
 const sortByName = (list) => {
@@ -33,12 +34,19 @@ const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 const setAuthServerConfig = async (id, authServer) =>
   set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
-const getClientCredentials = async (authServerId) => {
+const getClientCredentials = async (
+  authServerId,
+  softwareStatementId = NO_SOFTWARE_STATEMENT_ID,
+) => {
   const authServer = await getAuthServerConfig(authServerId);
-  if (authServer && authServer.clientCredentials) {
-    return authServer.clientCredentials;
+  if (authServer
+    && authServer.clientCredentials
+    && authServer.clientCredentials.length > 0) {
+    return authServer.clientCredentials.find(cred =>
+      cred.softwareStatementId === softwareStatementId);
   }
-  const err = new Error(`clientCredentials not found for ${authServerId}`);
+
+  const err = new Error(`clientCredentials not found for authServerId: [${authServerId}], softwareStatementId: [${softwareStatementId}]`);
   err.status = 500;
   throw err;
 };
@@ -142,12 +150,21 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   return null;
 };
 
-const updateClientCredentials = async (id, clientCredentials) => {
+const updateClientCredentials = async (
+  id, newCredentials,
+  softwareStatementId = NO_SOFTWARE_STATEMENT_ID,
+) => {
   const authServer = await getAuthServerConfig(id);
   if (!authServer) {
     throw new Error('Auth Server Not Found !');
   }
-  authServer.clientCredentials = clientCredentials;
+
+  authServer.clientCredentials = authServer.clientCredentials || [];
+  const found = authServer.clientCredentials.find(cred =>
+    cred.softwareStatementId === softwareStatementId);
+  const updated = Object.assign(found || { softwareStatementId }, newCredentials);
+  if (!found) authServer.clientCredentials.push(updated);
+
   await setAuthServerConfig(id, authServer);
   return true;
 };

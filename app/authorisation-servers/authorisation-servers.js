@@ -254,7 +254,16 @@ const openIdConfigValue = async (id, key) => {
 
 const authorisationEndpoint = async id => openIdConfigValue(id, 'authorization_endpoint');
 
-const requestObjectSigningAlgs = async id => openIdConfigValue(id, 'request_object_signing_alg_values_supported');
+const requestObjectSigningAlgs = async (id) => {
+  let registeredConfig;
+  try {
+    registeredConfig = getRegisteredConfig(id);
+  } catch (e) {
+    registeredConfig = {};
+  }
+  return registeredConfig.request_object_signing_alg
+    || openIdConfigValue(id, 'request_object_signing_alg_values_supported');
+};
 
 const idTokenSigningAlgs = async id => openIdConfigValue(id, 'id_token_signing_alg_values_supported');
 

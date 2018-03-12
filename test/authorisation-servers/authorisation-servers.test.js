@@ -1,7 +1,10 @@
 const assert = require('assert');
 
 const { drop } = require('../../app/storage.js');
-const { ASPSP_AUTH_SERVERS_COLLECTION } = require('../../app/authorisation-servers/authorisation-servers');
+const {
+  ASPSP_AUTH_SERVERS_COLLECTION,
+  NO_SOFTWARE_STATEMENT_ID,
+} = require('../../app/authorisation-servers/authorisation-servers');
 const {
   allAuthorisationServers,
   authorisationEndpoint,
@@ -49,7 +52,12 @@ const newClientCredentials = {
   clientSecret: 'a-client-secret',
 };
 
-const clientCredentials = [Object.assign({ softwareStatementId: 'local' }, newClientCredentials)];
+const clientCredentials = [
+  Object.assign(
+    { softwareStatementId: NO_SOFTWARE_STATEMENT_ID },
+    newClientCredentials,
+  ),
+];
 
 const withOpenIdConfig = {
   id: authServerId,

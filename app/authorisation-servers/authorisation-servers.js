@@ -1,3 +1,4 @@
+const env = require('env-var');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const { getAll, get, set } = require('../storage');
@@ -5,6 +6,11 @@ const { getOpenIdConfig } = require('./openid-config');
 
 const NO_SOFTWARE_STATEMENT_ID = 'local';
 const ASPSP_AUTH_SERVERS_COLLECTION = 'aspspAuthorisationServers';
+
+const isProvisionedForOpenBanking = () => env.get('OB_PROVISIONED').asString() === 'true';
+
+const getSoftwareStatementId = () => (isProvisionedForOpenBanking() ?
+  env.get('SOFTWARE_STATEMENT_ID').asString() : NO_SOFTWARE_STATEMENT_ID);
 
 const sortByName = (list) => {
   list.sort((a, b) => {
@@ -34,11 +40,9 @@ const getAuthServerConfig = async id => get(ASPSP_AUTH_SERVERS_COLLECTION, id);
 const setAuthServerConfig = async (id, authServer) =>
   set(ASPSP_AUTH_SERVERS_COLLECTION, authServer, id);
 
-const getClientCredentials = async (
-  authServerId,
-  softwareStatementId = NO_SOFTWARE_STATEMENT_ID,
-) => {
+const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
+  const softwareStatementId = getSoftwareStatementId();
   if (authServer
     && authServer.clientCredentials
     && authServer.clientCredentials.length > 0) {
@@ -150,11 +154,9 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   return null;
 };
 
-const updateClientCredentials = async (
-  id, newCredentials,
-  softwareStatementId = NO_SOFTWARE_STATEMENT_ID,
-) => {
+const updateClientCredentials = async (id, newCredentials) => {
   const authServer = await getAuthServerConfig(id);
+  const softwareStatementId = getSoftwareStatementId();
   if (!authServer) {
     throw new Error('Auth Server Not Found !');
   }
@@ -247,3 +249,4 @@ exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
 exports.idTokenSigningAlgs = idTokenSigningAlgs;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;
+exports.NO_SOFTWARE_STATEMENT_ID = NO_SOFTWARE_STATEMENT_ID;

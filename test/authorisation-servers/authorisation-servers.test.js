@@ -18,6 +18,8 @@ const {
   fapiFinancialIdFor,
   requestObjectSigningAlgs,
   idTokenSigningAlgs,
+  updateRegisteredConfig,
+  getRegisteredConfig,
 } = require('../../app/authorisation-servers');
 
 const nock = require('nock');
@@ -59,6 +61,17 @@ const clientCredentials = [
   ),
 ];
 
+const registeredConfig = {
+  request_object_signing_alg: ['PS256'],
+};
+
+const registeredConfigs = [
+  Object.assign(
+    { softwareStatementId: NO_SOFTWARE_STATEMENT_ID },
+    registeredConfig,
+  ),
+];
+
 const withOpenIdConfig = {
   id: authServerId,
   obDirectoryConfig: {
@@ -81,6 +94,18 @@ const withClientCredsConfig = {
     OBOrganisationId: 'aaa-example-org',
   },
   clientCredentials,
+};
+
+const withRegisteredConfig = {
+  id: authServerId,
+  obDirectoryConfig: {
+    BaseApiDNSUri: baseApiDNSUri,
+    CustomerFriendlyName: 'AAA Example Bank',
+    OpenIDConfigEndPointUri: 'http://example.com/openidconfig',
+    Id: authServerId,
+    OBOrganisationId: 'aaa-example-org',
+  },
+  registeredConfigs,
 };
 
 const callAndGetLatestConfig = async (fn, authorisationServerId, data) => {
@@ -170,6 +195,45 @@ describe('authorisation servers', () => {
         toUpdate,
       );
       assert.deepEqual(authServerConfig.clientCredentials, [toUpdate]);
+    });
+  });
+
+  describe('updateRegisteredConfig', () => {
+    it('before called registered config not present', async () => {
+      const authServerConfig = await callAndGetLatestConfig();
+      assert.ok(!authServerConfig.registeredConfigs, 'registeredConfig not present');
+    });
+
+    it('stores registeredConfig in db when not OB provisioned', async () => {
+      const authServerConfig = await callAndGetLatestConfig(
+        updateRegisteredConfig,
+        authServerId,
+        registeredConfig,
+      );
+      assert.ok(authServerConfig.registeredConfigs, 'registeredConfig present');
+      assert.deepEqual(authServerConfig, withRegisteredConfig);
+    });
+  });
+
+  describe('getRegisteredConfig', () => {
+    beforeEach(async () => {
+      await updateRegisteredConfig(authServerId, registeredConfig);
+    });
+
+    describe('called with invalid authServerId', () => {
+      it('throws error', async () => {
+        try {
+          await getRegisteredConfig('invalid-id');
+          assert.ok(false);
+        } catch (err) {
+          assert.equal(err.status, 500);
+        }
+      });
+    });
+
+    it('retrieves registered config for an authorisationServerId', async () => {
+      const found = await getRegisteredConfig(authServerId);
+      assert.deepEqual(found, registeredConfigs[0]);
     });
   });
 

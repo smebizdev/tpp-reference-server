@@ -264,9 +264,8 @@ const requestObjectSigningAlgs = async (id) => {
 
   if (registeredConfig.request_object_signing_alg) {
     return registeredConfig.request_object_signing_alg;
-  } else {
-    return await openIdConfigValue(id, 'request_object_signing_alg_values_supported');
   }
+  return openIdConfigValue(id, 'request_object_signing_alg_values_supported');
 };
 
 const idTokenSigningAlgs = async id => openIdConfigValue(id, 'id_token_signing_alg_values_supported');

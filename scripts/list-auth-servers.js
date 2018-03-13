@@ -16,6 +16,7 @@ const authServerRows = async () => {
     'OBOrganisationId',
     'clientCredentialsPresent',
     'openIdConfigPresent',
+    'registeredConfigsPresent',
   ].join('\t');
   const rows = [header];
   const list = await allAuthorisationServers();
@@ -31,6 +32,7 @@ const authServerRows = async () => {
       config ? config.OBOrganisationId : '',
       !!item.clientCredentials,
       !!item.openIdConfig,
+      !!item.registeredConfigs,
     ].join('\t');
     rows.push(line);
   });

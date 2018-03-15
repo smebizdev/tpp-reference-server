@@ -1,9 +1,16 @@
+const env = require('env-var');
 const error = require('debug')('error');
 const debug = require('debug')('debug');
 const { getAll, get, set } = require('../storage');
 const { getOpenIdConfig } = require('./openid-config');
 
+const NO_SOFTWARE_STATEMENT_ID = 'local';
 const ASPSP_AUTH_SERVERS_COLLECTION = 'aspspAuthorisationServers';
+
+const isProvisionedForOpenBanking = () => env.get('OB_PROVISIONED').asString() === 'true';
+
+const getSoftwareStatementId = () => (isProvisionedForOpenBanking() ?
+  env.get('SOFTWARE_STATEMENT_ID').asString() : NO_SOFTWARE_STATEMENT_ID);
 
 const sortByName = (list) => {
   list.sort((a, b) => {
@@ -35,10 +42,15 @@ const setAuthServerConfig = async (id, authServer) =>
 
 const getClientCredentials = async (authServerId) => {
   const authServer = await getAuthServerConfig(authServerId);
-  if (authServer && authServer.clientCredentials) {
-    return authServer.clientCredentials;
+  const softwareStatementId = getSoftwareStatementId();
+  if (authServer
+    && authServer.clientCredentials
+    && authServer.clientCredentials.length > 0) {
+    return authServer.clientCredentials.find(cred =>
+      cred.softwareStatementId === softwareStatementId);
   }
-  const err = new Error(`clientCredentials not found for ${authServerId}`);
+
+  const err = new Error(`clientCredentials not found for authServerId: [${authServerId}], softwareStatementId: [${softwareStatementId}]`);
   err.status = 500;
   throw err;
 };
@@ -142,12 +154,50 @@ const fetchAndStoreOpenIdConfig = async (id, openidConfigUrl) => {
   return null;
 };
 
-const updateClientCredentials = async (id, clientCredentials) => {
+const updateClientCredentials = async (id, newCredentials) => {
   const authServer = await getAuthServerConfig(id);
+  const softwareStatementId = getSoftwareStatementId();
   if (!authServer) {
     throw new Error('Auth Server Not Found !');
   }
-  authServer.clientCredentials = clientCredentials;
+
+  authServer.clientCredentials = authServer.clientCredentials || [];
+  const found = authServer.clientCredentials.find(cred =>
+    cred.softwareStatementId === softwareStatementId);
+  const updated = Object.assign(found || { softwareStatementId }, newCredentials);
+  if (!found) authServer.clientCredentials.push(updated);
+
+  await setAuthServerConfig(id, authServer);
+  return true;
+};
+
+const getRegisteredConfig = async (authServerId) => {
+  const authServer = await getAuthServerConfig(authServerId);
+  const softwareStatementId = getSoftwareStatementId();
+  if (authServer
+    && authServer.registeredConfigs
+    && authServer.registeredConfigs.length > 0) {
+    return authServer.registeredConfigs.find(config =>
+      config.softwareStatementId === softwareStatementId);
+  }
+
+  const err = new Error(`Registered config not found for authServerId: [${authServerId}], softwareStatementId: [${softwareStatementId}]`);
+  err.status = 500;
+  throw err;
+};
+
+const updateRegisteredConfig = async (id, newConfig) => {
+  const authServer = await getAuthServerConfig(id);
+  const softwareStatementId = getSoftwareStatementId();
+  if (!authServer) {
+    throw new Error('Auth Server Not Found !');
+  }
+  authServer.registeredConfigs = authServer.registeredConfigs || [];
+  const found = authServer.registeredConfigs.find(config =>
+    config.softwareStatementId === softwareStatementId);
+  const updated = Object.assign(found || { softwareStatementId }, newConfig);
+  if (!found) authServer.registeredConfigs.push(updated);
+
   await setAuthServerConfig(id, authServer);
   return true;
 };
@@ -204,7 +254,19 @@ const openIdConfigValue = async (id, key) => {
 
 const authorisationEndpoint = async id => openIdConfigValue(id, 'authorization_endpoint');
 
-const requestObjectSigningAlgs = async id => openIdConfigValue(id, 'request_object_signing_alg_values_supported');
+const requestObjectSigningAlgs = async (id) => {
+  let registeredConfig;
+  try {
+    registeredConfig = await getRegisteredConfig(id);
+  } catch (e) {
+    registeredConfig = {};
+  }
+
+  if (registeredConfig.request_object_signing_alg) {
+    return registeredConfig.request_object_signing_alg;
+  }
+  return openIdConfigValue(id, 'request_object_signing_alg_values_supported');
+};
 
 const idTokenSigningAlgs = async id => openIdConfigValue(id, 'id_token_signing_alg_values_supported');
 
@@ -229,4 +291,7 @@ exports.fapiFinancialIdFor = fapiFinancialIdFor;
 exports.requireAuthorisationServerId = requireAuthorisationServerId;
 exports.requestObjectSigningAlgs = requestObjectSigningAlgs;
 exports.idTokenSigningAlgs = idTokenSigningAlgs;
+exports.updateRegisteredConfig = updateRegisteredConfig;
+exports.getRegisteredConfig = getRegisteredConfig;
 exports.ASPSP_AUTH_SERVERS_COLLECTION = ASPSP_AUTH_SERVERS_COLLECTION;
+exports.NO_SOFTWARE_STATEMENT_ID = NO_SOFTWARE_STATEMENT_ID;

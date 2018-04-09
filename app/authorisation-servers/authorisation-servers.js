@@ -161,7 +161,8 @@ const updateClientCredentials = async (id, newCredentials) => {
     throw new Error('Auth Server Not Found !');
   }
 
-  authServer.clientCredentials = authServer.clientCredentials || [];
+  authServer.clientCredentials = Array.isArray(authServer.clientCredentials) ?
+    authServer.clientCredentials : [];
   const found = authServer.clientCredentials.find(cred =>
     cred.softwareStatementId === softwareStatementId);
   const updated = Object.assign(found || { softwareStatementId }, newCredentials);

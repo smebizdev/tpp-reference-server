@@ -6,6 +6,40 @@ const { extractHeaders } = require('../session');
 const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
+const util = require('util');
+const url = require('url');
+const objectSize = require('object.size');
+const { validate } = require('../validator');
+const { initValidatorApp } = require('../validator/init-validator-app');
+
+const getRawQs = req => (
+  req.qsRaw && req.qsRaw.length
+    ? req.qsRaw.join('&')
+    : undefined);
+
+const getQs = req => (
+  objectSize(req.qs)
+    ? req.qs
+    : getRawQs(req));
+
+const reqSerializer = req => (
+  {
+    method: req.method,
+    url: req.url,
+    qs: getQs(req),
+    path: req.url && url.parse(req.url).pathname,
+    body: req._data, // eslint-disable-line
+    headers: req.header,
+  }
+);
+
+const resSerializer = res => (
+  {
+    statusCode: res.statusCode,
+    headers: res.headers,
+    body: objectSize(res.body) ? res.body : res.text,
+  }
+);
 
 const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
@@ -58,7 +92,19 @@ const resourceRequestHandler = async (req, res) => {
       throw err;
     }
     debug(`response.status ${response.status}`);
-    debug(`response.body ${JSON.stringify(response.body)}`);
+    const theReq = reqSerializer(call);
+    const theRes = resSerializer(response.res);
+    debug('---');
+    debug(`response.req: ${util.inspect(theReq)}`);
+    debug('---');
+    debug(`response.res: ${util.inspect(theRes)}`);
+
+    const validatorApp = await initValidatorApp();
+    const validationResponse = validate(validatorApp, theReq, theRes);
+    debug('---');
+    const { statusCode, headers, body } = validationResponse;
+    debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
+    debug('===');
 
     return res.status(response.status).json(response.body);
   } catch (err) {

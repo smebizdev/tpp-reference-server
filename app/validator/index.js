@@ -1,5 +1,7 @@
-const { initApp } = require('./init-validator-app');
+const { addValidatorMiddleware, initValidatorApp, validateResponseOn } = require('./init-validator-app');
 const { validate } = require('./validate-request-response');
 
-exports.initApp = initApp;
+exports.addValidatorMiddleware = addValidatorMiddleware;
+exports.initValidatorApp = initValidatorApp;
 exports.validate = validate;
+exports.validateResponseOn = validateResponseOn;

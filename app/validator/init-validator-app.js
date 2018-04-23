@@ -5,6 +5,7 @@ const { swaggerMiddleware } = require('./swagger-middleware');
 
 const accountsSwagger = () => process.env.ACCOUNT_SWAGGER;
 const paymentsSwagger = () => process.env.PAYMENT_SWAGGER;
+const validateResponseOn = () => process.env.VALIDATE_RESPONSE === 'true';
 
 const addValidationMiddleware = async (app, swaggerUriOrFile, swaggerFile) => {
   const { metadata, validator } = await swaggerMiddleware(swaggerUriOrFile, swaggerFile);
@@ -22,4 +23,18 @@ const initValidatorApp = async () => {
   return app;
 };
 
+let validatorApp;
+
+const addValidatorMiddleware = async (req, res, next) => {
+  if (validateResponseOn()) {
+    if (!validatorApp) {
+      validatorApp = await initValidatorApp();
+    }
+    req.validatorApp = validatorApp;
+  }
+  next();
+};
+
 exports.initValidatorApp = initValidatorApp;
+exports.addValidatorMiddleware = addValidatorMiddleware;
+exports.validateResponseOn = validateResponseOn;

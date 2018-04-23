@@ -1,6 +1,5 @@
 const assert = require('assert');
-const { validate } = require('../../app/validator/index.js');
-const { initValidatorApp } = require('../..//app/validator/init-validator-app.js');
+const { initValidatorApp, validate } = require('../../app/validator/index.js');
 
 const { validRequest } = require('./fixtures/valid-request');
 const { validResponse } = require('./fixtures/valid-response');
@@ -18,8 +17,8 @@ describe('validate', () => {
     it('returns 400 status with json error object', () => {
       const response = validate(app, validRequest(), null);
       assert.equal(response.statusCode, 400);
-      assert(response.body.failedValidation, true);
-      assert(response.body.message, 'Response validation failed: response was blank.');
+      assert.equal(response.body.failedValidation, true);
+      assert.equal(response.body.message, 'Response validation failed: response was blank.');
     });
   });
 

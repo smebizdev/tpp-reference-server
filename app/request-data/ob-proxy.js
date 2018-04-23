@@ -9,8 +9,7 @@ const error = require('debug')('error');
 const util = require('util');
 const url = require('url');
 const objectSize = require('object.size');
-const { validate } = require('../validator');
-const { initValidatorApp } = require('../validator/init-validator-app');
+const { validate, validateResponseOn } = require('../validator');
 
 const getRawQs = req => (
   req.qsRaw && req.qsRaw.length
@@ -62,6 +61,15 @@ const scopeAndUrl = (req, host) => {
   return { proxiedUrl, scope };
 };
 
+const validateRequestResponse = (validatorApp, req, res, responseBody) => {
+  const theReq = reqSerializer(req);
+  const theRes = resSerializer(res);
+  const { statusCode, headers, body } = validate(validatorApp, theReq, theRes);
+  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
+  const failedValidation = body.failedValidation || false;
+  return Object.assign(responseBody, { failedValidation });
+};
+
 const resourceRequestHandler = async (req, res) => {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -84,6 +92,7 @@ const resourceRequestHandler = async (req, res) => {
       permissions,
       authorisationServerId,
     });
+
     let response;
     try {
       response = await call.send();
@@ -91,22 +100,14 @@ const resourceRequestHandler = async (req, res) => {
       error(`error getting ${proxiedUrl}: ${err.message}`);
       throw err;
     }
-    debug(`response.status ${response.status}`);
-    const theReq = reqSerializer(call);
-    const theRes = resSerializer(response.res);
-    debug('---');
-    debug(`response.req: ${util.inspect(theReq)}`);
-    debug('---');
-    debug(`response.res: ${util.inspect(theRes)}`);
 
-    const validatorApp = await initValidatorApp();
-    const validationResponse = validate(validatorApp, theReq, theRes);
-    debug('---');
-    const { statusCode, headers, body } = validationResponse;
-    debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
-    debug('===');
-
-    return res.status(response.status).json(response.body);
+    let result;
+    if (validateResponseOn()) {
+      result = validateRequestResponse(req.validatorApp, call, response.res, response.body);
+    } else {
+      result = response.body;
+    }
+    return res.status(response.status).json(result);
   } catch (err) {
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);

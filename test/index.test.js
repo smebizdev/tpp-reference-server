@@ -28,7 +28,7 @@ const requestHeaders = {
 
 nock(/example\.com/, requestHeaders)
   .get('/open-banking/v1.1/accounts')
-  .times(3)
+  .times(5)
   .reply(200, {
     Data: {
       Account: [
@@ -247,6 +247,7 @@ describe('Proxy', () => {
     delete process.env.DEBUG;
     delete process.env.OB_DIRECTORY_HOST;
     delete process.env.AUTHORIZATION;
+    delete process.env.VALIDATE_RESPONSE;
   });
 
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', async () => {
@@ -254,6 +255,21 @@ describe('Proxy', () => {
     const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
     assert.equal(r.status, 200);
     assert.equal(r.body.Data.Account[0].AccountId, '22290');
+  });
+
+
+  it('sets failedValidation on response when VALIDATE_RESPONSE is true', async () => {
+    process.env.VALIDATE_RESPONSE = 'true';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.body.failedValidation, false);
+  });
+
+  it('does not set failedValidation on response when VALIDATE_RESPONSE is false', async () => {
+    process.env.VALIDATE_RESPONSE = 'false';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.body.failedValidation, undefined);
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {

@@ -205,7 +205,7 @@ const loginAsync = async (application) => {
   return endAsync();
 };
 
-const requestResource = (sessionId, url, application, callback) => {
+const requestResource = async (sessionId, url, application) => {
   const req = request(application)
     .get(url)
     .set('Accept', 'application/json')
@@ -213,7 +213,16 @@ const requestResource = (sessionId, url, application, callback) => {
   if (sessionId) {
     req.set('authorization', sessionId);
   }
-  req.end(callback);
+  req.end[util.promisify.custom] = () => new Promise((resolve, reject) =>
+    req.end((err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    }));
+  const endAsync = util.promisify(req.end);
+  return endAsync();
 };
 
 describe('Proxy', () => {
@@ -240,14 +249,11 @@ describe('Proxy', () => {
     delete process.env.AUTHORIZATION;
   });
 
-  it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
-    loginAsync(app).then(({ sessionId }) => {
-      requestResource(sessionId, '/open-banking/v1.1/accounts', app, (e, r) => {
-        assert.equal(r.status, 200);
-        assert.equal(r.body.Data.Account[0].AccountId, '22290');
-        done();
-      });
-    });
+  it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', async () => {
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.status, 200);
+    assert.equal(r.body.Data.Account[0].AccountId, '22290');
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {
@@ -263,43 +269,29 @@ describe('Proxy', () => {
     });
   });
 
-  it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
-    loginAsync(app).then(({ sessionId }) => {
-      requestResource(sessionId, '/open-banking/non-existing', app, (e, r) => {
-        assert.equal(r.status, 404);
-        done();
-      });
-    });
+  it('returns proxy 404 reponse for /open-banking/non-existing', async () => {
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/non-existing', app);
+    assert.equal(r.status, 404);
   });
 
-  it('returns 404 for path != /open-banking', (done) => {
-    loginAsync(app).then(({ sessionId }) => {
-      requestResource(sessionId, '/open-banking-invalid', app, (e, r) => {
-        assert.equal(r.status, 404);
-        done();
-      });
-    });
+  it('returns 404 for path != /open-banking', async () => {
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking-invalid', app);
+    assert.equal(r.status, 404);
   });
 
-  it('returns proxy 401 unauthorised response for /open-banking/* with missing authorization header', (done) => {
-    loginAsync(app).then(() => {
-      requestResource(null, '/open-banking/v1.1/accounts', app, (e, r) => {
-        assert.equal(r.status, 401);
-        const header = r.headers['access-control-allow-origin'];
-        assert.equal(header, '*');
-        done();
-      });
-    });
+  it('returns proxy 401 unauthorised response for /open-banking/* with missing authorization header', async () => {
+    await loginAsync(app);
+    const r = await requestResource(null, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.status, 401);
+    assert.equal(r.headers['access-control-allow-origin'], '*');
   });
 
-  it('returns proxy 401 unauthorised response for /open-banking/* with invalid authorization header', (done) => {
-    loginAsync(app).then(() => {
-      requestResource('invalid-token', '/open-banking/v1.1/accounts', app, (e, r) => {
-        assert.equal(r.status, 401);
-        const header = r.headers['access-control-allow-origin'];
-        assert.equal(header, '*');
-        done();
-      });
-    });
+  it('returns proxy 401 unauthorised response for /open-banking/* with invalid authorization header', async () => {
+    await loginAsync(app);
+    const r = await requestResource('invalid-token', '/open-banking/v1.1/accounts', app);
+    assert.equal(r.status, 401);
+    assert.equal(r.headers['access-control-allow-origin'], '*');
   });
 });

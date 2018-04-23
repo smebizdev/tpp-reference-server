@@ -7,11 +7,15 @@ const log = require('debug')('log');
 const fetchSwagger = async (swaggerPath, fileName) => {
   const swagger = swaggerPath;
   if (swagger.startsWith('https')) {
-    log(`http get: ${swagger}`);
     const file = `./${fileName}`;
-    fs.writeFileSync(file, '');
+    if (fs.existsSync(file)) {
+      log(`Swagger file exists: ${file} - so not getting: ${swagger}`);
+      return file;
+    }
 
     try {
+      log(`http get: ${swagger}`);
+      fs.writeFileSync(file, '');
       const response = await superagent
         .get(swagger)
         .set({ Accept: 'application/json' });

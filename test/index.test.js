@@ -11,6 +11,7 @@ process.env.OB_DIRECTORY_HOST = 'http://example.com';
 const { app } = require('../app/index.js');
 const { session } = require('../app/session');
 const assert = require('assert');
+const util = require('util');
 
 const nock = require('nock');
 
@@ -166,6 +167,27 @@ const { drop } = require('../app/storage.js');
 
 const resourceApiHost = 'http://example.com';
 
+const loginWithConsent = async (application) => {
+  const loginAnd = login(application);
+  loginAnd.end[util.promisify.custom] = () => new Promise((resolve, reject) =>
+    loginAnd.end((err, res) => {
+      if (err) {
+        reject(err);
+      } else {
+        const sessionId = res.body.sid;
+        setConsent({
+          username,
+          authorisationServerId: authServerId,
+          scope,
+        }, consentPayload);
+        resolve({ sessionId, res });
+      }
+    }));
+
+  const endAsync = util.promisify(loginAnd.end);
+  return endAsync();
+};
+
 describe('Proxy', () => {
   beforeEach(async () => {
     await setAuthServerConfig(authServerId, {
@@ -186,91 +208,63 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
-    login(app).end((err, res) => {
-      const sessionId = res.body.sid;
-      setConsent({
-        username,
-        authorisationServerId: authServerId,
-        scope,
-      }, consentPayload).then(() => {
-        request(app)
-          .get('/open-banking/v1.1/accounts')
-          .set('Accept', 'application/json')
-          .set('authorization', sessionId)
-          .set('x-authorization-server-id', authServerId)
-          .end((e, r) => {
-            assert.equal(r.status, 200);
-            assert.equal(r.body.hi, 'ya');
-            done();
-          });
-      });
+    loginWithConsent(app).then(({ sessionId }) => {
+      request(app)
+        .get('/open-banking/v1.1/accounts')
+        .set('Accept', 'application/json')
+        .set('authorization', sessionId)
+        .set('x-authorization-server-id', authServerId)
+        .end((e, r) => {
+          assert.equal(r.status, 200);
+          assert.equal(r.body.hi, 'ya');
+          done();
+        });
     });
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {
-    login(app).end((err, res) => {
-      const sessionId = res.body.sid;
-      setConsent({
-        username,
-        authorisationServerId: authServerId,
-        scope,
-      }, consentPayload).then(() => {
-        request(app)
-          .get('/open-banking/v1.1/accounts')
-          .set('Accept', 'application/json')
-          .set('authorization', sessionId)
-          .end((e, r) => {
-            assert.equal(r.status, 400);
-            done();
-          });
-      });
+    loginWithConsent(app).then(({ sessionId }) => {
+      request(app)
+        .get('/open-banking/v1.1/accounts')
+        .set('Accept', 'application/json')
+        .set('authorization', sessionId)
+        .end((e, r) => {
+          assert.equal(r.status, 400);
+          done();
+        });
     });
   });
 
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
-    login(app).end((err, res) => {
-      const sessionId = res.body.sid;
-      setConsent({
-        username,
-        authorisationServerId: authServerId,
-        scope,
-      }, consentPayload).then(() => {
-        request(app)
-          .get('/open-banking/non-existing')
-          .set('Accept', 'application/json')
-          .set('authorization', sessionId)
-          .set('x-fapi-financial-id', fapiFinancialId)
-          .set('x-authorization-server-id', authServerId)
-          .end((e, r) => {
-            assert.equal(r.status, 404);
-            done();
-          });
-      });
+    loginWithConsent(app).then(({ sessionId }) => {
+      request(app)
+        .get('/open-banking/non-existing')
+        .set('Accept', 'application/json')
+        .set('authorization', sessionId)
+        .set('x-fapi-financial-id', fapiFinancialId)
+        .set('x-authorization-server-id', authServerId)
+        .end((e, r) => {
+          assert.equal(r.status, 404);
+          done();
+        });
     });
   });
 
-  it('should return 404 for path != /open-banking', (done) => {
-    login(app).end((err, res) => {
-      const sessionId = res.body.sid;
-      setConsent({
-        username,
-        authorisationServerId: authServerId,
-        scope,
-      }, consentPayload).then(() => {
-        request(app)
-          .get('/open-banking-invalid')
-          .set('Accept', 'application/json')
-          .set('authorization', sessionId)
-          .end((e, r) => {
-            assert.equal(r.status, 404);
-            done();
-          });
-      });
+  it('returns 404 for path != /open-banking', (done) => {
+    loginWithConsent(app).then(({ sessionId }) => {
+      request(app)
+        .get('/open-banking-invalid')
+        .set('Accept', 'application/json')
+        .set('authorization', sessionId)
+        .end((e, r) => {
+          assert.equal(r.status, 404);
+          done();
+        });
     });
   });
 
   it('returns proxy 401 unauthorised response for /open-banking/* with missing authorization header', (done) => {
-    login(app).end(() => {
+    loginWithConsent(app).then(() => {
       request(app)
         .get('/open-banking/v1.1/balances')
         .set('Accept', 'application/json')
@@ -286,7 +280,7 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 401 unauthorised response for /open-banking/* with invalid authorization header', (done) => {
-    login(app).end(() => {
+    loginWithConsent(app).then(() => {
       request(app)
         .get('/open-banking/v1.1/products')
         .set('Accept', 'application/json')

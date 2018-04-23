@@ -189,7 +189,7 @@ const { drop } = require('../app/storage.js');
 
 const resourceApiHost = 'http://example.com';
 
-const loginWithConsent = async (application) => {
+const loginAsync = async (application) => {
   const loginAnd = login(application);
   loginAnd.end[util.promisify.custom] = () => new Promise((resolve, reject) =>
     loginAnd.end((err, res) => {
@@ -197,11 +197,6 @@ const loginWithConsent = async (application) => {
         reject(err);
       } else {
         const sessionId = res.body.sid;
-        setConsent({
-          username,
-          authorisationServerId: authServerId,
-          scope,
-        }, consentPayload);
         resolve({ sessionId, res });
       }
     }));
@@ -229,6 +224,11 @@ describe('Proxy', () => {
         BaseApiDNSUri: resourceApiHost,
       },
     });
+    setConsent({
+      username,
+      authorisationServerId: authServerId,
+      scope,
+    }, consentPayload);
   });
 
   afterEach(async () => {
@@ -241,7 +241,7 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', (done) => {
-    loginWithConsent(app).then(({ sessionId }) => {
+    loginAsync(app).then(({ sessionId }) => {
       requestResource(sessionId, '/open-banking/v1.1/accounts', app, (e, r) => {
         assert.equal(r.status, 200);
         assert.equal(r.body.Data.Account[0].AccountId, '22290');
@@ -251,7 +251,7 @@ describe('Proxy', () => {
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {
-    loginWithConsent(app).then(({ sessionId }) => {
+    loginAsync(app).then(({ sessionId }) => {
       request(app)
         .get('/open-banking/v1.1/accounts')
         .set('Accept', 'application/json')
@@ -264,7 +264,7 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 404 reponse for /open-banking/non-existing', (done) => {
-    loginWithConsent(app).then(({ sessionId }) => {
+    loginAsync(app).then(({ sessionId }) => {
       requestResource(sessionId, '/open-banking/non-existing', app, (e, r) => {
         assert.equal(r.status, 404);
         done();
@@ -273,7 +273,7 @@ describe('Proxy', () => {
   });
 
   it('returns 404 for path != /open-banking', (done) => {
-    loginWithConsent(app).then(({ sessionId }) => {
+    loginAsync(app).then(({ sessionId }) => {
       requestResource(sessionId, '/open-banking-invalid', app, (e, r) => {
         assert.equal(r.status, 404);
         done();
@@ -282,7 +282,7 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 401 unauthorised response for /open-banking/* with missing authorization header', (done) => {
-    loginWithConsent(app).then(() => {
+    loginAsync(app).then(() => {
       requestResource(null, '/open-banking/v1.1/accounts', app, (e, r) => {
         assert.equal(r.status, 401);
         const header = r.headers['access-control-allow-origin'];
@@ -293,7 +293,7 @@ describe('Proxy', () => {
   });
 
   it('returns proxy 401 unauthorised response for /open-banking/* with invalid authorization header', (done) => {
-    loginWithConsent(app).then(() => {
+    loginAsync(app).then(() => {
       requestResource('invalid-token', '/open-banking/v1.1/accounts', app, (e, r) => {
         assert.equal(r.status, 401);
         const header = r.headers['access-control-allow-origin'];

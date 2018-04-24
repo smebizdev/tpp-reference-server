@@ -49,6 +49,7 @@ describe('postAccountRequests', () => {
   it('returns data when 201 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
     const result = await postAccountRequests(resourceServerPath, headers);
+    result.Data.CreationDateTime = response.Data.CreationDateTime;
     assert.deepEqual(result, response);
   });
 });
@@ -67,6 +68,7 @@ describe('getAccountRequest', () => {
   it('returns data when 200 OK', async () => {
     const resourceServerPath = 'http://example.com/prefix';
     const result = await getAccountRequest(accountRequestId, resourceServerPath, headers);
+    result.Data.CreationDateTime = response.Data.CreationDateTime;
     assert.deepEqual(result, response);
   });
 });

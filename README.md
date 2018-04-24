@@ -679,7 +679,7 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 * `OB_DIRECTORY_HOST=xxx` - OB Directory host.
 * `OB_ISSUING_CA=''` - base64 encoded `OB Issuing chain` cert from OB Directory.
 * `OB_PROVISIONED=false` - enables / disables enrolled with OB Directory mode.
-* `PORT=8003` - port where the app is running.
+* `TPP_REF_SERVER_PORT=8003` - port where the app is running.
 * `REDIS_HOST=localhost` - Redis configuration.
 * `REDIS_PORT=6379` - Redis port.
 * `SIGNING_KEY=''` - base64 encoded private key used to generate `Signing` cert OB Directory CSR.

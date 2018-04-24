@@ -29,25 +29,16 @@ const scopeAndUrl = (req, host) => {
 };
 
 const resourceRequestHandler = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  const {
-    interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
-  } = await extractHeaders(req.headers);
-  let host;
   try {
-    host = await resourceServerPath(authorisationServerId);
-  } catch (err) {
-    const status = err.response ? err.response.status : 500;
-    return res.status(status).send(err.message);
-  }
-  const { proxiedUrl, scope } = scopeAndUrl(req, host);
-  const { bearerToken, permissions } =
-    await accessTokenAndPermissions(username, authorisationServerId, scope);
-
-  try {
-    debug({
-      proxiedUrl, scope, bearerToken, fapiFinancialId,
-    });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const {
+      interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
+    } = await extractHeaders(req.headers);
+    const host = await resourceServerPath(authorisationServerId);
+    const { proxiedUrl, scope } = scopeAndUrl(req, host);
+    const { bearerToken, permissions } =
+      await accessTokenAndPermissions(username, authorisationServerId, scope);
+    debug({ proxiedUrl, scope, bearerToken, fapiFinancialId }); // eslint-disable-line
     const call = setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
@@ -59,13 +50,18 @@ const resourceRequestHandler = async (req, res) => {
       permissions,
       authorisationServerId,
     });
-    const response = await call.send();
+    let response;
+    try {
+      response = await call.send();
+    } catch (err) {
+      error(`error getting ${proxiedUrl}: ${err.message}`);
+      throw err;
+    }
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);
 
     return res.status(response.status).json(response.body);
   } catch (err) {
-    error(`error getting ${proxiedUrl}: ${err.message}`);
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);
   }

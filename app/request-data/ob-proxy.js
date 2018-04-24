@@ -7,40 +7,47 @@ const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
+const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
+  let accessToken;
+  let permissions;
+  try {
+    const consentKeys = { username, authorisationServerId, scope };
+    ({ accessToken, permissions } = await consentAccessTokenAndPermissions(consentKeys));
+  } catch (err) {
+    accessToken = null;
+    permissions = null;
+  }
+  const bearerToken = `Bearer ${accessToken}`;
+  return { bearerToken, permissions };
+};
+
+const scopeAndUrl = (req, host) => {
+  const path = `/open-banking${req.path}`;
+  const proxiedUrl = `${host}${path}`;
+  const scope = path.split('/')[3];
+  return { proxiedUrl, scope };
+};
+
 const resourceRequestHandler = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const {
     interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
   } = await extractHeaders(req.headers);
   let host;
-  let accessToken;
-  let permissions;
   try {
     host = await resourceServerPath(authorisationServerId);
   } catch (err) {
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);
   }
-  const path = `/open-banking${req.path}`;
-  const proxiedUrl = `${host}${path}`;
-  const scope = path.split('/')[3];
-  try {
-    const consentKeys = { username, authorisationServerId, scope };
-    const data = await consentAccessTokenAndPermissions(consentKeys);
-    accessToken = data.accessToken; // eslint-disable-line
-    permissions = data.permissions; // eslint-disable-line
-  } catch (err) {
-    accessToken = null;
-    permissions = null;
-  }
-  const bearerToken = `Bearer ${accessToken}`;
-
-  debug(`proxiedUrl: ${proxiedUrl}`);
-  debug(`scope: ${scope}`);
-  debug(`bearerToken ${bearerToken}`);
-  debug(`fapiFinancialId ${fapiFinancialId}`);
+  const { proxiedUrl, scope } = scopeAndUrl(req, host);
+  const { bearerToken, permissions } =
+    await accessTokenAndPermissions(username, authorisationServerId, scope);
 
   try {
+    debug({
+      proxiedUrl, scope, bearerToken, fapiFinancialId,
+    });
     const call = setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')

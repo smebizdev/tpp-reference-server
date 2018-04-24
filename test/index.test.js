@@ -52,6 +52,10 @@ nock(/example\.com/, requestHeaders)
     },
   });
 
+nock(/example\.com/, requestHeaders)
+  .get('/open-banking/v1.1/accounts/22290/balances')
+  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} }); // bad payload to trigger validation error
+
 nock(/example\.com/)
   .get('/open-banking/non-existing')
   .reply(404);
@@ -257,12 +261,18 @@ describe('Proxy', () => {
     assert.equal(r.body.Data.Account[0].AccountId, '22290');
   });
 
-
-  it('sets failedValidation on response when VALIDATE_RESPONSE is true', async () => {
+  it('sets failedValidation false on response when VALIDATE_RESPONSE is true and validation passes', async () => {
     process.env.VALIDATE_RESPONSE = 'true';
     const { sessionId } = await loginAsync(app);
     const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
     assert.equal(r.body.failedValidation, false);
+  });
+
+  it('sets failedValidation true on response when VALIDATE_RESPONSE is true and validation fails', async () => {
+    process.env.VALIDATE_RESPONSE = 'true';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts/22290/balances', app);
+    assert.equal(r.body.failedValidation, true);
   });
 
   it('does not set failedValidation on response when VALIDATE_RESPONSE is false', async () => {

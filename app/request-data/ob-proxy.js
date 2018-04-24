@@ -7,38 +7,7 @@ const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 const util = require('util');
-const url = require('url');
-const objectSize = require('object.size');
 const { validate, validateResponseOn } = require('../validator');
-
-const getRawQs = req => (
-  req.qsRaw && req.qsRaw.length
-    ? req.qsRaw.join('&')
-    : undefined);
-
-const getQs = req => (
-  objectSize(req.qs)
-    ? req.qs
-    : getRawQs(req));
-
-const reqSerializer = req => (
-  {
-    method: req.method,
-    url: req.url,
-    qs: getQs(req),
-    path: req.url && url.parse(req.url).pathname,
-    body: req._data, // eslint-disable-line
-    headers: req.header,
-  }
-);
-
-const resSerializer = res => (
-  {
-    statusCode: res.statusCode,
-    headers: res.headers,
-    body: objectSize(res.body) ? res.body : res.text,
-  }
-);
 
 const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
@@ -62,9 +31,7 @@ const scopeAndUrl = (req, host) => {
 };
 
 const validateRequestResponse = (validatorApp, req, res, responseBody) => {
-  const theReq = reqSerializer(req);
-  const theRes = resSerializer(res);
-  const { statusCode, headers, body } = validate(validatorApp, theReq, theRes);
+  const { statusCode, headers, body } = validate(validatorApp, req, res);
   debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
   const failedValidation = body.failedValidation || false;
   return Object.assign(responseBody, { failedValidation });

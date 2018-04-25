@@ -7,40 +7,38 @@ const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
-const resourceRequestHandler = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  const {
-    interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
-  } = await extractHeaders(req.headers);
-  let host;
+const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
   let permissions;
   try {
-    host = await resourceServerPath(authorisationServerId);
-  } catch (err) {
-    const status = err.response ? err.response.status : 500;
-    return res.status(status).send(err.message);
-  }
-  const path = `/open-banking${req.path}`;
-  const proxiedUrl = `${host}${path}`;
-  const scope = path.split('/')[3];
-  try {
     const consentKeys = { username, authorisationServerId, scope };
-    const data = await consentAccessTokenAndPermissions(consentKeys);
-    accessToken = data.accessToken; // eslint-disable-line
-    permissions = data.permissions; // eslint-disable-line
+    ({ accessToken, permissions } = await consentAccessTokenAndPermissions(consentKeys));
   } catch (err) {
     accessToken = null;
     permissions = null;
   }
   const bearerToken = `Bearer ${accessToken}`;
+  return { bearerToken, permissions };
+};
 
-  debug(`proxiedUrl: ${proxiedUrl}`);
-  debug(`scope: ${scope}`);
-  debug(`bearerToken ${bearerToken}`);
-  debug(`fapiFinancialId ${fapiFinancialId}`);
+const scopeAndUrl = (req, host) => {
+  const path = `/open-banking${req.path}`;
+  const proxiedUrl = `${host}${path}`;
+  const scope = path.split('/')[3];
+  return { proxiedUrl, scope };
+};
 
+const resourceRequestHandler = async (req, res) => {
   try {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const {
+      interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
+    } = await extractHeaders(req.headers);
+    const host = await resourceServerPath(authorisationServerId);
+    const { proxiedUrl, scope } = scopeAndUrl(req, host);
+    const { bearerToken, permissions } =
+      await accessTokenAndPermissions(username, authorisationServerId, scope);
+    debug({ proxiedUrl, scope, bearerToken, fapiFinancialId }); // eslint-disable-line
     const call = setupMutualTLS(request.get(proxiedUrl))
       .set('Authorization', bearerToken)
       .set('Accept', 'application/json')
@@ -52,13 +50,18 @@ const resourceRequestHandler = async (req, res) => {
       permissions,
       authorisationServerId,
     });
-    const response = await call.send();
+    let response;
+    try {
+      response = await call.send();
+    } catch (err) {
+      error(`error getting ${proxiedUrl}: ${err.message}`);
+      throw err;
+    }
     debug(`response.status ${response.status}`);
     debug(`response.body ${JSON.stringify(response.body)}`);
 
     return res.status(response.status).json(response.body);
   } catch (err) {
-    error(`error getting ${proxiedUrl}: ${err.message}`);
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);
   }

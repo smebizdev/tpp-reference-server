@@ -6,6 +6,8 @@ const { extractHeaders } = require('../session');
 const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
+const util = require('util');
+const { validate, validateResponseOn } = require('../validator');
 
 const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
@@ -26,6 +28,13 @@ const scopeAndUrl = (req, host) => {
   const proxiedUrl = `${host}${path}`;
   const scope = path.split('/')[3];
   return { proxiedUrl, scope };
+};
+
+const validateRequestResponse = (validatorApp, req, res, responseBody) => {
+  const { statusCode, headers, body } = validate(validatorApp, req, res);
+  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
+  const failedValidation = body.failedValidation || false;
+  return Object.assign(responseBody, { failedValidation });
 };
 
 const resourceRequestHandler = async (req, res) => {
@@ -50,6 +59,7 @@ const resourceRequestHandler = async (req, res) => {
       permissions,
       authorisationServerId,
     });
+
     let response;
     try {
       response = await call.send();
@@ -57,10 +67,14 @@ const resourceRequestHandler = async (req, res) => {
       error(`error getting ${proxiedUrl}: ${err.message}`);
       throw err;
     }
-    debug(`response.status ${response.status}`);
-    debug(`response.body ${JSON.stringify(response.body)}`);
 
-    return res.status(response.status).json(response.body);
+    let result;
+    if (validateResponseOn()) {
+      result = validateRequestResponse(req.validatorApp, call, response.res, response.body);
+    } else {
+      result = response.body;
+    }
+    return res.status(response.status).json(result);
   } catch (err) {
     const status = err.response ? err.response.status : 500;
     return res.status(status).send(err.message);

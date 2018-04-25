@@ -28,7 +28,7 @@ const requestHeaders = {
 
 nock(/example\.com/, requestHeaders)
   .get('/open-banking/v1.1/accounts')
-  .times(3)
+  .times(5)
   .reply(200, {
     Data: {
       Account: [
@@ -51,6 +51,10 @@ nock(/example\.com/, requestHeaders)
       TotalPages: 1,
     },
   });
+
+nock(/example\.com/, requestHeaders)
+  .get('/open-banking/v1.1/accounts/22290/balances')
+  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} }); // bad payload to trigger validation error
 
 nock(/example\.com/)
   .get('/open-banking/non-existing')
@@ -225,6 +229,9 @@ const requestResource = async (sessionId, url, application) => {
   return endAsync();
 };
 
+process.env.ACCOUNT_SWAGGER = process.env.ACCOUNT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json';
+process.env.PAYMENT_SWAGGER = process.env.PAYMENT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json';
+
 describe('Proxy', () => {
   beforeEach(async () => {
     await setAuthServerConfig(authServerId, {
@@ -247,6 +254,7 @@ describe('Proxy', () => {
     delete process.env.DEBUG;
     delete process.env.OB_DIRECTORY_HOST;
     delete process.env.AUTHORIZATION;
+    delete process.env.VALIDATE_RESPONSE;
   });
 
   it('returns proxy 200 response for /open-banking/v1.1/accounts with valid session', async () => {
@@ -254,6 +262,27 @@ describe('Proxy', () => {
     const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
     assert.equal(r.status, 200);
     assert.equal(r.body.Data.Account[0].AccountId, '22290');
+  });
+
+  it('sets failedValidation false on response when VALIDATE_RESPONSE is true and validation passes', async () => {
+    process.env.VALIDATE_RESPONSE = 'true';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.body.failedValidation, false);
+  });
+
+  it('sets failedValidation true on response when VALIDATE_RESPONSE is true and validation fails', async () => {
+    process.env.VALIDATE_RESPONSE = 'true';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts/22290/balances', app);
+    assert.equal(r.body.failedValidation, true);
+  });
+
+  it('does not set failedValidation on response when VALIDATE_RESPONSE is false', async () => {
+    process.env.VALIDATE_RESPONSE = 'false';
+    const { sessionId } = await loginAsync(app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
+    assert.equal(r.body.failedValidation, undefined);
   });
 
   it('returns 400 response for missing x-authorization-server-id', (done) => {

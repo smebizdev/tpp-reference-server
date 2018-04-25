@@ -4,6 +4,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { addValidatorMiddleware } = require('./validator');
 const { requireAuthorization } = require('./session');
 const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
@@ -48,7 +49,12 @@ app.post('/payment-submissions', paymentSubmission);
 app.all('/tpp/authorized', requireAuthorization);
 app.post('/tpp/authorized', authorisationCodeGrantedHandler);
 
-app.all('/open-banking/*', requireAuthorization, requireAuthorisationServerId);
+app.all(
+  '/open-banking/*',
+  requireAuthorization,
+  requireAuthorisationServerId,
+  addValidatorMiddleware,
+);
 app.use('/open-banking', resourceRequestHandler);
 
 exports.app = app;

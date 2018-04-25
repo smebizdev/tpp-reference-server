@@ -22,10 +22,13 @@
     "morgan": "^1.9.0",
     "njwt": "0.4.0",
     "node-jose": "^0.11.0",
+    "object.size": "^1.0.0",
     "qs": "6.5.1",
     "redis": "^2.8.0",
     "superagent": "^3.8.2",
     "superagent-bunyan": "^5.2.0",
+    "swagger-tools": "^0.10.3",
+    "url-pattern": "^1.0.3",
     "uuid": "^3.2.1"
   },
   "devDependencies": {

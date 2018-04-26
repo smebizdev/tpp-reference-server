@@ -7,6 +7,12 @@ const { validResponse } = require('./fixtures/valid-response');
 process.env.ACCOUNT_SWAGGER = process.env.ACCOUNT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json';
 process.env.PAYMENT_SWAGGER = process.env.PAYMENT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json';
 
+const details = {
+  interactionId: '590bcc25-517c-4caf-a140-077b41ffe095',
+  sessionId: '2789f200-4960-11e8-b019-35d9f0621d63',
+  authorisationServerId: 'testAuthServerId',
+};
+
 describe('validate', () => {
   let app;
   before(async () => {
@@ -14,8 +20,8 @@ describe('validate', () => {
   });
 
   describe('without response provided', () => {
-    it('returns 400 status with json error object', () => {
-      const response = validate(app, validRequest(), null);
+    it('returns 400 status with json error object', async () => {
+      const response = await validate(app, null, validRequest(), null, details);
       assert.equal(response.statusCode, 400);
       assert.equal(response.body.failedValidation, true);
       assert.equal(response.body.message, 'Response validation failed: response was blank.');
@@ -23,8 +29,8 @@ describe('validate', () => {
   });
 
   describe('with valid request and response', () => {
-    it('returns response status and json', () => {
-      const response = validate(app, validRequest(), validResponse());
+    it('returns response status and json', async () => {
+      const response = await validate(app, null, validRequest(), validResponse(), details);
       const expected = validResponse();
       assert.equal(response.statusCode, expected.statusCode);
       assert.deepEqual(response.headers, expected.headers);
@@ -43,10 +49,10 @@ describe('validate', () => {
       warnings: [],
     };
 
-    it('returns 400 status with json error object', () => {
+    it('returns 400 status with json error object', async () => {
       const invalidResponse = validResponse();
       delete invalidResponse.body.Data.Balance[0].Amount;
-      const response = validate(app, validRequest(), invalidResponse);
+      const response = await validate(app, null, validRequest(), invalidResponse, details);
       const {
         failedValidation, message, originalResponse, results,
       } = response.body;

@@ -30,8 +30,8 @@ const scopeAndUrl = (req, host) => {
   return { proxiedUrl, scope };
 };
 
-const validateRequestResponse = (validatorApp, req, res, responseBody) => {
-  const { statusCode, headers, body } = validate(validatorApp, req, res);
+const validateRequestResponse = async (validatorApp, kafkaStream, req, res, responseBody, details) => { // eslint-disable-line
+  const { statusCode, headers, body } = await validate(validatorApp, kafkaStream, req, res, details); // eslint-disable-line
   debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
   const failedValidation = body.failedValidation || false;
   return Object.assign(responseBody, { failedValidation });
@@ -53,12 +53,13 @@ const resourceRequestHandler = async (req, res) => {
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);
-    setupResponseLogging(call, {
+    const details = {
       interactionId,
       sessionId,
       permissions,
       authorisationServerId,
-    });
+    };
+    setupResponseLogging(call, details);
 
     let response;
     try {
@@ -70,7 +71,11 @@ const resourceRequestHandler = async (req, res) => {
 
     let result;
     if (validateResponseOn()) {
-      result = validateRequestResponse(req.validatorApp, call, response.res, response.body);
+      result =
+        await validateRequestResponse(
+          req.validatorApp,
+          req.kafkaStream, call, response.res, response.body, details,
+        );
     } else {
       result = response.body;
     }

@@ -1,9 +1,8 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../certs-util');
+const { createRequest } = require('../ob-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessTokenAndPermissions } = require('../authorise');
 const { extractHeaders } = require('../session');
-const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 const util = require('util');
@@ -19,8 +18,7 @@ const accessTokenAndPermissions = async (username, authorisationServerId, scope)
     accessToken = null;
     permissions = null;
   }
-  const bearerToken = `Bearer ${accessToken}`;
-  return { bearerToken, permissions };
+  return { accessToken, permissions };
 };
 
 const scopeAndUrl = (req, host) => {
@@ -40,26 +38,16 @@ const validateRequestResponse = async (validatorApp, kafkaStream, req, res, resp
 const resourceRequestHandler = async (req, res) => {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    const {
-      interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
-    } = await extractHeaders(req.headers);
-    const host = await resourceServerPath(authorisationServerId);
+    const reqHeaders = await extractHeaders(req.headers);
+    const host = await resourceServerPath(reqHeaders.authorisationServerId);
     const { proxiedUrl, scope } = scopeAndUrl(req, host);
-    const { bearerToken, permissions } =
-      await accessTokenAndPermissions(username, authorisationServerId, scope);
-    debug({ proxiedUrl, scope, bearerToken, fapiFinancialId }); // eslint-disable-line
-    const call = setupMutualTLS(request.get(proxiedUrl))
-      .set('Authorization', bearerToken)
-      .set('Accept', 'application/json')
-      .set('x-fapi-financial-id', fapiFinancialId)
-      .set('x-fapi-interaction-id', interactionId);
-    const details = {
-      interactionId,
-      sessionId,
-      permissions,
-      authorisationServerId,
-    };
-    setupResponseLogging(call, details);
+    const { accessToken, permissions } =
+      await accessTokenAndPermissions(reqHeaders.username, reqHeaders.authorisationServerId, scope);
+    const headers = Object.assign({ accessToken, permissions }, reqHeaders);
+    debug({
+      proxiedUrl, scope, accessToken, fapiFinancialId: headers.fapiFinancialId,
+    });
+    const call = createRequest(request.get(proxiedUrl), headers);
 
     let response;
     try {
@@ -74,7 +62,12 @@ const resourceRequestHandler = async (req, res) => {
       result =
         await validateRequestResponse(
           req.validatorApp,
-          req.kafkaStream, call, response.res, response.body, details,
+          req.kafkaStream, call, response.res, response.body, {
+            interactionId: headers.interactionId,
+            sessionId: headers.sessionId,
+            permissions: headers.permissions,
+            authorisationServerId: headers.authorisationServerId,
+          },
         );
     } else {
       result = response.body;

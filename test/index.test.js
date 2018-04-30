@@ -57,7 +57,7 @@ nock(/example\.com/, requestHeaders)
   .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} }); // bad payload to trigger validation error
 
 nock(/example\.com/)
-  .get('/open-banking/non-existing')
+  .get('/open-banking/v1.1/accounts/non-existing')
   .reply(404);
 
 const login = application => request(application)
@@ -300,7 +300,7 @@ describe('Proxy', () => {
 
   it('returns proxy 404 reponse for /open-banking/non-existing', async () => {
     const { sessionId } = await loginAsync(app);
-    const r = await requestResource(sessionId, '/open-banking/non-existing', app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts/non-existing', app);
     assert.equal(r.status, 404);
   });
 

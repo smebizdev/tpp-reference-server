@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../certs-util');
+const { setupMutualTLS } = require('../ob-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessTokenAndPermissions } = require('../authorise');
 const { extractHeaders } = require('../session');

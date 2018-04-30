@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../certs-util');
+const { setupMutualTLS } = require('../ob-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const assert = require('assert');

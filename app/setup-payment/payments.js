@@ -18,9 +18,8 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     verifyHeaders(headers);
     const paymentsUri = `${resourceServerPath}${paymentPathEndpoint}`;
     log(`POST to ${paymentsUri}`);
-    const payment = createRequest(request.post(paymentsUri), headers);
-    payment.send(paymentData);
-    const response = await payment;
+    const call = createRequest(request.post(paymentsUri), headers);
+    const response = await call.send(paymentData);
     debug(`${response.status} response for ${paymentsUri}`);
 
     return response.body;

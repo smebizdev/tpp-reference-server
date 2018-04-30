@@ -23,8 +23,8 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const body = buildAccountRequestData(headers.permissions);
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
-    const response = await createRequest(request.post(accountRequestsUri), headers)
-      .send(body);
+    const call = createRequest(request.post(accountRequestsUri), headers);
+    const response = await call.send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {

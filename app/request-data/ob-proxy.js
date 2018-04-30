@@ -19,8 +19,7 @@ const accessTokenAndPermissions = async (username, authorisationServerId, scope)
     accessToken = null;
     permissions = null;
   }
-  const bearerToken = `Bearer ${accessToken}`;
-  return { bearerToken, permissions };
+  return { accessToken, permissions };
 };
 
 const scopeAndUrl = (req, host) => {
@@ -45,11 +44,11 @@ const resourceRequestHandler = async (req, res) => {
     } = await extractHeaders(req.headers);
     const host = await resourceServerPath(authorisationServerId);
     const { proxiedUrl, scope } = scopeAndUrl(req, host);
-    const { bearerToken, permissions } =
+    const { accessToken, permissions } =
       await accessTokenAndPermissions(username, authorisationServerId, scope);
-    debug({ proxiedUrl, scope, bearerToken, fapiFinancialId }); // eslint-disable-line
+    debug({ proxiedUrl, scope, accessToken, fapiFinancialId }); // eslint-disable-line
     const call = setupMutualTLS(request.get(proxiedUrl))
-      .set('Authorization', bearerToken)
+      .set('Authorization', `Bearer ${accessToken}`)
       .set('Accept', 'application/json')
       .set('x-fapi-financial-id', fapiFinancialId)
       .set('x-fapi-interaction-id', interactionId);

@@ -1,5 +1,7 @@
 const url = require('url');
 const objectSize = require('object.size');
+const assert = require('assert');
+const errorLog = require('debug')('error');
 
 const getRawQs = req => (
   req.qsRaw && req.qsRaw.length
@@ -47,13 +49,34 @@ const noResponseError = {
   },
 };
 
-const validate = (app, req, res) => {
-  if (!res) {
-    return noResponseError;
-  }
+const checkDetails = (details) => {
+  assert.ok(details.sessionId, 'sessionId missing from validate call');
+  assert.ok(details.interactionId, 'interactionId missing from validate call');
+  assert.ok(details.authorisationServerId, 'authorisationServerId missing from validate call');
+};
+
+const validate = async (app, kafkaStream, req, res, details) => {
+  checkDetails(details);
   const request = reqSerializer(req);
-  const response = resSerializer(res);
-  app.handle(request, response);
+  let response;
+  if (!res) {
+    response = noResponseError;
+  } else {
+    response = resSerializer(res);
+    app.handle(request, response);
+  }
+  if (kafkaStream) {
+    try {
+      await kafkaStream.write({
+        details,
+        request,
+        response,
+      });
+    } catch (err) {
+      errorLog(err);
+      throw err;
+    }
+  }
   return response;
 };
 

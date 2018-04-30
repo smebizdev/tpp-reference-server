@@ -61,7 +61,7 @@ describe('KafkaStream', () => {
     },
   });
 
-  (process.env.TEST_KAFKA === 'true') && it('gets producer error properly', function (done) { // eslint-disable-line
+  it('gets producer error properly; requires Kafka be running', function (done) { // eslint-disable-line
     this.timeout(5000);
     const kafkaConsumer = setupConsumer();
     kafkaConsumer.init().then(() => {
@@ -92,7 +92,7 @@ describe('KafkaStream', () => {
     });
   });
 
-  (process.env.TEST_KAFKA === 'true') && it('writes to stream properly', function (done) { // eslint-disable-line
+  it('writes to stream properly; requires Kafka be running', (done) => {
     const kafkaConsumer = setupConsumer();
 
     kafkaConsumer.init().then(() => {

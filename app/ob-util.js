@@ -1,3 +1,4 @@
+const assert = require('assert');
 const { setupResponseLogging } = require('./response-logger');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
@@ -24,14 +25,20 @@ const setHeaders = (requestObj, headers) => {
     .set('x-fapi-financial-id', headers.fapiFinancialId);
 
   setOptionalHeader('x-idempotency-key', headers.idempotencyKey, requestObj);
-  setOptionalHeader('x-idempotency-key', headers.idempotencyKey, requestObj);
   setOptionalHeader('x-fapi-customer-last-logged-time', headers.customerLastLogged, requestObj);
   setOptionalHeader('x-fapi-customer-ip-address', headers.customerIp, requestObj);
   setOptionalHeader('x-jws-signature', headers.jwsSignature, requestObj);
   return requestObj;
 };
 
+const verifyHeaders = (headers) => {
+  assert.ok(headers.accessToken, 'accessToken missing from headers');
+  assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
+  assert.ok(headers.interactionId, 'interactionId missing from headers');
+};
+
 const createRequest = (requestObj, headers) => {
+  verifyHeaders(headers);
   const req = setHeaders(setupMutualTLS(requestObj), headers);
   const { interactionId, sessionId, authorisationServerId } = headers;
   setupResponseLogging(req, { interactionId, sessionId, authorisationServerId });

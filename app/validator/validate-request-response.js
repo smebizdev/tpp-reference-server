@@ -22,7 +22,8 @@ const lowerCaseHeaders = (req) => {
 };
 
 const reqSerializer = (req) => {
-  if (Object.keys(req).includes('_data')) {
+  const keys = Object.keys(req);
+  if (keys.includes('_data') || keys.includes('res')) {
     return lowerCaseHeaders({
       method: req.method,
       url: req.url,
@@ -69,8 +70,8 @@ const validate = async (app, kafkaStream, req, res, details) => {
     try {
       await kafkaStream.write({
         details,
-        request,
-        response,
+        request: reqSerializer(request),
+        response: resSerializer(res),
       });
     } catch (err) {
       errorLog(err);

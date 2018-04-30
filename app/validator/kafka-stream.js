@@ -1,4 +1,5 @@
 const Kafka = require('no-kafka');
+const errorLog = require('debug')('error');
 
 class RoundRobinPartitioner extends Kafka.DefaultPartitioner {
   partition(topicName, partitions, message) { // eslint-disable-line
@@ -37,7 +38,13 @@ class KafkaStream {
   }
 
   async write(record) {
-    const value = JSON.stringify(record);
+    let value;
+    try {
+      value = JSON.stringify(record);
+    } catch (err) {
+      errorLog({ record });
+      throw err;
+    }
     try {
       const messageSet = await this.producer.send({
         topic: this.topic,

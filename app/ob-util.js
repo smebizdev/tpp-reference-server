@@ -11,12 +11,25 @@ const key = () => Buffer.from(process.env.TRANSPORT_KEY || '', 'base64').toStrin
 
 const setupMutualTLS = agent => (mtlsEnabled ? agent.key(key()).cert(cert).ca(cert) : agent);
 
-const setHeaders = (requestObj, headers) => requestObj
-  .set('authorization', `Bearer ${headers.accessToken}`)
-  .set('content-type', APPLICATION_JSON)
-  .set('accept', APPLICATION_JSON)
-  .set('x-fapi-interaction-id', headers.interactionId)
-  .set('x-fapi-financial-id', headers.fapiFinancialId);
+const setOptionalHeader = (header, value, requestObj) => {
+  if (value) requestObj.set(header, value);
+};
+
+const setHeaders = (requestObj, headers) => {
+  requestObj
+    .set('authorization', `Bearer ${headers.accessToken}`)
+    .set('content-type', APPLICATION_JSON)
+    .set('accept', APPLICATION_JSON)
+    .set('x-fapi-interaction-id', headers.interactionId)
+    .set('x-fapi-financial-id', headers.fapiFinancialId);
+
+  setOptionalHeader('x-idempotency-key', headers.idempotencyKey, requestObj);
+  setOptionalHeader('x-idempotency-key', headers.idempotencyKey, requestObj);
+  setOptionalHeader('x-fapi-customer-last-logged-time', headers.customerLastLogged, requestObj);
+  setOptionalHeader('x-fapi-customer-ip-address', headers.customerIp, requestObj);
+  setOptionalHeader('x-jws-signature', headers.jwsSignature, requestObj);
+  return requestObj;
+};
 
 const createRequest = (requestObj, headers) => {
   const req = setHeaders(setupMutualTLS(requestObj), headers);

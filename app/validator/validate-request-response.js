@@ -74,6 +74,7 @@ const validate = async (app, kafkaStream, req, res, details) => {
       });
     } catch (err) {
       errorLog(err);
+      throw err;
     }
   }
   return response;

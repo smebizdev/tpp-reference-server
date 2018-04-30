@@ -1,9 +1,8 @@
 const request = require('superagent');
-const { setHeaders, setupMutualTLS } = require('../ob-util');
+const { createRequest } = require('../ob-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const assert = require('assert');
-const { setupResponseLogging } = require('../response-logger');
 
 const buildAccountRequestData = Permissions => ({
   Data: { Permissions },
@@ -15,13 +14,6 @@ const verifyHeaders = (headers) => {
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
   assert.ok(headers.interactionId, 'interactionId missing from headers');
   assert.ok(headers.sessionId, 'sessionId missing from headers');
-};
-
-const createRequest = (requestObj, headers) => {
-  const req = setHeaders(setupMutualTLS(requestObj), headers);
-  const { interactionId, sessionId, authorisationServerId } = headers;
-  setupResponseLogging(req, { interactionId, sessionId, authorisationServerId });
-  return req;
 };
 
 /*

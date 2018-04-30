@@ -1,3 +1,4 @@
+const { setupResponseLogging } = require('./response-logger');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
 
@@ -17,8 +18,15 @@ const setHeaders = (requestObj, headers) => requestObj
   .set('x-fapi-interaction-id', headers.interactionId)
   .set('x-fapi-financial-id', headers.fapiFinancialId);
 
+const createRequest = (requestObj, headers) => {
+  const req = setHeaders(setupMutualTLS(requestObj), headers);
+  const { interactionId, sessionId, authorisationServerId } = headers;
+  setupResponseLogging(req, { interactionId, sessionId, authorisationServerId });
+  return req;
+};
+
 exports.setupMutualTLS = setupMutualTLS;
-exports.setHeaders = setHeaders;
+exports.createRequest = createRequest;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;

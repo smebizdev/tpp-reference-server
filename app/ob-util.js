@@ -1,6 +1,8 @@
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
 
+const APPLICATION_JSON = 'application/json; charset=utf-8';
+
 const mtlsEnabled = process.env.MTLS_ENABLED === 'true';
 const ca = Buffer.from(process.env.OB_ISSUING_CA || '', 'base64').toString();
 const cert = Buffer.from(process.env.TRANSPORT_CERT || '', 'base64').toString();
@@ -8,7 +10,15 @@ const key = () => Buffer.from(process.env.TRANSPORT_KEY || '', 'base64').toStrin
 
 const setupMutualTLS = agent => (mtlsEnabled ? agent.key(key()).cert(cert).ca(cert) : agent);
 
+const setHeaders = (requestObj, headers) => requestObj
+  .set('authorization', `Bearer ${headers.accessToken}`)
+  .set('content-type', APPLICATION_JSON)
+  .set('accept', APPLICATION_JSON)
+  .set('x-fapi-interaction-id', headers.interactionId)
+  .set('x-fapi-financial-id', headers.fapiFinancialId);
+
 exports.setupMutualTLS = setupMutualTLS;
+exports.setHeaders = setHeaders;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;

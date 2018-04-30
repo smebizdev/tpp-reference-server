@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../ob-util');
+const { setHeaders, setupMutualTLS } = require('../ob-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const assert = require('assert');
@@ -10,21 +10,12 @@ const buildAccountRequestData = Permissions => ({
   Risk: {},
 });
 
-const APPLICATION_JSON = 'application/json; charset=utf-8';
-
 const verifyHeaders = (headers) => {
   assert.ok(headers.accessToken, 'accessToken missing from headers');
   assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
   assert.ok(headers.interactionId, 'interactionId missing from headers');
   assert.ok(headers.sessionId, 'sessionId missing from headers');
 };
-
-const setHeaders = (requestObj, headers) => requestObj
-  .set('authorization', `Bearer ${headers.accessToken}`)
-  .set('content-type', APPLICATION_JSON)
-  .set('accept', APPLICATION_JSON)
-  .set('x-fapi-interaction-id', headers.interactionId)
-  .set('x-fapi-financial-id', headers.fapiFinancialId);
 
 const createRequest = (requestObj, headers) => {
   const req = setHeaders(setupMutualTLS(requestObj), headers);

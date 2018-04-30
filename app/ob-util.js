@@ -2,7 +2,7 @@ const assert = require('assert');
 const { setupResponseLogging } = require('./response-logger');
 const debug = require('debug')('debug');
 const util = require('util');
-const { validate } = require('./validator');
+const { validate, validateResponseOn } = require('./validator');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
 
@@ -55,8 +55,28 @@ const validateRequestResponse = async (validatorApp, kafkaStream, req, res, resp
   return Object.assign(responseBody, { failedValidation });
 };
 
+const obtainResult = async (req, call, response, headers) => {
+  let result;
+  if (validateResponseOn()) {
+    result =
+      await validateRequestResponse(
+        req.validatorApp,
+        req.kafkaStream, call, response.res, response.body, {
+          interactionId: headers.interactionId,
+          sessionId: headers.sessionId,
+          permissions: headers.permissions,
+          authorisationServerId: headers.authorisationServerId,
+        },
+      );
+  } else {
+    result = response.body;
+  }
+  return result;
+};
+
 exports.setupMutualTLS = setupMutualTLS;
 exports.createRequest = createRequest;
+exports.obtainResult = obtainResult;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;

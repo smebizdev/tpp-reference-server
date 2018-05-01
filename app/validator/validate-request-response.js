@@ -58,6 +58,20 @@ const checkDetails = (details) => {
   assert.ok(details.authorisationServerId, 'authorisationServerId missing from validate call');
 };
 
+const writeToKafka = async (details, request, res) => {
+  try {
+    const kafka = await kafkaStream();
+    await kafka.write({
+      details,
+      request: reqSerializer(request),
+      response: resSerializer(res),
+    });
+  } catch (err) {
+    errorLog(err);
+    throw err;
+  }
+};
+
 const validate = async (req, res, details) => {
   checkDetails(details);
   const request = reqSerializer(req);
@@ -69,19 +83,12 @@ const validate = async (req, res, details) => {
     const app = await validatorApp();
     debug('validate');
     await app.handle(request, response);
+    if (response.statusCode !== 400) {
+      debug('validation passed');
+    }
   }
   if (kakfaConfigured()) {
-    try {
-      const kafka = await kafkaStream();
-      await kafka.write({
-        details,
-        request: reqSerializer(request),
-        response: resSerializer(res),
-      });
-    } catch (err) {
-      errorLog(err);
-      throw err;
-    }
+    await writeToKafka(details, request, res);
   }
   return response;
 };

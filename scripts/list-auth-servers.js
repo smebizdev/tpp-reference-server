@@ -2,8 +2,10 @@ const path = require('path');
 const dotenv = require('dotenv');
 const debug = require('debug')('debug');
 
-const ENVS = dotenv.load({ path: path.join(__dirname, '..', '.env') });
-debug(`ENVs set: ${JSON.stringify(ENVS.parsed)}`);
+if (process.env.NODE_ENV !== 'test') {
+  const ENVS = dotenv.load({ path: path.join(__dirname, '..', '.env') });
+  debug(`ENVs set: ${JSON.stringify(ENVS.parsed)}`);
+}
 
 const { allAuthorisationServers } = require('../app/authorisation-servers');
 

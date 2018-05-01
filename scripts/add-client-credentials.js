@@ -3,9 +3,10 @@ const dotenv = require('dotenv');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
 
-const ENVS = dotenv.load({ path: path.join(__dirname, '..', '.env') });
-debug(`ENVs set: ${JSON.stringify(ENVS.parsed)}`);
-
+if (process.env.NODE_ENV !== 'test') {
+  const ENVS = dotenv.load({ path: path.join(__dirname, '..', '.env') });
+  debug(`ENVs set: ${JSON.stringify(ENVS.parsed)}`);
+}
 const { updateClientCredentials } = require('../app/authorisation-servers');
 
 const args = process.argv.slice(2).reduce((acc, arg) => {

@@ -2,6 +2,8 @@ const url = require('url');
 const objectSize = require('object.size');
 const assert = require('assert');
 const errorLog = require('debug')('error');
+const debug = require('debug')('debug');
+const { validatorApp, kakfaConfigured, kafkaStream } = require('./init-validator-app');
 
 const getRawQs = req => (
   req.qsRaw && req.qsRaw.length
@@ -56,7 +58,7 @@ const checkDetails = (details) => {
   assert.ok(details.authorisationServerId, 'authorisationServerId missing from validate call');
 };
 
-const validate = async (app, kafkaStream, req, res, details) => {
+const validate = async (req, res, details) => {
   checkDetails(details);
   const request = reqSerializer(req);
   let response;
@@ -64,11 +66,14 @@ const validate = async (app, kafkaStream, req, res, details) => {
     response = noResponseError;
   } else {
     response = resSerializer(res);
-    app.handle(request, response);
+    const app = await validatorApp();
+    debug('validate');
+    await app.handle(request, response);
   }
-  if (kafkaStream) {
+  if (kakfaConfigured()) {
     try {
-      await kafkaStream.write({
+      const kafka = await kafkaStream();
+      await kafka.write({
         details,
         request: reqSerializer(request),
         response: resSerializer(res),

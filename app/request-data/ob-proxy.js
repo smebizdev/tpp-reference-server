@@ -48,7 +48,7 @@ const resourceRequestHandler = async (req, res) => {
       throw err;
     }
 
-    const result = await obtainResult(req, call, response, headers);
+    const result = await obtainResult(call, response, headers);
 
     return res.status(response.status).json(result);
   } catch (err) {

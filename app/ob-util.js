@@ -48,26 +48,23 @@ const createRequest = (requestObj, headers) => {
   return req;
 };
 
-const validateRequestResponse = async (validatorApp, kafkaStream, req, res, responseBody, details) => { // eslint-disable-line
-  const { statusCode, headers, body } = await validate(validatorApp, kafkaStream, req, res, details); // eslint-disable-line
+const validateRequestResponse = async (req, res, responseBody, details) => {
+  const { statusCode, headers, body } = await validate(req, res, details);
   debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
   const failedValidation = body.failedValidation || false;
   return Object.assign(responseBody, { failedValidation });
 };
 
-const obtainResult = async (req, call, response, headers) => {
+const obtainResult = async (call, response, headers) => {
   let result;
   if (validateResponseOn()) {
     result =
-      await validateRequestResponse(
-        req.validatorApp,
-        req.kafkaStream, call, response.res, response.body, {
-          interactionId: headers.interactionId,
-          sessionId: headers.sessionId,
-          permissions: headers.permissions,
-          authorisationServerId: headers.authorisationServerId,
-        },
-      );
+      await validateRequestResponse(call, response.res, response.body, {
+        interactionId: headers.interactionId,
+        sessionId: headers.sessionId,
+        permissions: headers.permissions,
+        authorisationServerId: headers.authorisationServerId,
+      });
   } else {
     result = response.body;
   }

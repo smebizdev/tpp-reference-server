@@ -1,3 +1,5 @@
+const debug = require('debug')('debug');
+
 const validationErrorMiddleware = (err, req, res, next) => { // eslint-disable-line
   if (err.failedValidation) {
     const {
@@ -9,7 +11,7 @@ const validationErrorMiddleware = (err, req, res, next) => { // eslint-disable-l
       warnings,
       message,
     } = err;
-
+    debug('failed validation');
     res.body = {
       apiDeclarations,
       errors,

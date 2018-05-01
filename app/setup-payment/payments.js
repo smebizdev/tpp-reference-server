@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { createRequest } = require('../ob-util');
+const { createRequest, obtainResult } = require('../ob-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
@@ -22,7 +22,8 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     const response = await call.send(paymentData);
     debug(`${response.status} response for ${paymentsUri}`);
 
-    return response.body;
+    const result = await obtainResult(call, response, headers);
+    return result;
   } catch (err) {
     if (err.response && err.response.text) {
       error(err.response.text);

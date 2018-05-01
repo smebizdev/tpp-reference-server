@@ -1,5 +1,5 @@
 const request = require('superagent');
-const { createRequest } = require('../ob-util');
+const { createRequest, obtainResult } = require('../ob-util');
 const log = require('debug')('log');
 const debug = require('debug')('debug');
 const assert = require('assert');
@@ -26,7 +26,9 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const call = createRequest(request.post(accountRequestsUri), headers);
     const response = await call.send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
-    return response.body;
+
+    const result = await obtainResult(call, response, headers);
+    return result;
   } catch (err) {
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 500;

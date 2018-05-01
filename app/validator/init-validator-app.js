@@ -64,12 +64,7 @@ const kafkaStream = async () => {
   return _kafkaStream;
 };
 
-const addValidatorMiddleware = async (req, res, next) => {
-  next();
-};
-
 exports.initValidatorApp = initValidatorApp;
-exports.addValidatorMiddleware = addValidatorMiddleware;
 exports.validateResponseOn = validateResponseOn;
 exports.validatorApp = validatorApp;
 exports.kafkaStream = kafkaStream;

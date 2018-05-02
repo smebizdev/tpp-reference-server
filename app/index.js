@@ -4,7 +4,6 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { addValidatorMiddleware } = require('./validator');
 const { requireAuthorization } = require('./session');
 const { requireAuthorisationServerId } = require('./authorisation-servers');
 const { login } = require('./session');
@@ -53,7 +52,6 @@ app.all(
   '/open-banking/*',
   requireAuthorization,
   requireAuthorisationServerId,
-  addValidatorMiddleware,
 );
 app.use('/open-banking', resourceRequestHandler);
 

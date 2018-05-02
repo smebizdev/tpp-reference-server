@@ -1,5 +1,8 @@
 const assert = require('assert');
 const { setupResponseLogging } = require('./response-logger');
+const debug = require('debug')('debug');
+const util = require('util');
+const { validate, validateResponseOn } = require('./validator');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
 
@@ -45,9 +48,34 @@ const createRequest = (requestObj, headers) => {
   return req;
 };
 
+const validateRequestResponse = async (req, res, responseBody, details) => {
+  const { statusCode, headers, body } = await validate(req, res, details);
+  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
+  const failedValidation = body.failedValidation || false;
+  return Object.assign(responseBody, { failedValidation });
+};
+
+const obtainResult = async (call, response, headers) => {
+  let result;
+  if (validateResponseOn()) {
+    result =
+      await validateRequestResponse(call, response.res, response.body, {
+        interactionId: headers.interactionId,
+        sessionId: headers.sessionId,
+        permissions: headers.permissions,
+        authorisationServerId: headers.authorisationServerId,
+      });
+  } else {
+    result = response.body;
+  }
+  return result;
+};
+
 exports.setupMutualTLS = setupMutualTLS;
 exports.createRequest = createRequest;
+exports.obtainResult = obtainResult;
 exports.caCert = ca;
 exports.clientCert = cert;
 exports.clientKey = key;
 exports.mtlsEnabled = mtlsEnabled;
+exports.validateRequestResponse = validateRequestResponse;

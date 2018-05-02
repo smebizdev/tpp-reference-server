@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { initValidatorApp, validate } = require('../../app/validator/index.js');
+const { validate } = require('../../app/validator/index.js');
 
 const { validRequest } = require('./fixtures/valid-request');
 const { validResponse } = require('./fixtures/valid-response');
@@ -14,14 +14,17 @@ const details = {
 };
 
 describe('validate', () => {
-  let app;
-  before(async () => {
-    app = await initValidatorApp();
+  before(() => {
+    process.env.VALIDATE_RESPONSE = 'true';
+  });
+
+  after(() => {
+    delete process.env.VALIDATE_RESPONSE;
   });
 
   describe('without response provided', () => {
     it('returns 400 status with json error object', async () => {
-      const response = await validate(app, null, validRequest(), null, details);
+      const response = await validate(validRequest(), null, details);
       assert.equal(response.statusCode, 400);
       assert.equal(response.body.failedValidation, true);
       assert.equal(response.body.message, 'Response validation failed: response was blank.');
@@ -30,7 +33,7 @@ describe('validate', () => {
 
   describe('with valid request and response', () => {
     it('returns response status and json', async () => {
-      const response = await validate(app, null, validRequest(), validResponse(), details);
+      const response = await validate(validRequest(), validResponse(), details);
       const expected = validResponse();
       assert.equal(response.statusCode, expected.statusCode);
       assert.deepEqual(response.headers, expected.headers);
@@ -52,7 +55,7 @@ describe('validate', () => {
     it('returns 400 status with json error object', async () => {
       const invalidResponse = validResponse();
       delete invalidResponse.body.Data.Balance[0].Amount;
-      const response = await validate(app, null, validRequest(), invalidResponse, details);
+      const response = await validate(validRequest(), invalidResponse, details);
       const {
         failedValidation, message, originalResponse, results,
       } = response.body;

@@ -1,12 +1,10 @@
 const request = require('superagent');
-const { createRequest } = require('../ob-util');
+const { createRequest, obtainResult } = require('../ob-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessTokenAndPermissions } = require('../authorise');
 const { extractHeaders } = require('../session');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
-const util = require('util');
-const { validate, validateResponseOn } = require('../validator');
 
 const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
@@ -26,13 +24,6 @@ const scopeAndUrl = (req, host) => {
   const proxiedUrl = `${host}${path}`;
   const scope = path.split('/')[3];
   return { proxiedUrl, scope };
-};
-
-const validateRequestResponse = async (validatorApp, kafkaStream, req, res, responseBody, details) => { // eslint-disable-line
-  const { statusCode, headers, body } = await validate(validatorApp, kafkaStream, req, res, details); // eslint-disable-line
-  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
-  const failedValidation = body.failedValidation || false;
-  return Object.assign(responseBody, { failedValidation });
 };
 
 const resourceRequestHandler = async (req, res) => {
@@ -57,21 +48,8 @@ const resourceRequestHandler = async (req, res) => {
       throw err;
     }
 
-    let result;
-    if (validateResponseOn()) {
-      result =
-        await validateRequestResponse(
-          req.validatorApp,
-          req.kafkaStream, call, response.res, response.body, {
-            interactionId: headers.interactionId,
-            sessionId: headers.sessionId,
-            permissions: headers.permissions,
-            authorisationServerId: headers.authorisationServerId,
-          },
-        );
-    } else {
-      result = response.body;
-    }
+    const result = await obtainResult(call, response, headers);
+
     return res.status(response.status).json(result);
   } catch (err) {
     const status = err.response ? err.response.status : 500;

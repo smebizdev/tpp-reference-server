@@ -41,26 +41,31 @@ const initKafkaStream = async () => {
   return kafkaStream;
 };
 
-let validatorApp;
-let kafkaStream;
+let _validatorApp; // eslint-disable-line
+let _kafkaStream; // eslint-disable-line
 
-const addValidatorMiddleware = async (req, res, next) => {
-  if (validateResponseOn()) {
-    if (!validatorApp) {
-      validatorApp = await initValidatorApp();
-    }
-    req.validatorApp = validatorApp;
-
-    if (kakfaConfigured()) {
-      if (!kafkaStream) {
-        kafkaStream = await initKafkaStream();
-      }
-      req.kafkaStream = kafkaStream;
-    }
+const validatorApp = async () => {
+  if (!validateResponseOn()) {
+    return undefined;
   }
-  next();
+  if (!_validatorApp) {
+    _validatorApp = await initValidatorApp();
+  }
+  return _validatorApp;
+};
+
+const kafkaStream = async () => {
+  if (!(validateResponseOn() && kakfaConfigured())) {
+    return undefined;
+  }
+  if (!_kafkaStream) {
+    _kafkaStream = await initKafkaStream();
+  }
+  return _kafkaStream;
 };
 
 exports.initValidatorApp = initValidatorApp;
-exports.addValidatorMiddleware = addValidatorMiddleware;
 exports.validateResponseOn = validateResponseOn;
+exports.validatorApp = validatorApp;
+exports.kafkaStream = kafkaStream;
+exports.kakfaConfigured = kakfaConfigured;

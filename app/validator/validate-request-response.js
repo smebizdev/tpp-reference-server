@@ -23,7 +23,7 @@ const lowerCaseHeaders = (req) => {
   return req;
 };
 
-const reqSerializer = (req) => {
+const reqSerializer = (req, lowerCaseHeader = true) => {
   let serialized;
   const keys = Object.keys(req);
   if (keys.includes('_data') || keys.includes('res')) {
@@ -38,7 +38,10 @@ const reqSerializer = (req) => {
   } else {
     serialized = req;
   }
-  return lowerCaseHeaders(serialized);
+  if (lowerCaseHeader) {
+    serialized = lowerCaseHeaders(serialized);
+  }
+  return serialized;
 };
 
 const resSerializer = res => ({

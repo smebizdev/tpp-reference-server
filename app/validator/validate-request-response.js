@@ -92,7 +92,7 @@ const writeToKafka = async (logObject) => {
   }
 };
 
-const validate = async (req, res, details) => {
+const runValidation = async (req, res, details) => {
   checkDetails(details);
   const request = reqSerializer(req);
   let validationResponse;
@@ -107,6 +107,11 @@ const validate = async (req, res, details) => {
       debug('validation passed');
     }
   }
+  return validationResponse;
+};
+
+const validate = async (req, res, details) => {
+  const validationResponse = await runValidation(req, res, details);
   if (kakfaConfigured()) {
     const logObject = logFormat(req, res, details, validationResponse);
     await writeToKafka(logObject);

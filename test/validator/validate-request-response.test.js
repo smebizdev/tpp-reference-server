@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { validate } = require('../../app/validator/index.js');
+const { validate, logFormat } = require('../../app/validator');
 
 const { validRequest } = require('./fixtures/valid-request');
 const { validResponse } = require('./fixtures/valid-response');
@@ -70,6 +70,23 @@ describe('validate', () => {
       const expected = invalidResponse();
       assert.deepEqual(JSON.parse(originalResponse), expected.body);
       assert.deepEqual(results, validationResults);
+    });
+
+    it('and logFormat returns output object for logging', async () => {
+      const response = await validate(validRequest(), invalidResponse(), details);
+      const { failedValidation, message, results } = response.body;
+      const output = logFormat(validRequest(), invalidResponse(), details, response);
+
+      assert.deepEqual(output.request, validRequest());
+      assert.deepEqual(output.response, invalidResponse());
+      assert.deepEqual(output.details, details);
+      assert.ok(output.report, 'expect output object to contain report property');
+      const expectedReport = {
+        failedValidation,
+        message,
+        results,
+      };
+      assert.deepEqual(output.report, expectedReport);
     });
   });
 });

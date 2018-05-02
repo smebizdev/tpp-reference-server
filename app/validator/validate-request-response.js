@@ -64,6 +64,24 @@ const checkDetails = (details) => {
   assert.ok(details.authorisationServerId, 'authorisationServerId missing from validate call');
 };
 
+const validationReport = (validationResponse) => {
+  let report;
+  if (validationResponse.statusCode === 400) {
+    report = JSON.parse(JSON.stringify(validationResponse.body));
+    delete report.originalResponse;
+  } else {
+    report = { validationFailed: false };
+  }
+  return report;
+};
+
+const logFormat = (request, response, details, validationResponse) => ({
+  details,
+  report: validationReport(validationResponse),
+  request: reqSerializer(request, false),
+  response: resSerializer(response),
+});
+
 const writeToKafka = async (details, request, res) => {
   try {
     const kafka = await kafkaStream();
@@ -99,4 +117,5 @@ const validate = async (req, res, details) => {
   return response;
 };
 
+exports.logFormat = logFormat;
 exports.validate = validate;

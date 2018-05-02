@@ -82,14 +82,10 @@ const logFormat = (request, response, details, validationResponse) => ({
   response: resSerializer(response),
 });
 
-const writeToKafka = async (details, request, res) => {
+const writeToKafka = async (logObject) => {
   try {
     const kafka = await kafkaStream();
-    await kafka.write({
-      details,
-      request: reqSerializer(request),
-      response: resSerializer(res),
-    });
+    await kafka.write(logObject);
   } catch (err) {
     errorLog(err);
     throw err;
@@ -112,7 +108,8 @@ const validate = async (req, res, details) => {
     }
   }
   if (kakfaConfigured()) {
-    await writeToKafka(details, request, res);
+    const logObject = logFormat(req, res, details, validationResponse);
+    await writeToKafka(logObject);
   }
   return validationResponse;
 };

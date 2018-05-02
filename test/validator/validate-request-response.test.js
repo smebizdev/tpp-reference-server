@@ -7,6 +7,12 @@ const { validResponse } = require('./fixtures/valid-response');
 process.env.ACCOUNT_SWAGGER = process.env.ACCOUNT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json';
 process.env.PAYMENT_SWAGGER = process.env.PAYMENT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json';
 
+const invalidResponse = () => {
+  const response = validResponse();
+  delete response.body.Data.Balance[0].Amount;
+  return response;
+};
+
 const details = {
   interactionId: '590bcc25-517c-4caf-a140-077b41ffe095',
   sessionId: '2789f200-4960-11e8-b019-35d9f0621d63',
@@ -53,9 +59,7 @@ describe('validate', () => {
     };
 
     it('returns 400 status with json error object', async () => {
-      const invalidResponse = validResponse();
-      delete invalidResponse.body.Data.Balance[0].Amount;
-      const response = await validate(validRequest(), invalidResponse, details);
+      const response = await validate(validRequest(), invalidResponse(), details);
       const {
         failedValidation, message, originalResponse, results,
       } = response.body;
@@ -63,8 +67,7 @@ describe('validate', () => {
       assert.equal(response.statusCode, 400);
       assert(failedValidation, true);
       assert(message, 'Response validation failed: failed schema validation');
-      const expected = validResponse();
-      delete expected.body.Data.Balance[0].Amount;
+      const expected = invalidResponse();
       assert.deepEqual(JSON.parse(originalResponse), expected.body);
       assert.deepEqual(results, validationResults);
     });

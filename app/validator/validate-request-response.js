@@ -24,18 +24,21 @@ const lowerCaseHeaders = (req) => {
 };
 
 const reqSerializer = (req) => {
+  let serialized;
   const keys = Object.keys(req);
   if (keys.includes('_data') || keys.includes('res')) {
-    return lowerCaseHeaders({
+    serialized = {
       method: req.method,
       url: req.url,
       qs: getQs(req),
       path: req.url && url.parse(req.url).pathname,
       body: req._data, // eslint-disable-line
       headers: req.header,
-    });
+    };
+  } else {
+    serialized = req;
   }
-  return lowerCaseHeaders(req);
+  return lowerCaseHeaders(serialized);
 };
 
 const resSerializer = res => ({

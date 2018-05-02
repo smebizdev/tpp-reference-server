@@ -99,22 +99,22 @@ const writeToKafka = async (details, request, res) => {
 const validate = async (req, res, details) => {
   checkDetails(details);
   const request = reqSerializer(req);
-  let response;
+  let validationResponse;
   if (!res) {
-    response = noResponseError;
+    validationResponse = noResponseError;
   } else {
-    response = resSerializer(res);
+    validationResponse = resSerializer(res);
     const app = await validatorApp();
     debug('validate');
-    await app.handle(request, response);
-    if (response.statusCode !== 400) {
+    await app.handle(request, validationResponse);
+    if (validationResponse.statusCode !== 400) {
       debug('validation passed');
     }
   }
   if (kakfaConfigured()) {
     await writeToKafka(details, request, res);
   }
-  return response;
+  return validationResponse;
 };
 
 exports.logFormat = logFormat;

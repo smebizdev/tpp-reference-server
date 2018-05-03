@@ -52,9 +52,10 @@ nock(/example\.com/, requestHeaders)
     },
   });
 
+// bad payload to trigger validation error
 nock(/example\.com/, requestHeaders)
   .get('/open-banking/v1.1/accounts/22290/balances')
-  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} }); // bad payload to trigger validation error
+  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} });
 
 nock(/example\.com/)
   .get('/open-banking/v1.1/accounts/non-existing')

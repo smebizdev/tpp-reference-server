@@ -1,8 +1,10 @@
 const request = require('superagent');
 const { createRequest, obtainResult } = require('../ob-util');
 const log = require('debug')('log');
+const errorLog = require('debug')('error');
 const debug = require('debug')('debug');
 const assert = require('assert');
+const util = require('util');
 
 const buildAccountRequestData = Permissions => ({
   Data: { Permissions },
@@ -30,6 +32,7 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const result = await obtainResult(call, response, headers);
     return result;
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 500;
     throw error;
@@ -50,6 +53,7 @@ const getAccountRequest = async (accountRequestId, resourceServerPath, headers) 
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 500;
     throw error;
@@ -69,6 +73,7 @@ const deleteAccountRequest = async (accountRequestId, resourceServerPath, header
     }
     throw new Error('Bad Request');
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 400;
     throw error;

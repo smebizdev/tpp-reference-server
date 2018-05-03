@@ -1,7 +1,5 @@
 const assert = require('assert');
 const { setupResponseLogging } = require('./response-logger');
-const debug = require('debug')('debug');
-const util = require('util');
 const { validate, validateResponseOn } = require('./validator');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0; // To enable use of self signed certs
@@ -49,9 +47,7 @@ const createRequest = (requestObj, headers) => {
 };
 
 const validateRequestResponse = async (req, res, responseBody, details) => {
-  const { statusCode, headers, body } = await validate(req, res, details);
-  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
-  const failedValidation = body.failedValidation || false;
+  const { failedValidation } = await validate(req, res, details);
   return Object.assign(responseBody, { failedValidation });
 };
 

@@ -94,16 +94,13 @@ const writeToKafka = async (logObject) => {
 
 const runValidation = async (req, res, details) => {
   checkDetails(details);
-  const request = reqSerializer(req);
-  let validationResponse;
   if (!res) {
-    validationResponse = noResponseError;
-  } else {
-    validationResponse = resSerializer(res);
-    const app = await validatorApp();
-    debug('validate');
-    await app.handle(request, validationResponse);
+    return noResponseError;
   }
+  const validationResponse = resSerializer(res);
+  const app = await validatorApp();
+  debug('validate');
+  await app.handle(reqSerializer(req), validationResponse);
   return validationResponse;
 };
 

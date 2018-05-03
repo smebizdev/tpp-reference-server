@@ -103,9 +103,6 @@ const runValidation = async (req, res, details) => {
     const app = await validatorApp();
     debug('validate');
     await app.handle(request, validationResponse);
-    if (validationResponse.statusCode !== 400) {
-      debug('validation passed');
-    }
   }
   return validationResponse;
 };

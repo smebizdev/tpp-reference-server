@@ -2,6 +2,7 @@ const debug = require('debug')('debug');
 
 const validationErrorMiddleware = (err, req, res, next) => { // eslint-disable-line
   if (err.failedValidation) {
+    debug('failed validation');
     const {
       apiDeclarations,
       results,
@@ -11,7 +12,6 @@ const validationErrorMiddleware = (err, req, res, next) => { // eslint-disable-l
       warnings,
       message,
     } = err;
-    debug('failed validation');
     res.body = {
       apiDeclarations,
       errors,
@@ -22,6 +22,8 @@ const validationErrorMiddleware = (err, req, res, next) => { // eslint-disable-l
       message,
     };
     return res.status(400).end();
+  } else if (res.statusCode !== 400) {
+    debug('passed validation');
   }
   next();
 };

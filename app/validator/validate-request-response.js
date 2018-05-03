@@ -70,7 +70,7 @@ const validationReport = (validationResponse) => {
     report = JSON.parse(JSON.stringify(validationResponse.body));
     delete report.originalResponse;
   } else {
-    report = { validationFailed: false };
+    report = { failedValidation: false };
   }
   return report;
 };
@@ -79,7 +79,7 @@ const logFormat = (request, response, details, validationResponse) => ({
   details,
   report: validationReport(validationResponse),
   request: reqSerializer(request, false),
-  response: resSerializer(response),
+  response: response ? resSerializer(response) : response,
 });
 
 const writeToKafka = async (logObject) => {
@@ -109,12 +109,13 @@ const runValidation = async (req, res, details) => {
 
 const validate = async (req, res, details) => {
   const validationResponse = await runValidation(req, res, details);
+  const logObject = logFormat(req, res, details, validationResponse);
   if (kakfaConfigured()) {
-    const logObject = logFormat(req, res, details, validationResponse);
     await writeToKafka(logObject);
   }
-  return validationResponse;
+  return logObject.report;
 };
 
 exports.logFormat = logFormat;
+exports.runValidation = runValidation;
 exports.validate = validate;

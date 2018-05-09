@@ -45,6 +45,9 @@ To check services running:
 brew services list
 ```
 
+You can find a [Kafka quickstart installation guide here](https://kafka.apache.org/quickstart),
+for alternate install instructions.
+
 We expect to add steps for setting up a docker container for running Kafka soon.
 
 ## Creating test topic in Kafka

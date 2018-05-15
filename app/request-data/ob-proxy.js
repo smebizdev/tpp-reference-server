@@ -1,13 +1,10 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../certs-util');
+const { createRequest, obtainResult } = require('../ob-util');
 const { resourceServerPath } = require('../authorisation-servers');
 const { consentAccessTokenAndPermissions } = require('../authorise');
 const { extractHeaders } = require('../session');
-const { setupResponseLogging } = require('../response-logger');
 const debug = require('debug')('debug');
 const error = require('debug')('error');
-const util = require('util');
-const { validate, validateResponseOn } = require('../validator');
 
 const accessTokenAndPermissions = async (username, authorisationServerId, scope) => {
   let accessToken;
@@ -19,8 +16,7 @@ const accessTokenAndPermissions = async (username, authorisationServerId, scope)
     accessToken = null;
     permissions = null;
   }
-  const bearerToken = `Bearer ${accessToken}`;
-  return { bearerToken, permissions };
+  return { accessToken, permissions };
 };
 
 const scopeAndUrl = (req, host) => {
@@ -30,35 +26,19 @@ const scopeAndUrl = (req, host) => {
   return { proxiedUrl, scope };
 };
 
-const validateRequestResponse = (validatorApp, req, res, responseBody) => {
-  const { statusCode, headers, body } = validate(validatorApp, req, res);
-  debug(`validationResponse: ${util.inspect({ statusCode, headers, body })}`);
-  const failedValidation = body.failedValidation || false;
-  return Object.assign(responseBody, { failedValidation });
-};
-
 const resourceRequestHandler = async (req, res) => {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    const {
-      interactionId, fapiFinancialId, sessionId, username, authorisationServerId,
-    } = await extractHeaders(req.headers);
-    const host = await resourceServerPath(authorisationServerId);
+    const reqHeaders = await extractHeaders(req.headers);
+    const host = await resourceServerPath(reqHeaders.authorisationServerId);
     const { proxiedUrl, scope } = scopeAndUrl(req, host);
-    const { bearerToken, permissions } =
-      await accessTokenAndPermissions(username, authorisationServerId, scope);
-    debug({ proxiedUrl, scope, bearerToken, fapiFinancialId }); // eslint-disable-line
-    const call = setupMutualTLS(request.get(proxiedUrl))
-      .set('Authorization', bearerToken)
-      .set('Accept', 'application/json')
-      .set('x-fapi-financial-id', fapiFinancialId)
-      .set('x-fapi-interaction-id', interactionId);
-    setupResponseLogging(call, {
-      interactionId,
-      sessionId,
-      permissions,
-      authorisationServerId,
+    const { accessToken, permissions } =
+      await accessTokenAndPermissions(reqHeaders.username, reqHeaders.authorisationServerId, scope);
+    const headers = Object.assign({ accessToken, permissions }, reqHeaders);
+    debug({
+      proxiedUrl, scope, accessToken, fapiFinancialId: headers.fapiFinancialId,
     });
+    const call = createRequest(request.get(proxiedUrl), headers);
 
     let response;
     try {
@@ -68,12 +48,8 @@ const resourceRequestHandler = async (req, res) => {
       throw err;
     }
 
-    let result;
-    if (validateResponseOn()) {
-      result = validateRequestResponse(req.validatorApp, call, response.res, response.body);
-    } else {
-      result = response.body;
-    }
+    const result = await obtainResult(call, response, headers);
+
     return res.status(response.status).json(result);
   } catch (err) {
     const status = err.response ? err.response.status : 500;

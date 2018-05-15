@@ -52,12 +52,13 @@ nock(/example\.com/, requestHeaders)
     },
   });
 
+// bad payload to trigger validation error
 nock(/example\.com/, requestHeaders)
   .get('/open-banking/v1.1/accounts/22290/balances')
-  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} }); // bad payload to trigger validation error
+  .reply(200, { Data: { Balance: {} }, Links: { Self: '' }, Meta: {} });
 
 nock(/example\.com/)
-  .get('/open-banking/non-existing')
+  .get('/open-banking/v1.1/accounts/non-existing')
   .reply(404);
 
 const login = application => request(application)
@@ -268,14 +269,14 @@ describe('Proxy', () => {
     process.env.VALIDATE_RESPONSE = 'true';
     const { sessionId } = await loginAsync(app);
     const r = await requestResource(sessionId, '/open-banking/v1.1/accounts', app);
-    assert.equal(r.body.failedValidation, false);
+    assert.equal(r.body.failedValidation, false, `Expect failedValidation: false in response JSON, got: ${r.body.failedValidation}`);
   });
 
   it('sets failedValidation true on response when VALIDATE_RESPONSE is true and validation fails', async () => {
     process.env.VALIDATE_RESPONSE = 'true';
     const { sessionId } = await loginAsync(app);
     const r = await requestResource(sessionId, '/open-banking/v1.1/accounts/22290/balances', app);
-    assert.equal(r.body.failedValidation, true);
+    assert.equal(r.body.failedValidation, true, `Expect failedValidation: true in response JSON, got: ${r.body.failedValidation}`);
   });
 
   it('does not set failedValidation on response when VALIDATE_RESPONSE is false', async () => {
@@ -300,7 +301,7 @@ describe('Proxy', () => {
 
   it('returns proxy 404 reponse for /open-banking/non-existing', async () => {
     const { sessionId } = await loginAsync(app);
-    const r = await requestResource(sessionId, '/open-banking/non-existing', app);
+    const r = await requestResource(sessionId, '/open-banking/v1.1/accounts/non-existing', app);
     assert.equal(r.status, 404);
   });
 

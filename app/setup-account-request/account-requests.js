@@ -1,36 +1,18 @@
 const request = require('superagent');
-const { setupMutualTLS } = require('../certs-util');
+const { createRequest, obtainResult } = require('../ob-util');
 const log = require('debug')('log');
+const errorLog = require('debug')('error');
 const debug = require('debug')('debug');
 const assert = require('assert');
-const { setupResponseLogging } = require('../response-logger');
+const util = require('util');
 
 const buildAccountRequestData = Permissions => ({
   Data: { Permissions },
   Risk: {},
 });
 
-const APPLICATION_JSON = 'application/json; charset=utf-8';
-
 const verifyHeaders = (headers) => {
-  assert.ok(headers.accessToken, 'accessToken missing from headers');
-  assert.ok(headers.fapiFinancialId, 'fapiFinancialId missing from headers');
-  assert.ok(headers.interactionId, 'interactionId missing from headers');
   assert.ok(headers.sessionId, 'sessionId missing from headers');
-};
-
-const setHeaders = (requestObj, headers) => requestObj
-  .set('authorization', `Bearer ${headers.accessToken}`)
-  .set('content-type', APPLICATION_JSON)
-  .set('accept', APPLICATION_JSON)
-  .set('x-fapi-interaction-id', headers.interactionId)
-  .set('x-fapi-financial-id', headers.fapiFinancialId);
-
-const createRequest = (requestObj, headers) => {
-  const req = setHeaders(setupMutualTLS(requestObj), headers);
-  const { interactionId, sessionId, authorisationServerId } = headers;
-  setupResponseLogging(req, { interactionId, sessionId, authorisationServerId });
-  return req;
 };
 
 /*
@@ -43,11 +25,14 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const body = buildAccountRequestData(headers.permissions);
     const accountRequestsUri = `${resourceServerPath}/open-banking/v1.1/account-requests`;
     log(`POST to ${accountRequestsUri}`);
-    const response = await createRequest(request.post(accountRequestsUri), headers)
-      .send(body);
+    const call = createRequest(request.post(accountRequestsUri), headers);
+    const response = await call.send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
-    return response.body;
+
+    const result = await obtainResult(call, response, headers);
+    return result;
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 500;
     throw error;
@@ -68,6 +53,7 @@ const getAccountRequest = async (accountRequestId, resourceServerPath, headers) 
     debug(`${response.status} response for ${accountRequestsUri}`);
     return response.body;
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 500;
     throw error;
@@ -87,6 +73,7 @@ const deleteAccountRequest = async (accountRequestId, resourceServerPath, header
     }
     throw new Error('Bad Request');
   } catch (err) {
+    errorLog(util.inspect(err));
     const error = new Error(err.message);
     error.status = err.response ? err.response.status : 400;
     throw error;

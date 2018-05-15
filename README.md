@@ -693,6 +693,10 @@ The call out to the `/payment-submissions` endpoint with a `GET` and the `Paymen
 
 You can follow these [instructions to deploy to heroku](./README-HEROKU.md).
 
+## Validating API responses
+
+You can follow these [instructions to configure optional validation of API responses](./README_VALIDATION.md).
+
 ## Testing
 
 Run unit tests with:

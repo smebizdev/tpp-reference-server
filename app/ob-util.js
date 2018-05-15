@@ -29,7 +29,7 @@ const setHeaders = (requestObj, headers) => {
   setOptionalHeader('x-fapi-customer-last-logged-time', headers.customerLastLogged, requestObj);
   setOptionalHeader('x-fapi-customer-ip-address', headers.customerIp, requestObj);
   setOptionalHeader('x-jws-signature', headers.jwsSignature, requestObj);
-  setOptionalHeader('x-validation-run-id', headers.jwsSignature, requestObj);
+  setOptionalHeader('x-validation-run-id', headers.validationRunId, requestObj);
   return requestObj;
 };
 

@@ -42,8 +42,18 @@ const verifyHeaders = (headers) => {
 const createRequest = (requestObj, headers) => {
   verifyHeaders(headers);
   const req = setHeaders(setupMutualTLS(requestObj), headers);
-  const { interactionId, sessionId, authorisationServerId, validationRunId } = headers;
-  setupResponseLogging(req, { validationRunId, interactionId, sessionId, authorisationServerId });
+  const {
+    interactionId,
+    sessionId,
+    authorisationServerId,
+    validationRunId,
+  } = headers;
+  setupResponseLogging(req, {
+    validationRunId,
+    interactionId,
+    sessionId,
+    authorisationServerId,
+  });
   return req;
 };
 

@@ -11,7 +11,6 @@ process.env.OB_DIRECTORY_HOST = 'http://example.com';
 const { app } = require('../app/index.js');
 const { session } = require('../app/session');
 const assert = require('assert');
-const util = require('util');
 
 const nock = require('nock');
 
@@ -197,7 +196,7 @@ const resourceApiHost = 'http://example.com';
 const loginAsync = async (application) => {
   const res = await login(application);
   const sessionId = res.body.sid;
-  return { sessionId, res }
+  return { sessionId, res };
 };
 
 const requestResource = async (sessionId, url, application) => {

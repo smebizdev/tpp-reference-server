@@ -36,7 +36,11 @@ const resourceRequestHandler = async (req, res) => {
       await accessTokenAndPermissions(reqHeaders.username, reqHeaders.authorisationServerId, scope);
     const headers = Object.assign({ accessToken, permissions }, reqHeaders);
     debug({
-      proxiedUrl, scope, accessToken, fapiFinancialId: headers.fapiFinancialId,
+      proxiedUrl,
+      scope,
+      accessToken,
+      fapiFinancialId: headers.fapiFinancialId,
+      validationRunId: headers.validationRunId,
     });
     const call = createRequest(request.get(proxiedUrl), headers);
 

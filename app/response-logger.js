@@ -11,6 +11,7 @@ const logger = bunyan.createLogger({
 
 const setupResponseLogging = (requestObj, extras) => {
   if (process.env.NODE_ENV !== 'test' && process.env.LOG_ASPSP_RESPONSES === 'true') {
+    assert.ok(extras.validationRunId, 'validationRunId missing from setupResponseLogging call');
     assert.ok(extras.sessionId, 'sessionId missing from setupResponseLogging call');
     assert.ok(extras.interactionId, 'interactionId missing from setupResponseLogging call');
     assert.ok(extras.authorisationServerId, 'authorisationServerId missing from setupResponseLogging call');

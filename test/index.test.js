@@ -223,7 +223,7 @@ describe('Proxy', () => {
         BaseApiDNSUri: resourceApiHost,
       },
     });
-    setConsent({
+    await setConsent({
       username,
       authorisationServerId: authServerId,
       scope,

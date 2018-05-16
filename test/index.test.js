@@ -3,6 +3,7 @@ const request = require('supertest');
 const authorization = 'abc';
 const fapiFinancialId = 'xyz';
 const authServerId = 'testAuthServerId';
+const validationRunId = 'validationRunId';
 
 process.env.DEBUG = 'error';
 process.env.AUTHORIZATION = authorization;
@@ -203,7 +204,8 @@ const requestResource = async (sessionId, url, application) => {
   const req = request(application)
     .get(url)
     .set('Accept', 'application/json')
-    .set('x-authorization-server-id', authServerId);
+    .set('x-authorization-server-id', authServerId)
+    .set('x-validation-run-id', validationRunId);
   if (sessionId) {
     req.set('authorization', sessionId);
   }

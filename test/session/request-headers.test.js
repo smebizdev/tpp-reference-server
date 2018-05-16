@@ -28,32 +28,26 @@ const requestHeaders = {
   'x-validation-run-id': validationRunId,
 };
 
+const expectedHeaders = extra => Object.assign({}, {
+  fapiFinancialId,
+  sessionId,
+  username,
+  authorisationServerId,
+  validationRunId,
+}, extra);
+
 describe('extractHeaders from request headers', () => {
   it('returns headers object', async () => {
     const interactionId = generatedInteractionId;
     const headers = await extractHeaders(requestHeaders);
-    assert.deepEqual(headers, {
-      fapiFinancialId,
-      interactionId,
-      sessionId,
-      username,
-      authorisationServerId,
-      validationRunId,
-    });
+    assert.deepEqual(headers, expectedHeaders({ interactionId }));
   });
 
   describe('when x-fapi-interaction-id in headers', () => {
     it('returns headers with same interactionId', async () => {
       const interactionId = 'existingId';
       const headers = await extractHeaders(Object.assign({ 'x-fapi-interaction-id': interactionId }, requestHeaders));
-      assert.deepEqual(headers, {
-        fapiFinancialId,
-        interactionId,
-        sessionId,
-        username,
-        authorisationServerId,
-        validationRunId,
-      });
+      assert.deepEqual(headers, expectedHeaders({ interactionId }));
     });
   });
 });

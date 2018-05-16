@@ -3,6 +3,7 @@ const request = require('supertest');
 const authorization = 'abc';
 const fapiFinancialId = 'xyz';
 const authServerId = 'testAuthServerId';
+const validationRunId = 'validationRunId';
 
 process.env.DEBUG = 'error';
 process.env.AUTHORIZATION = authorization;
@@ -11,7 +12,6 @@ process.env.OB_DIRECTORY_HOST = 'http://example.com';
 const { app } = require('../app/index.js');
 const { session } = require('../app/session');
 const assert = require('assert');
-const util = require('util');
 
 const nock = require('nock');
 
@@ -195,39 +195,21 @@ const { drop } = require('../app/storage.js');
 const resourceApiHost = 'http://example.com';
 
 const loginAsync = async (application) => {
-  const loginAnd = login(application);
-  loginAnd.end[util.promisify.custom] = () => new Promise((resolve, reject) =>
-    loginAnd.end((err, res) => {
-      if (err) {
-        reject(err);
-      } else {
-        const sessionId = res.body.sid;
-        resolve({ sessionId, res });
-      }
-    }));
-
-  const endAsync = util.promisify(loginAnd.end);
-  return endAsync();
+  const res = await login(application);
+  const sessionId = res.body.sid;
+  return { sessionId, res };
 };
 
 const requestResource = async (sessionId, url, application) => {
   const req = request(application)
     .get(url)
     .set('Accept', 'application/json')
-    .set('x-authorization-server-id', authServerId);
+    .set('x-authorization-server-id', authServerId)
+    .set('x-validation-run-id', validationRunId);
   if (sessionId) {
     req.set('authorization', sessionId);
   }
-  req.end[util.promisify.custom] = () => new Promise((resolve, reject) =>
-    req.end((err, res) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(res);
-      }
-    }));
-  const endAsync = util.promisify(req.end);
-  return endAsync();
+  return req;
 };
 
 process.env.ACCOUNT_SWAGGER = process.env.ACCOUNT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json';
@@ -241,7 +223,7 @@ describe('Proxy', () => {
         BaseApiDNSUri: resourceApiHost,
       },
     });
-    setConsent({
+    await setConsent({
       username,
       authorisationServerId: authServerId,
       scope,

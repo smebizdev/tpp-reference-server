@@ -18,6 +18,7 @@ const details = {
   interactionId: '590bcc25-517c-4caf-a140-077b41ffe095',
   sessionId: '2789f200-4960-11e8-b019-35d9f0621d63',
   authorisationServerId: 'testAuthServerId',
+  validationRunId: 'testValidationRunId',
 };
 
 describe('validate', () => {

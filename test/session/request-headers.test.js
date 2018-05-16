@@ -7,6 +7,7 @@ const sessionId = 'testSessionId';
 const username = 'testUsername';
 const generatedInteractionId = 'testInteractionId';
 const fapiFinancialId = 'testFapiFinancialId';
+const validationRunId = 'testValidationRunId';
 
 const { extractHeaders } = proxyquire(
   '../../app/session/request-headers.js',
@@ -24,27 +25,29 @@ const { extractHeaders } = proxyquire(
 const requestHeaders = {
   'authorization': sessionId,
   'x-authorization-server-id': authorisationServerId,
+  'x-validation-run-id': validationRunId,
 };
 
+const expectedHeaders = extra => Object.assign({}, {
+  fapiFinancialId,
+  sessionId,
+  username,
+  authorisationServerId,
+  validationRunId,
+}, extra);
+
 describe('extractHeaders from request headers', () => {
-  it('returns authorisationServerId and headers object', async () => {
+  it('returns headers object', async () => {
     const interactionId = generatedInteractionId;
     const headers = await extractHeaders(requestHeaders);
-    // assert.equal(value.authorisationServerId, authorisationServerId);
-    // assert.equal(value.authorisationServerId, authorisationServerId);
-    assert.deepEqual(headers, {
-      fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
-    });
+    assert.deepEqual(headers, expectedHeaders({ interactionId }));
   });
 
   describe('when x-fapi-interaction-id in headers', () => {
     it('returns headers with same interactionId', async () => {
       const interactionId = 'existingId';
       const headers = await extractHeaders(Object.assign({ 'x-fapi-interaction-id': interactionId }, requestHeaders));
-      // assert.equal(value.authorisationServerId, authorisationServerId);
-      assert.deepEqual(headers, {
-        fapiFinancialId, interactionId, sessionId, username, authorisationServerId,
-      });
+      assert.deepEqual(headers, expectedHeaders({ interactionId }));
     });
   });
 });

@@ -8,9 +8,15 @@ const extractHeaders = async (headers) => {
   const fapiFinancialId = await fapiFinancialIdFor(authorisationServerId);
   const interactionId = headers['x-fapi-interaction-id'] || uuidv4();
   const username = await getUsername(sessionId);
+  const validationRunId = headers['x-validation-run-id'];
 
   return {
-    authorisationServerId, fapiFinancialId, interactionId, sessionId, username,
+    authorisationServerId,
+    fapiFinancialId,
+    interactionId,
+    sessionId,
+    username,
+    validationRunId,
   };
 };
 

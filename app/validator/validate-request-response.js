@@ -59,6 +59,7 @@ const noResponseError = {
 };
 
 const checkDetails = (details) => {
+  assert.ok(details.validationRunId, 'validationRunId missing from validate call');
   assert.ok(details.sessionId, 'sessionId missing from validate call');
   assert.ok(details.interactionId, 'interactionId missing from validate call');
   assert.ok(details.authorisationServerId, 'authorisationServerId missing from validate call');

@@ -29,6 +29,7 @@ const setHeaders = (requestObj, headers) => {
   setOptionalHeader('x-fapi-customer-last-logged-time', headers.customerLastLogged, requestObj);
   setOptionalHeader('x-fapi-customer-ip-address', headers.customerIp, requestObj);
   setOptionalHeader('x-jws-signature', headers.jwsSignature, requestObj);
+  setOptionalHeader('x-validation-run-id', headers.validationRunId, requestObj);
   return requestObj;
 };
 
@@ -41,8 +42,18 @@ const verifyHeaders = (headers) => {
 const createRequest = (requestObj, headers) => {
   verifyHeaders(headers);
   const req = setHeaders(setupMutualTLS(requestObj), headers);
-  const { interactionId, sessionId, authorisationServerId } = headers;
-  setupResponseLogging(req, { interactionId, sessionId, authorisationServerId });
+  const {
+    interactionId,
+    sessionId,
+    authorisationServerId,
+    validationRunId,
+  } = headers;
+  setupResponseLogging(req, {
+    validationRunId,
+    interactionId,
+    sessionId,
+    authorisationServerId,
+  });
   return req;
 };
 
@@ -60,6 +71,7 @@ const obtainResult = async (call, response, headers) => {
         sessionId: headers.sessionId,
         permissions: headers.permissions,
         authorisationServerId: headers.authorisationServerId,
+        validationRunId: headers.validationRunId,
       });
   } else {
     result = response.body;

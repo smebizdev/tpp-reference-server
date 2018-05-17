@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/OpenBankingUK/tpp-reference-server.svg?style=svg)](https://circleci.com/gh/OpenBankingUK/tpp-reference-server)
+
 # TPP Reference Server
 
 This application simulates a typical Third Party Provider (TPP) backend server.

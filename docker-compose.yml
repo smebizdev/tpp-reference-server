@@ -59,7 +59,7 @@ services:
      - "TRANSPORT_KEY=''"
      - "VALIDATE_RESPONSE=${VALIDATE_RESPONSE:-false}"
      - "VALIDATION_KAFKA_TOPIC=kafka-test-topic"
-     - "VALIDATION_KAFKA_BROKER=127.0.0.1:9092"
+     - "VALIDATION_KAFKA_BROKER=localhost:9092"
     links:
      - redis
      - mongo

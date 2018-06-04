@@ -57,6 +57,9 @@ services:
      - "SOFTWARE_STATEMENT_REDIRECT_URL=http://localhost:8080/tpp/authorized"
      - "TRANSPORT_CERT=''"
      - "TRANSPORT_KEY=''"
+     - "VALIDATE_RESPONSE=${VALIDATE_RESPONSE:-false}"
+     - "VALIDATION_KAFKA_TOPIC=kafka-test-topic"
+     - "VALIDATION_KAFKA_BROKER=localhost:9092"
     links:
      - redis
      - mongo

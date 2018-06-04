@@ -11,9 +11,6 @@ WORKDIR /home/node/app
 RUN chown -R node:node /home/node/app
 USER node:node
 
-# ARG TAG_VERSION=master
-# RUN git clone -b ${TAG_VERSION} --single-branch https://github.com/OpenBankingUK/tpp-reference-server.git /home/node/app/tpp-reference-server
-
 RUN mkdir /home/node/app/tpp-reference-server
 COPY . /home/node/app/tpp-reference-server
 WORKDIR /home/node/app/tpp-reference-server

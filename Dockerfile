@@ -8,9 +8,6 @@ RUN apk update && apk upgrade && \
     apk add --no-cache bash git curl
 
 WORKDIR /home/node/app
-RUN chown -R node:node /home/node/app
-USER node:node
-
 RUN mkdir /home/node/app/tpp-reference-server
 COPY . /home/node/app/tpp-reference-server
 WORKDIR /home/node/app/tpp-reference-server

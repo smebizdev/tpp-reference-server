@@ -4,22 +4,22 @@ services:
     image: "redis:alpine"
     container_name: "redis"
     hostname: "redis"
-    ports:
-     - "6379:6379"
+    expose:
+     - 6379
 
   mongo:
     image: "mvertes/alpine-mongo:3.6.5-0"
     container_name: "mongo"
     hostname: "mongo"
-    ports:
-     - "27017:27017"
+    expose:
+     - 27017
 
   refmockserver:
     image: ob/reference-mock-server
     container_name: "reference-mock-server"
     hostname: "reference-mock-server"
-    ports:
-     - "8001:8001"
+    expose:
+     - 8001
     environment:
      - "ACCESS_TOKEN=2YotnFZFEjr1zCsicMWpAA"
      - "ACCOUNT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json"
@@ -37,12 +37,11 @@ services:
      - "PORT=8001"
      - "USER_DATA_DIRECTORY=alice"
      - "VERSION=v1.1"
-    command: >
+    command: |
       /bin/bash -c "
         rm -fr .env
         echo Start the Reference Mock Service
-        DEBUG=debug,log,error npm run foreman
-        "
+        DEBUG=debug,log,error npm run foreman"
 
   tpp-server:
     build: .
@@ -50,7 +49,7 @@ services:
     hostname: "tpp-reference-server"
     image: ob/tpp-server
     ports:
-     - "8003:8003"
+     - 8003:8003
     environment:
      - "ACCOUNT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json"
      - "PAYMENT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json"
@@ -75,10 +74,6 @@ services:
      - "VALIDATE_RESPONSE=${VALIDATE_RESPONSE:-true}"
      - "VALIDATION_KAFKA_TOPIC=kafka-test-topic"
      - "VALIDATION_KAFKA_BROKER=kafka:9092"
-    links:
-     - redis
-     - mongo
-     - refmockserver
     depends_on:
      - redis
      - mongo

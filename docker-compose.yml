@@ -51,9 +51,9 @@ services:
 
   tpp-server:
     build: .
+    image: "openbankinguk/tpp-reference-server"
     container_name: "tpp-reference-server"
     hostname: "tpp-reference-server"
-    image: openbankinguk/tpp-reference-server
     networks:
       - openbanking_network
     ports:

@@ -19,7 +19,7 @@ services:
      - 27017
 
   refmockserver:
-    image: ob/reference-mock-server
+    image: "openbankinguk/reference-mock-server"
     container_name: "reference-mock-server"
     hostname: "reference-mock-server"
     networks:

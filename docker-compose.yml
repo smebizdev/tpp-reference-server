@@ -104,4 +104,3 @@ services:
 
 networks:
   openbanking_network:
-    name: openbanking_network

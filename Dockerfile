@@ -1,8 +1,5 @@
 FROM openbankinguk/node:latest
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache bash git curl
-
 WORKDIR /home/node/app
 RUN mkdir /home/node/app/tpp-reference-server
 COPY . /home/node/app/tpp-reference-server

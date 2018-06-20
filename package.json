@@ -37,7 +37,7 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.11.0",
     "foreman": "^2.0.0",
-    "mocha": "^3.5.3",
+    "mocha": "^4.1.0",
     "nock": "^9.2.5",
     "node-mocks-http": "1.6.6",
     "proxyquire": "^1.8.0",
@@ -47,7 +47,7 @@
   "scripts": {
     "foreman": "./node_modules/foreman/nf.js start",
     "start": "node index.js",
-    "test": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive -ig 'requires Kafka be running'",
+    "test": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --exit --colors --recursive -ig 'requires Kafka be running'",
     "test:kafka": "NODE_ENV=test VALIDATION_KAFKA_TOPIC=kafka-test-topic VALIDATION_KAFKA_BROKER=127.0.0.1:9092 MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive",
     "test:watch": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive --watch -ig 'requires Kafka be running'",
     "test:debug": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' node --inspect-brk node_modules/mocha/bin/_mocha --recursive --watch --no-timeouts -ig 'requires Kafka be running'",

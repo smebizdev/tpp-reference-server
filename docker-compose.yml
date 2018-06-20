@@ -6,8 +6,8 @@ services:
     hostname: "redis"
     networks:
       - openbanking_network
-    expose:
-     - 6379
+    ports:
+     - 6379:6379
 
   mongo:
     image: "mvertes/alpine-mongo:3.6.5-0"
@@ -15,8 +15,8 @@ services:
     hostname: "mongo"
     networks:
       - openbanking_network
-    expose:
-     - 27017
+    ports:
+     - 27017:27017
 
   refmockserver:
     image: "openbankinguk/reference-mock-server"
@@ -109,4 +109,3 @@ networks:
 # networks:
 #   openbanking_network:
 #     name: openbanking_network
-

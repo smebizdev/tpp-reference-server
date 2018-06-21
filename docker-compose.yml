@@ -24,8 +24,8 @@ services:
     hostname: "reference-mock-server"
     networks:
       - openbanking_network
-    expose:
-     - 8001
+    ports:
+     - 8001:8001
     environment:
      - "ACCESS_TOKEN=2YotnFZFEjr1zCsicMWpAA"
      - "ACCOUNT_SWAGGER=https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json"

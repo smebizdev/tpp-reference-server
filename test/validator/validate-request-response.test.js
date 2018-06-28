@@ -19,6 +19,7 @@ const details = {
   sessionId: '2789f200-4960-11e8-b019-35d9f0621d63',
   authorisationServerId: 'testAuthServerId',
   validationRunId: 'testValidationRunId',
+  scope: 'accounts',
 };
 
 describe('validate', () => {

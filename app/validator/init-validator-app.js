@@ -4,8 +4,6 @@ const { validationErrorMiddleware } = require('./validation-error-middleware');
 const { swaggerMiddleware } = require('./swagger-middleware');
 const { KafkaStream } = require('./kafka-stream');
 
-const accountsSwagger = () => process.env.ACCOUNT_SWAGGER;
-const paymentsSwagger = () => process.env.PAYMENT_SWAGGER;
 const validateResponseOn = () => process.env.VALIDATE_RESPONSE === 'true';
 
 const logTopic = () => process.env.VALIDATION_KAFKA_TOPIC;
@@ -19,11 +17,15 @@ const addValidationMiddleware = async (app, swaggerUriOrFile, swaggerFile) => {
   app.use(validationErrorMiddleware);
 };
 
-const initValidatorApp = async () => {
+const configureSwagger = async (scope, app) => ({
+  accounts: async target => addValidationMiddleware(target, process.env.ACCOUNT_SWAGGER, 'account-swagger.json'),
+  payments: async target => addValidationMiddleware(target, process.env.PAYMENT_SWAGGER, 'payment-swagger.json'),
+}[scope](app));
+
+const initValidatorApp = async (scope) => {
   const app = express();
   app.disable('x-powered-by');
-  await addValidationMiddleware(app, accountsSwagger(), 'account-swagger.json');
-  await addValidationMiddleware(app, paymentsSwagger(), 'payment-swagger.json');
+  await configureSwagger(scope, app);
   return app;
 };
 
@@ -41,17 +43,18 @@ const initKafkaStream = async () => {
   return kafkaStream;
 };
 
-let _validatorApp; // eslint-disable-line
+let _validators = {}; // eslint-disable-line
 let _kafkaStream; // eslint-disable-line
 
-const validatorApp = async () => {
+const validatorApp = async (scope) => {
   if (!validateResponseOn()) {
     return undefined;
   }
-  if (!_validatorApp) {
-    _validatorApp = await initValidatorApp();
+  if (!_validators[scope] || !_validators[scope].default) {
+    const app = await initValidatorApp(scope);
+    _validators[scope] = { default: app };
   }
-  return _validatorApp;
+  return _validators[scope].default;
 };
 
 const kafkaStream = async () => {

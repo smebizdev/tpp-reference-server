@@ -34,7 +34,7 @@ const resourceRequestHandler = async (req, res) => {
     const { proxiedUrl, scope } = scopeAndUrl(req, host);
     const { accessToken, permissions } =
       await accessTokenAndPermissions(reqHeaders.username, reqHeaders.authorisationServerId, scope);
-    const headers = Object.assign({ accessToken, permissions }, reqHeaders);
+    const headers = Object.assign({ accessToken, permissions, scope }, reqHeaders);
     debug({
       proxiedUrl,
       scope,

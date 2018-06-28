@@ -72,6 +72,7 @@ const obtainResult = async (call, response, headers) => {
         permissions: headers.permissions,
         authorisationServerId: headers.authorisationServerId,
         validationRunId: headers.validationRunId,
+        scope: headers.scope,
       });
   } else {
     result = response.body;

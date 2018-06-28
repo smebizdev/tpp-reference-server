@@ -22,7 +22,7 @@ const postPayments = async (resourceServerPath, paymentPathEndpoint, headers, pa
     const response = await call.send(paymentData);
     debug(`${response.status} response for ${paymentsUri}`);
 
-    const result = await obtainResult(call, response, headers);
+    const result = await obtainResult(call, response, Object.assign({}, headers, { scope: 'payments' }));
     return result;
   } catch (err) {
     if (err.response && err.response.text) {

@@ -29,7 +29,7 @@ const postAccountRequests = async (resourceServerPath, headers) => {
     const response = await call.send(body);
     debug(`${response.status} response for ${accountRequestsUri}`);
 
-    const result = await obtainResult(call, response, headers);
+    const result = await obtainResult(call, response, Object.assign({}, headers, { scope: 'accounts' }));
     return result;
   } catch (err) {
     errorLog(util.inspect(err));

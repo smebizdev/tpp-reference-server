@@ -33,7 +33,8 @@ const accountRequestAuthoriseConsent = async (req, res) => {
   try {
     const headers = await extractHeaders(req.headers);
     const { authorisationServerId, username, sessionId } = headers;
-    const headersWithPermissions = Object.assign({ permissions: DefaultPermissions }, headers);
+    const permissionsList = headers.permissions || DefaultPermissions;
+    const headersWithPermissions = Object.assign({ permissions: permissionsList }, headers);
     const { accountRequestId, permissions } = await setupAccountRequest(headersWithPermissions);
     const interactionId2 = uuidv4();
     const uri = await generateRedirectUri(authorisationServerId, accountRequestId, 'openid accounts', sessionId, interactionId2);

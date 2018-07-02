@@ -9,6 +9,10 @@ const extractHeaders = async (headers) => {
   const interactionId = headers['x-fapi-interaction-id'] || uuidv4();
   const username = await getUsername(sessionId);
   const validationRunId = headers['x-validation-run-id'];
+  let permissions = headers['x-permissions'];
+  if (permissions) {
+    permissions = permissions.split(' ');
+  }
 
   return {
     authorisationServerId,
@@ -17,6 +21,7 @@ const extractHeaders = async (headers) => {
     sessionId,
     username,
     validationRunId,
+    permissions,
   };
 };
 

@@ -8,6 +8,8 @@ const username = 'testUsername';
 const generatedInteractionId = 'testInteractionId';
 const fapiFinancialId = 'testFapiFinancialId';
 const validationRunId = 'testValidationRunId';
+const permissions = 'ReadAccountsDetail ReadTransactionsDebits';
+const permissionsList = permissions.split(' ');
 
 const { extractHeaders } = proxyquire(
   '../../app/session/request-headers.js',
@@ -26,6 +28,7 @@ const requestHeaders = {
   'authorization': sessionId,
   'x-authorization-server-id': authorisationServerId,
   'x-validation-run-id': validationRunId,
+  'x-permissions': permissions,
 };
 
 const expectedHeaders = extra => Object.assign({}, {
@@ -34,6 +37,7 @@ const expectedHeaders = extra => Object.assign({}, {
   username,
   authorisationServerId,
   validationRunId,
+  permissions: permissionsList,
 }, extra);
 
 describe('extractHeaders from request headers', () => {

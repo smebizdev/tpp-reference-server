@@ -30,7 +30,8 @@
     "superagent-bunyan": "^5.2.0",
     "swagger-tools": "^0.10.3",
     "url-pattern": "^1.0.3",
-    "uuid": "^3.2.1"
+    "uuid": "^3.2.1",
+    "winston": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
@@ -47,7 +48,7 @@
   "scripts": {
     "foreman": "./node_modules/foreman/nf.js start",
     "start": "node index.js",
-    "test": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --exit --colors --recursive -ig 'requires Kafka be running'",
+    "test": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --exit --colors --full-trace --recursive -ig 'requires Kafka be running'",
     "test:kafka": "NODE_ENV=test VALIDATION_KAFKA_TOPIC=kafka-test-topic VALIDATION_KAFKA_BROKER=127.0.0.1:9092 MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive",
     "test:watch": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' mocha --recursive --watch -ig 'requires Kafka be running'",
     "test:debug": "NODE_ENV=test MONGODB_URI='localhost:27017/test-tpp-server' node --inspect-brk node_modules/mocha/bin/_mocha --recursive --watch --no-timeouts -ig 'requires Kafka be running'",

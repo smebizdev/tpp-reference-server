@@ -44,10 +44,10 @@ services:
      - "USER_DATA_DIRECTORY=alice"
      - "VERSION=v1.1"
     command: |
-      /bin/bash -c "
+      /bin/bash -c '
         rm -fr .env
-        echo Start the Reference Mock Service
-        DEBUG=debug,log,error npm run foreman"
+        echo -e "\033[92m  ---> starting openbankinguk/reference-mock-server ...  \033[0m"
+        DEBUG=debug,log,error npm run foreman'
 
   tpp-server:
     build: .

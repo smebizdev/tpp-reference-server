@@ -3,9 +3,14 @@ const { replayMiddleware } = require('./replay-middleware');
 const { validationErrorMiddleware } = require('./validation-error-middleware');
 const { swaggerMiddleware } = require('./swagger-middleware');
 const { KafkaStream } = require('./kafka-stream');
+const path = require('path');
+const { logger } = require('../utils/logger');
+
+// validator key -> express app validator
+const validators = new Map();
+let _kafkaStream; // eslint-disable-line
 
 const validateResponseOn = () => process.env.VALIDATE_RESPONSE === 'true';
-
 const logTopic = () => process.env.VALIDATION_KAFKA_TOPIC;
 const connectionString = () => process.env.VALIDATION_KAFKA_BROKER;
 
@@ -17,15 +22,40 @@ const addValidationMiddleware = async (app, swaggerUriOrFile, swaggerFile) => {
   app.use(validationErrorMiddleware);
 };
 
-const configureSwagger = async (scope, app) => ({
-  accounts: async target => addValidationMiddleware(target, process.env.ACCOUNT_SWAGGER, 'account-swagger.json'),
-  payments: async target => addValidationMiddleware(target, process.env.PAYMENT_SWAGGER, 'payment-swagger.json'),
-}[scope](app));
+const configureSwagger = async (details, app) => {
+  const {
+    accountSwaggers = [],
+    scope,
+  } = details;
+  logger.log('verbose', 'configureSwagger', { details });
 
-const initValidatorApp = async (scope) => {
+  const middlewares = {
+    accounts: async target => addValidationMiddleware(target, process.env.ACCOUNT_SWAGGER, 'account-swagger.json'),
+    payments: async target => addValidationMiddleware(target, process.env.PAYMENT_SWAGGER, 'payment-swagger.json'),
+  };
+
+  if (scope && middlewares[scope]) {
+    await middlewares[scope](app);
+  }
+
+  // fetch all accountSwaggers then write them to disk
+  for (let x = 0; x < accountSwaggers.length; x += 1) {
+    const accountSwagger = accountSwaggers[x];
+
+    const swaggerUriOrFile = accountSwagger;
+    const swaggerFile = path.basename(swaggerUriOrFile);
+
+    logger.log('verbose', 'configureSwagger', { swaggerUriOrFile, swaggerFile });
+    // eslint-disable-next-line no-await-in-loop
+    await addValidationMiddleware(app, swaggerUriOrFile, swaggerFile);
+  }
+};
+
+const initValidatorApp = async (details) => {
   const app = express();
   app.disable('x-powered-by');
-  await configureSwagger(scope, app);
+  await configureSwagger(details, app);
+
   return app;
 };
 
@@ -40,21 +70,40 @@ const initKafkaStream = async () => {
     topic: logTopic(),
   });
   await kafkaStream.init();
+
   return kafkaStream;
 };
 
-let _validators = {}; // eslint-disable-line
-let _kafkaStream; // eslint-disable-line
+const makeValidatorKey = (details) => {
+  const {
+    accountSwaggers = [],
+    scope = '',
+  } = details;
 
-const validatorApp = async (scope) => {
+  const keys = accountSwaggers.slice().concat([scope]);
+  const key = keys.sort().toString();
+
+  return key;
+};
+
+const validatorApp = async (details) => {
   if (!validateResponseOn()) {
     return undefined;
   }
-  if (!_validators[scope] || !_validators[scope].default) {
-    const app = await initValidatorApp(scope);
-    _validators[scope] = { default: app };
+
+  const validatorKey = makeValidatorKey(details);
+  const createValidator = !validators.has(validatorKey) || !validators.get(validatorKey).default;
+  logger.log('verbose', 'validatorApp', {
+    details, validatorKey, createValidator, validators: JSON.stringify([...validators]),
+  });
+
+  if (createValidator) {
+    const app = await initValidatorApp(details);
+    validators.set(validatorKey, { default: app });
   }
-  return _validators[scope].default;
+
+  const validator = validators.get(validatorKey);
+  return validator.default;
 };
 
 const kafkaStream = async () => {

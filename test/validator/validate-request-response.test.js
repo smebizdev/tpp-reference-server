@@ -4,6 +4,7 @@ const { validate } = require('../../app/validator');
 
 const { validRequest } = require('./fixtures/valid-request');
 const { validResponse } = require('./fixtures/valid-response');
+const Transactions = require('./fixtures/transactions').default;
 
 process.env.ACCOUNT_SWAGGER = process.env.ACCOUNT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/ee715e094a59b37aeec46aef278f528f5d89eb03/dist/v1.1/account-info-swagger.json';
 process.env.PAYMENT_SWAGGER = process.env.PAYMENT_SWAGGER || 'https://raw.githubusercontent.com/OpenBankingUK/payment-initiation-api-spec/96307a92e70e209e51710fab54164f6e8d2e61cf/dist/v1.1/payment-initiation-swagger.json';
@@ -83,5 +84,81 @@ describe('validate', () => {
       };
       assert.deepEqual(output.report, expectedReport);
     });
+  });
+
+  describe('with x-account-swaggers header', () => {
+    it('returns failedValidation false on basic with basic accountSwaggers', async () => {
+      const detailsWithAccountSwaggers = Object.assign({}, details, {
+        accountSwaggers: [
+          'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/refapp-295-permission-specific-swagger-files/dist/v1.1.1/account-info-swagger-basic.json',
+        ],
+        scope: undefined,
+      });
+
+      const response = await validate(
+        Transactions.valid().request,
+        Transactions.valid().basic,
+        detailsWithAccountSwaggers,
+      );
+
+      // console.error('response:', JSON.stringify(response));
+      assert.deepEqual(
+        response,
+        { failedValidation: false },
+        JSON.stringify(response),
+      );
+    }).timeout(1000 * 5);
+
+    it('returns failedValidation true on detail with basic accountSwaggers', async () => {
+      const detailsWithAccountSwaggers = Object.assign({}, details, {
+        accountSwaggers: [
+          'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/refapp-295-permission-specific-swagger-files/dist/v1.1.1/account-info-swagger-basic.json',
+        ],
+        scope: undefined,
+      });
+
+      const response = await validate(
+        Transactions.valid().request,
+        Transactions.valid().detail,
+        detailsWithAccountSwaggers,
+      );
+
+      // console.error('response:', JSON.stringify(response));
+      assert.deepEqual(response, {
+        failedValidation: true,
+        results: {
+          errors: [{
+            code: 'OBJECT_ADDITIONAL_PROPERTIES',
+            message: 'Additional properties not allowed: MerchantDetails,Balance,TransactionInformation',
+            path: ['Data', 'Transaction', '0'],
+            description: 'Provides further details on an entry in the report.',
+          }],
+          warnings: [],
+        },
+        message: 'Response validation failed: failed schema validation',
+      }, JSON.stringify(response));
+    }).timeout(1000 * 5);
+
+    it('returns failedValidation false on detail with detail accountSwaggers', async () => {
+      const detailsWithAccountSwaggers = Object.assign({}, details, {
+        accountSwaggers: [
+          'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/refapp-295-permission-specific-swagger-files/dist/v1.1.1/account-info-swagger-detail.json',
+        ],
+        scope: undefined,
+      });
+
+      const response = await validate(
+        Transactions.valid().request,
+        Transactions.valid().detail,
+        detailsWithAccountSwaggers,
+      );
+
+      // console.error('response:', JSON.stringify(response));
+      assert.deepEqual(
+        response,
+        { failedValidation: false },
+        JSON.stringify(response),
+      );
+    }).timeout(1000 * 5);
   });
 });

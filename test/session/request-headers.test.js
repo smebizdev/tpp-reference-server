@@ -37,6 +37,7 @@ const expectedHeaders = extra => Object.assign({}, {
   username,
   authorisationServerId,
   validationRunId,
+  accountSwaggers: [],
   permissions: permissionsList,
 }, extra);
 
@@ -52,6 +53,25 @@ describe('extractHeaders from request headers', () => {
       const interactionId = 'existingId';
       const headers = await extractHeaders(Object.assign({ 'x-fapi-interaction-id': interactionId }, requestHeaders));
       assert.deepEqual(headers, expectedHeaders({ interactionId }));
+    });
+  });
+
+  describe('when X-ACCOUNT-SWAGGERS in headers', () => {
+    it('returns headers with same X-ACCOUNT-SWAGGERS', async () => {
+      const interactionId = generatedInteractionId;
+
+      const BASIC_ACCOUNT_SWAGGER = 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/refapp-295-permission-specific-swagger-files/dist/v2.0.0/account-info-swagger.json';
+      const DETAIL_ACCOUNT_SWAGGER = 'https://raw.githubusercontent.com/OpenBankingUK/account-info-api-spec/refapp-295-permission-specific-swagger-files/dist/v2.0.0/account-info-swagger-detail.json';
+      const xAccountSwaggers = `${BASIC_ACCOUNT_SWAGGER} ${DETAIL_ACCOUNT_SWAGGER}`;
+      const xAccountSwaggersExpected = xAccountSwaggers.split(' ');
+
+      const headers = Object.assign({}, { 'x-account-swaggers': xAccountSwaggers }, requestHeaders);
+      const extracted = await extractHeaders(headers);
+
+      assert.deepEqual(
+        extracted,
+        expectedHeaders({ accountSwaggers: xAccountSwaggersExpected, interactionId }),
+      );
     });
   });
 });

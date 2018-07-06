@@ -99,8 +99,7 @@ const runValidation = async (req, res, details) => {
     return noResponseError;
   }
   const validationResponse = resSerializer(res);
-  const { scope } = details;
-  const app = await validatorApp(scope);
+  const app = await validatorApp(details);
   debug('validate');
   await app.handle(reqSerializer(req), validationResponse);
   return validationResponse;

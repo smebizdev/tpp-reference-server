@@ -73,6 +73,7 @@ const obtainResult = async (call, response, headers) => {
         authorisationServerId: headers.authorisationServerId,
         validationRunId: headers.validationRunId,
         scope: headers.scope,
+        accountSwaggers: headers.accountSwaggers,
       });
   } else {
     result = response.body;

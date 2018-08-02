@@ -50,7 +50,7 @@ const extractAuthorisationServers = (data) => {
 const getAccessToken = async () => {
   try {
     let accessToken = JSON.parse(await getSessionAccessToken());
-    if (accessToken && accessToken.expiresAt < new Date().getTime()) {
+    if (accessToken && accessToken.expiresAt > new Date().getTime()) {
       return accessToken;
     }
 
